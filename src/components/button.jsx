@@ -5,7 +5,7 @@ export default function Button({ label, onClick, className = "", type = "button"
             type={type} // button, submit, reset
             onClick={onClick}
             disabled={disabled}
-            className={`w-[370px] h-[48px] bg-[#000000] text-[#ffffff] text-[16px] font-medium ${className}`}
+            className={`w-[370px] h-[48px] bg-[#000000] text-[#ffffff] text-[16px] font-medium cursor-pointer ${className}`}
         >
             {label}
         </button>

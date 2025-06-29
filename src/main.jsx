@@ -16,8 +16,8 @@ import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
+  <StrictMode className="app-viewport">
+    <App  />
   </StrictMode>,
 )
 >>>>>>> 13cf750 (input-field 작성)

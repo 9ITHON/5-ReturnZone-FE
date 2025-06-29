@@ -50,6 +50,9 @@ svg{
   -moz-osx-font-smoothing: grayscale;
 }
 
+html{
+  background-color: #000000;
+}
 a {
   font-weight: 500;
   text-decoration: none;
