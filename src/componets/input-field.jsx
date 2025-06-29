@@ -1,3 +1,4 @@
+// 레이블, 입력타입, 입력값에 따른 이벤트, 입력필드 힌트 텍스트, 외부 스타일 
 export default function InputField({ label, type, value, onChange, placeholder, className = "" }) {
     return (
         <div className="w-[370px] h-[76px] flex flex-col gap-[8px]">
