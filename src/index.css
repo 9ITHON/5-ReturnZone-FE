@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import "tailwindcss" ;
 
 :root {
@@ -34,3 +35,42 @@ svg{
   overflow: hidden;
 }
 
+=======
+@import "tailwindcss" ;
+
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* color-scheme: light dark; */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: none;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+svg{
+  fill : #000000;
+}
+
+.app-viewport {
+  width: 402px;
+  height: 756px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+>>>>>>> 13cf750 (input-field 작성)
