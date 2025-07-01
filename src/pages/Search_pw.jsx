@@ -6,7 +6,6 @@ export default function Search_pw() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // 프론트엔드 모의 비밀번호 찾기
   const handleSearchPassword = (e) => {
     e.preventDefault();
     if (!username || !email) {
@@ -75,13 +74,6 @@ export default function Search_pw() {
                 className="flex-1 bg-black text-white py-3 rounded-md font-semibold text-lg"
               >
                 비밀번호 찾기
-              </button>
-              <button
-                type="button"
-                onClick={() => window.location.href = '/search-id'}
-                className="flex-1 border border-black text-black py-3 rounded-md font-semibold text-lg bg-white"
-              >
-                아이디 찾기
               </button>
             </div>
             

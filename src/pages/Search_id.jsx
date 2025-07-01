@@ -6,7 +6,6 @@ export default function Search_id() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // 프론트엔드 모의 아이디 찾기
   const handleSearchId = (e) => {
     e.preventDefault();
     if (!name || !email) {
@@ -41,7 +40,7 @@ export default function Search_id() {
           <form onSubmit={handleSearchId}>
             <p className="text-gray-600 mb-8 text-base leading-relaxed">
               가입하신 이름과 이메일을 입력하시면<br />
-              아이디를 이메일로 보내드립니다.
+              아이디를 이메일로 알려드립니다다.
             </p>
             <label className="text-base font-semibold mb-2 block" htmlFor="name">이름</label>
             <input
