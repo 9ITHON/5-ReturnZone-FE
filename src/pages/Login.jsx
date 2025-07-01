@@ -71,10 +71,26 @@ export default function Login() {
             />
             기억하기
           </label>
-          <a href="#" className="text-sm text-[#2F3B8A] font-medium">비밀번호 찾기</a>
         </div>
         <button type="submit" className="w-full bg-black text-white py-2 rounded-md font-semibold text-lg mb-3">로그인</button>
         <button type="button" onClick={handleSignup} className="w-full border border-black text-black py-2 rounded-md font-semibold text-lg mb-3">회원가입</button>
+        <div className="flex gap-2 mb-3">
+        <button
+            type="button"
+            onClick={() => window.location.href = '/search-id'}
+            className="flex-1 border border-black text-black py-2 rounded-md font-semibold text-base bg-white"
+          >
+            아이디 찾기
+          </button>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/search-pw'}
+            className="flex-1 border border-black text-black py-2 rounded-md font-semibold text-base bg-white"
+          >
+            비밀번호 찾기
+          </button>
+          
+        </div>
         <button
           type="button"
           className="w-full flex items-center justify-center gap-2 bg-[#FFEB00] text-black py-2 rounded-md font-semibold text-lg border border-[#FFEB00] mb-2"
