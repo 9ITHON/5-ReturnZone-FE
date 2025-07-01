@@ -4,39 +4,50 @@ import axios from "axios";
 import Button from "../components/button"
 import Header from "../components/header"
 import InputField from "../components/input-field"
-import UserHeader from "../components/user-header";
+// import UserHeader from "../components/user-header";
 import GoLogin from "../assets/로그인가기.svg"
 
 export default function SignUp() {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    const [username, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [passwordConfirm, setPasswordConfirm] = useState("");
-    const [agree, setAgree] = useState(false);
+    const [username, setName] = useState(""); // 이름
+    const [email, setEmail] = useState(""); // 이메일
+    const [password, setPassword] = useState(""); // 비번
+    const [passwordConfirm, setPasswordConfirm] = useState(""); // 비번 확인
+    // const [agree, setAgree] = useState(false);
+    //오류 상태 관리
+    const [emailError, setEmailError] = useState(""); // 이메일
+    const [emailSuccess, setEmailSuccess] = useState("");
+    const [passwordError, setPasswordError] = useState(""); // 비번
+    const [passwordConfirmError, setPasswordConfirmError] = useState(""); // 비번 확인
+    const [isEmailChecked, setIsEmailChecked] = useState(false); // 사용자가 중복 확인을 하지 않고 회원가입 버튼을 누른 경우
+    // 이동 관련
     const navigate = useNavigate();
+
     // 회원가입 로직
     const handleSignUp = async () => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         // 필드 미입력
         if (!username || !email || !password || !passwordConfirm) {
             alert("모든 필드를 입력해주세요.");
             return;
         }
-        // 이메일 형식 확인
-        if (!emailRegex.test(email)) {
-            alert("올바른 이메일 형식을 입력해주세요.");
+        // 이메일 중복검사 안 했을 경우
+        if (!isEmailChecked) {
+            alert("이메일 중복검사를 먼저 진행해주세요.");
             return;
         }
         // 비밀번호 확인
         if (password !== passwordConfirm) {
-            alert("비밀번호가 일치하지 않습니다.");
+            setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
             return;
+        } else {
+            setPasswordConfirmError("");
         }
         // 비밀번호 8자 이상 확인
         if (password.length < 8) {
-            alert("비밀번호는 8자 이상이어야 합니다.");
+            setPasswordError("비밀번호는 8자 이상이어야 합니다.");
             return;
+        } else {
+            setPasswordError("");
         }
         // 약관 비동의
         // if (!agree) {
@@ -69,49 +80,56 @@ export default function SignUp() {
             alert("회원가입에 실패했습니다.");
         }
     };
+    const handleCheckEmail = async () => {
+        // 이메일 형식 확인
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setEmailError("이메일 형식을 지켜 작성해주세요");
+            return;
+        }
+        try {
+            const response = await axios.post(`${apiBase}/api/members/checkemail`, { email }); // API 주소 변경 필요
+            // 중복아이디 검사
+            if (response.status === 200) { // 코드 변경 필요
+                setEmailError("");
+                setEmailSuccess("사용가능한 이메일입니다!");
+            } else {
+                setEmailError("");
+                setEmailError("존재하는 이메일입니다");
+            }
+        } catch (error) {
+            if (error.response?.status === 200) {
+                // axios는 200도 catch함
+                setEmailSuccess("사용가능한 이메일입니다!");
+            } else {
+                setEmailError("존재하는 이메일입니다");
+            }
+        }
+    };
 
     return (
         <div className="flex flex-col items-center">
-            <UserHeader></UserHeader>
             <Link to="/Login" className="self-start">
                 <img src={GoLogin} alt="로그인으로 이동" className="ml-[20px]" />
             </Link>
             <Header title="회원가입" />
             {/* 사용자 입력창 */}
             <div className="w-[370px] mt-4 flex flex-col gap-4 mb-[36px]">
-
-                <InputField
-                    label="이름"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="이름을입력해주세요"
-                />
-                <InputField
-                    label="이메일"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="이메일을 입력해주세요"
-                    error="존재하는 이메일 입니다"
-                />
-                <InputField
-                    label="비밀번호"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="8자 이상 입력해주세요"
-                    error="8자 이상 입력해 주세요"
-                />
-                <InputField
-                    label="비밀번호 확인"
-                    type="password"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    placeholder="비밀번호를 적어주세요"
-                    error="비밀번호가 일치하지 않습니다"
-                />
-
+                <InputField label="이름" type="text" value={username} onChange={(e) => setName(e.target.value)} placeholder="이름을입력해주세요" />
+                {/* 이메일 입력 란 */}
+                <div className="flex justify-center items-center gap-[8px]">
+                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess} className="w-[250px]"
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setIsEmailChecked(false);
+                            setEmailError("");
+                            setEmailSuccess(""); // 메시지 상태 초기화
+                        }}
+                    />
+                    <Button label="중복검사" className="w-[80px]" onClick={handleCheckEmail} />
+                </div>
+                <InputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
+                <InputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
                 {/* <label className="flex items-center gap-2 text-sm">
                     <input
                         type="checkbox"
@@ -121,10 +139,7 @@ export default function SignUp() {
                     약관 동의하기
                 </label> */}
             </div>
-            <Button
-                    label="회원가입"
-                    onClick={handleSignUp}
-                />
+            <Button label="회원가입" onClick={handleSignUp} />
         </div>
     );
 }
