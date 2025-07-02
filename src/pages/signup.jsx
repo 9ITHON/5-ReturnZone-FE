@@ -88,21 +88,27 @@ export default function SignUp() {
             return;
         }
         try {
-            const response = await axios.post(`${apiBase}/api/members/checkemail`, { email }); // API 주소 변경 필요
-            // 중복아이디 검사
-            if (response.status === 200) { // 코드 변경 필요
+            const response = await axios.get(`${apiBase}/api/v1/members/email/${email}`);
+
+            // 사용 가능 (200 OK)
+            if (response.data === true) {
                 setEmailError("");
                 setEmailSuccess("사용가능한 이메일입니다!");
+                setIsEmailChecked(true);
             } else {
-                setEmailError("");
-                setEmailError("존재하는 이메일입니다");
+                setEmailError("이미 존재하는 이메일입니다");
+                setEmailSuccess("");
+                setIsEmailChecked(false);
             }
         } catch (error) {
-            if (error.response?.status === 200) {
-                // axios는 200도 catch함
-                setEmailSuccess("사용가능한 이메일입니다!");
+            if (error.response?.status === 400) {
+                setEmailError("이미 존재하는 이메일입니다");
+                setEmailSuccess("");
+                setIsEmailChecked(false);
             } else {
-                setEmailError("존재하는 이메일입니다");
+                setEmailError("서버 오류가 발생했습니다");
+                setEmailSuccess("");
+                setIsEmailChecked(false);
             }
         }
     };
@@ -117,8 +123,8 @@ export default function SignUp() {
             <div className="w-[370px] mt-4 flex flex-col gap-4 mb-[36px]">
                 <InputField label="이름" type="text" value={username} onChange={(e) => setName(e.target.value)} placeholder="이름을입력해주세요" />
                 {/* 이메일 입력 란 */}
-                <div className="flex justify-center items-center gap-[8px]">
-                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess} className="w-[250px]"
+                <div className="relative">
+                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess} className="!w-[354px]"
                         onChange={(e) => {
                             setEmail(e.target.value);
                             setIsEmailChecked(false);
@@ -126,7 +132,7 @@ export default function SignUp() {
                             setEmailSuccess(""); // 메시지 상태 초기화
                         }}
                     />
-                    <Button label="중복검사" className="w-[80px]" onClick={handleCheckEmail} />
+                    <Button label="중복 확인" className="absolute right-[30px] top-1/2 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111]" onClick={handleCheckEmail} />
                 </div>
                 <InputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
                 <InputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
