@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login.jsx';
-import Search_pw from './pages/Search_pw.jsx';
-import Search_id from './pages/Search_id.jsx';
+import Search_pw from './pages/Find.jsx';
+import Search_id from './pages/SearchId.jsx';
 
 // 메인 페이지
 function App() {

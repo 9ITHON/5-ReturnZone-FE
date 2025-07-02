@@ -36,7 +36,7 @@ export default function Login() {
     }
 
     try {
-      const API_BASE_URL = 'http://localhost:8080/api'; 
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
       const LOGIN_ENDPOINT = '/auth/login'; 
 
       const response = await axios.post(`${API_BASE_URL}${LOGIN_ENDPOINT}`, {
