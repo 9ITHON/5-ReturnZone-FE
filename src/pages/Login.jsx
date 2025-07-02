@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import Logo from '../components/Logo';
 import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
@@ -38,7 +39,6 @@ export default function Login() {
         <h1 className="text-3xl font-bold center leading-tight mb-6">환영합니다</h1>
         <form className="w-full flex flex-col flex-1" style={{minHeight: '400px'}} onSubmit={handleLogin}>
           <div className="flex flex-col gap-8 flex-1 mb-10">
-
             <InputField
               label="이메일"
               placeholder="이메일을 입력해주세요"
@@ -53,11 +53,9 @@ export default function Login() {
               onChange={e => setPassword(e.target.value)}
               type="password"
             />
-            <div>
-              <CheckBox label="자동 로그인" checked={remember} onChange={e => setRemember(e.target.checked)} />
-            </div>
           </div>
-          <div className="flex flex-col gap-4 mt-auto mb-10">
+          <CheckBox checked={remember} onChange={e => setRemember(e.target.checked)} />
+          <div className="flex flex-col gap-4 mt-4 mb-10">
             <MainButton type="submit">로그인</MainButton>
             <MainButton onClick={handleSignup} color="secondary">회원가입</MainButton>
             <MainButton onClick={handleKakaoLogin} color="kakao">
