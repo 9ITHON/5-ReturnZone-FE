@@ -11,8 +11,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
       alert('이메일과 비밀번호를 모두 입력해주세요.');
       return;
@@ -21,7 +22,45 @@ export default function Login() {
       alert('비밀번호는 8자 이상 입력해주세요.');
       return;
     }
-    alert(`로그인 성공!\n이메일: ${email}`);
+
+    try {
+      const API_BASE_URL = 'http://localhost:8080/api'; 
+      const LOGIN_ENDPOINT = '/auth/login'; 
+
+      const response = await axios.post(`${API_BASE_URL}${LOGIN_ENDPOINT}`, {
+        email: email,
+        password: password,
+      });
+
+      console.log('로그인 성공:', response.data);
+      alert(`로그인 성공!\n이메일: ${email}`);
+
+      if (response.data.token) {
+        localStorage.setItem('authToken', response.data.token);
+      }
+
+    } catch (error) {
+      console.error('로그인 실패:', error);
+      if (error.response) {
+        console.error('응답 데이터:', error.response.data);
+        console.error('응답 상태:', error.response.status);
+        console.error('응답 헤더:', error.response.headers);
+
+        if (error.response.status === 401) {
+          alert('로그인 실패: 이메일 또는 비밀번호가 올바르지 않습니다.');
+        } else if (error.response.data && error.response.data.message) {
+          alert(`로그인 실패: ${error.response.data.message}`);
+        } else {
+          alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+      } else if (error.request) {
+        console.error('요청:', error.request);
+        alert('서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.');
+      } else {
+        console.error('에러 메시지:', error.message);
+        alert(`로그인 요청 설정 중 오류 발생: ${error.message}`);
+      }
+    }
   };
 
   const handleSignup = () => {
