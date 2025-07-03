@@ -1,8 +1,10 @@
+import { useRef, useState } from "react";
+import axios from "axios";
+
 import InputField from "../components/input-field";
 import Button from "../components/button";
 import MainHeader from "../components/main-header";
-import { useRef, useState } from "react";
-import axios from "axios";
+import UnderNavbar from "../components/under-navbar";
 
 export default function RegisterPage() {
     const [images, setImages] = useState([]);
@@ -37,7 +39,7 @@ export default function RegisterPage() {
                 메인 등록 란
             </div>
             <div>
-                하단 바
+                <UnderNavbar/>
             </div>
         </div>
     )

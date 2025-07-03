@@ -18,7 +18,7 @@ export default function MainHeader({className=""}) {
         <div className={`w-[390px] h-[56px] px-[24px] py-[16px] flex items-center justify-between ${className}`}>
             <img src={HeaderIcon} alt="ReturnZone 로고" onClick={handleLogoClick}
                 className=' cursor-pointer' />
-            <img src={SearchIcon} alt="검색" onClick={handleSearchClick} />
+            <img src={SearchIcon} alt="검색" onClick={handleSearchClick} className=' cursor-pointer' />
         </div>
     )
 }
