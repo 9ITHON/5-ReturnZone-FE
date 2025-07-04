@@ -1,4 +1,4 @@
-import './App.css'
+import './index.css'
 
 // 메인 페이지
 function App() {
