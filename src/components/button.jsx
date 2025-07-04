@@ -2,7 +2,7 @@
 // 버튼 이름, 처리 이벤트, 스타일 덮어쓰기, 기본타입 버튼, 클릭 가능 활성화 
 export default function Button({ label, onClick, className = "", type = "button", disabled = false }) {
     return (
-        <div className="w-[354px]">
+        <div className="w-[342px]">
             <button
                 type={type} // button, submit, reset
                 onClick={onClick}

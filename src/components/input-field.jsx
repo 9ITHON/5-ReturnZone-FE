@@ -3,7 +3,7 @@ import ErrorIcon from "../assets/에러아이콘.svg"
 // 레이블, 입력타입, 입력값에 따른 이벤트, 입력필드 힌트 텍스트, 외부 스타일 
 export default function InputField({ label, type, value, onChange, placeholder, labelclassName = "", className = "", error = "", success = "" }) {
     return (
-        <div className="w-[354px] h-[113px] flex flex-col">
+        <div className="w-[342px] h-[113px] flex flex-col">
             <label className={`w-full h-[20px] text-[16px] font-semibold ${labelclassName}`}>
                 {label}
             </label>

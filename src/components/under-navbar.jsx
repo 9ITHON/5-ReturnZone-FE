@@ -5,18 +5,19 @@ import MyPageIcon from '../assets/mypage.svg'
 import { useNavigate } from 'react-router-dom'
 export default function UnderNavbar() {
     const navigate = useNavigate();
-
+    // 홈으로 이동
     const handleHomeClick = () => {
         navigate('/');
     }
-
+    // 등록페이지로 이동
     const handleRegisterClick = () => {
         navigate('/Register');
     }
-
+    // 채팅페이지로 이동
     const handleChatClick = () => {
         navigate('/Chat');
     }
+    // 마이페이지로 이동
     const handleMyPageClick = () => {
         navigate('/Mypage');
     }

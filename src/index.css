@@ -24,7 +24,7 @@ a {
 body {
   margin: 0;
   min-width: 320px;
-  background-color: #ffffff;
+  background-color: #000000;
   font-family: 'Pretendard Variable', sans-serif;
 }
 
@@ -37,4 +37,5 @@ svg{
   height: 844px;
   margin: 0 auto;
   overflow: hidden;
+  background-color: #ffffff;
 }
