@@ -65,7 +65,7 @@ export default function SignUp() {
             console.log('비밀번호:', password);
             console.log('비밀번호 확인:', passwordConfirm);
             console.log('약관 동의:', agree);
-            const response = await axios.post(`${apiBase}/api/members/signup`, { // api 호출은 api 명세에 따라 수정 필요(env 형식으로 관리 필요)
+            const response = await axios.post(`${apiBase}/api/v1/members/signup`, { // api 호출은 api 명세에 따라 수정 필요(env 형식으로 관리 필요)
                 username,
                 email,
                 password,

@@ -8,6 +8,8 @@ import RegisterHeader from "../components/register-header";
 import RegisterLabel from "../components/register-label";
 import RegisterTag from "../components/register-tag";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
+import CalendarModal from "../components/calendar-modal";
+import TimePickerModal from "../components/time-picker-modal";
 
 import CameraIcon from '../assets/camera.svg'
 import WhiteX from '../assets/흰색x.svg'
@@ -15,9 +17,11 @@ import InputArrow from '../assets/인풋꺽쇠.svg'
 import Plus from '../assets/plus.svg'
 import Calendar from '../assets/달력아이콘.svg'
 import Time from '../assets/time.svg'
+import XButton from '../assets/x버튼.svg'
 
 
 export default function RegisterPage() {
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
     const [selectedTag, setSelectedTag] = useState(""); // 분실, 찾았어요 처리
     const [selectedCategory, setSelectedCategory] = useState(""); // 카테고리
     const [title, setTitle] = useState(""); // 제목
@@ -26,7 +30,14 @@ export default function RegisterPage() {
     const [selectedLocation, setSelectedLocation] = useState(""); // 사용자 위치 저장
     const [detailLocation, setDetailLocation] = useState(""); // 상세 주소
     const [questions, setQuestions] = useState(["", ""]);  // 상세 특징(최소 2개)
-    
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false); // 캘린더 열림 상태
+    const [selectedDate, setSelectedDate] = useState(null) // 날짜 저장
+    const [isTimePickerOpen, setIsTimePickerOpen] = useState(false); // 시간 모달 열림 상태
+    const [selectedTimes, setSelectedTimes] = useState([]); // 시간 저장
+    const [description, setDescription] = useState(""); // 글 본문
+    const [itemName, setItemName] = useState(""); // 물품명
+    const [reward, setReward] = useState(""); // 현상금
+
     const navigate = useNavigate("");
     const location = useLocation();
     const isKeyboardOpen = UseKeyboardOpen();
@@ -36,9 +47,14 @@ export default function RegisterPage() {
     const dateLabel = selectedTag === "주인을 찾아요" ? "획득 날짜" : "분실 날짜";
     const timeLabel = selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간";
     const detailLabel = selectedTag === "주인을 찾아요" ? "획득한 분실품 특징 (최대 5개)" : "분실품 특징 (최대 5개)";
-
-
-
+    
+    // RegisterLocation에서 온 주소 수신
+    useEffect(() => {
+        if (location.state?.address) {
+            console.log("주소 수신:", location.state);
+            setSelectedLocation(location.state.address);
+        }
+    }, [location]);
     // 이미지 등록 버튼 (최대 5개)
     const handleCameraClick = (e) => {
         if (images.length >= 5) {
@@ -63,12 +79,6 @@ export default function RegisterPage() {
     const handleLocation = () => {
         navigate('/RegisterLocation');
     }
-    // RegisterLocation에서 온 주소 수신
-    useEffect(() => {
-        if (location.state?.address) {
-            setSelectedLocation(location.state.address);
-        }
-    }, [location]);
     // 상세 특징 업데이트
     const handleChange = (index, value) => {
         setQuestions((prev) => {
@@ -81,6 +91,74 @@ export default function RegisterPage() {
     const handleAddQuestion = () => {
         if (questions.length >= 5) return;
         setQuestions((prev) => [...prev, ""]);
+    };
+    // 질문 삭제
+    const handleDeleteQuestion = (index) => {
+        setQuestions(prev => prev.filter((_, i) => i !== index));
+    };
+    // API 연결
+    const handleRegister = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const { lat, lng } = location.state || {};
+            if (!lat || !lng) return alert("위치를 선택해주세요.");
+            if (!selectedDate) return alert("날짜를 선택해주세요.");
+
+            const date = selectedDate?.toISOString().split("T")[0];
+            const startTime = selectedTimes[0] || "00:00";
+            const endTime = selectedTimes[1] || "00:00";
+
+            const lostDateTimeStart = new Date(`${date}T${startTime}`);
+            const lostDateTimeEnd = new Date(`${date}T${endTime}`);
+
+            const payload = {
+                lostPostId: 1, // 추후 실제 ID 대응 필요
+                imageUrls: "https://your-bucket.s3.ap-northeast-2.amazonaws.com/lostPosts/lostpost1.jpg", // 임시 URL 
+                registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
+                title,
+                nickname: "유저 1", // 실제 사용자 정보 바인딩 필요
+                timeAgo: "방금 전",
+                lostLocationDong: selectedLocation,
+                detailedLocation: detailLocation,
+                latitude: lat,
+                longitude: lng,
+                reward: Number(reward),
+                instantSettlement: true,
+                description,
+                category: selectedCategory,
+                itemName,
+                feature1: questions[0] || "",
+                feature2: questions[1] || "",
+                feature3: questions[2] || "",
+                feature4: questions[3] || "",
+                feature5: questions[4] || "",
+                lostDateTimeStart: lostDateTimeStart.toISOString(),
+                lostDateTimeEnd: lostDateTimeEnd.toISOString(),
+            };
+
+            const response = await axios.post(`${apiBase}/api/v1/lostPosts`, {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`
+                },
+                validateStatus: () => true // 응답 코드를 catch로 넘기지 않도록 처리
+            });
+            console.log("등록 성공:", response.data);
+            alert("등록 완료!");
+            navigate("/"); // 완료 후 이동할 페이지
+
+            if (response.status === 201) {
+                alert("등록이 완료되었습니다.");
+                navigate("/");
+            } else if (response.status === 400) {
+                const msg = response.data?.message || "입력값을 다시 확인해 주세요.";
+                alert(`요청 오류: ${msg}`);
+            } else {
+                alert(`서버 오류 (${response.status})가 발생했습니다. 잠시 후 다시 시도해 주세요.`);
+            }
+        } catch (error) {
+            console.error("등록 요청 실패:", error);
+            alert("요청 중 예외가 발생했습니다.");
+        }
     };
 
 
@@ -146,9 +224,9 @@ export default function RegisterPage() {
                         <RegisterLabel label="등록 유형" />
                         <RegisterTag options={['분실했어요', '주인을 찾아요']} selected={selectedTag} onChange={setSelectedTag} />
                     </div>
-                    {/* 제목 함수 구현 필요*/}
+                    {/* 제목 함수*/}
                     <div className="h-[78px]">
-                        <InputField label="제목" placeholder="글 제목" type="text" value={title} ></InputField>
+                        <InputField label="제목" placeholder="글 제목" type="text" value={title} onChange={e => setTitle(e.target.value)} ></InputField>
                     </div>
                     {/* 자세한 내용 */}
                     <div>
@@ -159,7 +237,9 @@ export default function RegisterPage() {
                         </p>
                         <textarea
                             placeholder="글 본문"
-                            className="w-full h-[134px] p-[12px] border-[1px] border-[#B8B8B8] rounded-[8px] text-[16px] resize-none focus:border-[#111111]"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full h-[134px] p-[12px] border-[1px] border-[#B8B8B8] rounded-[8px] text-[16px] resize-none focus:border-[#111111] focus:outline-none"
                         />
                     </div>
                     {/* 카테고리 */}
@@ -169,14 +249,14 @@ export default function RegisterPage() {
                     </div>
                     {/* 물품명 */}
                     <div className="h-[78px]">
-                        <InputField label="물품명" placeholder="ex) 아이폰 16" />
+                        <InputField label="물품명" placeholder="ex) 아이폰 16" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} />
                     </div>
                     {/* 분실품 장소 */}
                     <div>
                         <RegisterLabel label={locationLabel} />
                         <button
                             onClick={handleLocation}
-                            className="w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal text-[#B8B8B8] cursor-pointer"
+                            className={`w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedLocation ? "text-[#111111]" : "text-[#B8B8B8]"}`}
                         >
                             {selectedLocation || "위치를 지정해 주세요"}
                             <img src={InputArrow} alt=">" />
@@ -193,11 +273,12 @@ export default function RegisterPage() {
                     <div>
                         <RegisterLabel label={dateLabel} />
                         <button
-                            // onClick={handleLocation} 함수 변경 필요
-                            className="w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal text-[#B8B8B8] cursor-pointer"
+                            onClick={() => setIsCalendarOpen(true)}
+                            className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedDate ? "text-[#111111]" : "text-[#B8B8B8]"}`}
                         >
                             <div className="flex items-center gap-[8px]">
-                                <img src={Calendar} alt="" />{selectedLocation || "날짜 선택"}
+                                <img src={Calendar} alt="" />
+                                {selectedDate ? selectedDate.toLocaleDateString() : "날짜 선택"}
                             </div>
                             <img src={InputArrow} alt=">" />
                         </button>
@@ -206,12 +287,16 @@ export default function RegisterPage() {
                     <div>
                         <RegisterLabel label={timeLabel} />
                         <button
-                            // onClick={handleLocation} 함수 변경 필요
-                            className="w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal text-[#B8B8B8] cursor-pointer"
+                            onClick={() => setIsTimePickerOpen(true)}
+                            className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedTimes.length > 0 ? "text-[#111111]" : "text-[#B8B8B8]"}`}
                         >
                             <div className="flex items-center gap-[8px]">
                                 <img src={Time} alt="" />
-                                {selectedLocation || (selectedTag === "주인을 찾아요" ? "획득 시간 선택" : "시간 선택")}
+                                {selectedTimes.length > 0
+                                    ? selectedTimes.join(" ~ ")
+                                    : selectedTag === "주인을 찾아요"
+                                        ? "획득 시간 선택"
+                                        : "시간 선택"}
                             </div>
                             <img src={InputArrow} alt=">" />
                         </button>
@@ -234,16 +319,27 @@ export default function RegisterPage() {
                                 className="w-full h-[56px] my-[4px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px]  placeholder-[#B8B8B8] font-normal"
                             />
                         ))}
-                        {questions.length < 5 && (
-                            <button
-                                type="button"
-                                onClick={handleAddQuestion}
-                                className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
-                            >
-                                <img src={Plus} alt="+" />
-                                질문 추가
-                            </button>
-                        )}
+                        <div className="flex gap-[10px]">
+                            {questions.length < 5 && (
+                                <button
+                                    type="button"
+                                    onClick={handleAddQuestion}
+                                    className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
+                                >
+                                    <img src={Plus} alt="+" />
+                                    질문 추가
+                                </button>
+                            )}
+                            {questions.length > 2 && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleDeleteQuestion(questions.length - 1)}
+                                    className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
+                                >
+                                    <img src={XButton} alt="x" className="w-[18px] h-[18px]" /> 질문 삭제
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {/* 분실했어요 조건 렌더링 */}
                     {selectedTag === "분실했어요" && (
@@ -256,7 +352,7 @@ export default function RegisterPage() {
                                     금액은 입력값과 일치해야 하며, 입금자명은 계정명과 동일해야 합니다.
                                 </p>
                                 <div className="flex items-center border border-[#D0D0D0] rounded-[8px] px-[16px] py-[14px]">
-                                    <input type="number" placeholder="금액을 입력해주세요"
+                                    <input type="number" placeholder="금액을 입력해주세요" value={reward} onChange={(e) => setReward(e.target.value)}
                                         className=" flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin" />
                                     <span className="text-[#888] text-[14px]" >(원)</span>
                                 </div>
@@ -283,10 +379,22 @@ export default function RegisterPage() {
                 </div>
             </div>
             <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
-                <Button label="등록 하기"
-                // onClick={handleRegister}
-                />
+                <Button label="등록 하기" onClick={handleRegister} />
             </div>
+            {/* 캘린더 모달 조건 렌더링 */}
+            {isCalendarOpen && (
+                <CalendarModal
+                    onClose={() => setIsCalendarOpen(false)}
+                    onSelect={(date) => setSelectedDate(date)}
+                />
+            )}
+            {/* 시간선택 모달 조건 렌더링 */}
+            {isTimePickerOpen && (
+                <TimePickerModal
+                    onClose={() => setIsTimePickerOpen(false)}
+                    onSelect={(times) => setSelectedTimes(times)}
+                />
+            )}
         </div>
     )
 }
