@@ -9,6 +9,7 @@ const ItemCard = ({
   reward = '10,000원',
   status = '', // '분실했어요' | '주인 찾아요' | ''
   imageUrl = '',
+  distance = null, // Distance in kilometers
 }) => (
   <div className="flex flex-row w-full max-w-[342px] h-[122px] bg-white rounded-xl shadow-sm p-0 relative overflow-hidden">
     {/* 이미지 영역 */}
@@ -31,6 +32,12 @@ const ItemCard = ({
       <div className="flex flex-row items-center gap-1 text-xs h-5 mt-1">
         <span className="flex items-center px-2 py-0.5 bg-blue-50 text-[#0066FF] font-semibold rounded-md text-[11px] h-5">{tag}</span>
         <span className="text-[#808080] text-[13px] ml-1">{location}</span>
+        {distance !== null && (
+          <>
+            <span className="w-1 h-1 bg-[#B8B8B8] rounded-full mx-1 inline-block" />
+            <span className="text-[#808080] text-[13px]">{distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}</span>
+          </>
+        )}
         <span className="w-1 h-1 bg-[#B8B8B8] rounded-full mx-1 inline-block" />
         <span className="text-[#808080] text-[13px]">{time}</span>
       </div>
