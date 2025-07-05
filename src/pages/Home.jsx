@@ -30,7 +30,7 @@ const MOCK_ITEMS = [
     location: '월계1동',
     time: '10분 전',
     reward: '10,000원',
-    status: '본 실물이요',
+    status: '분실했어요',
     category: '전자기기'
   },
   {
@@ -116,14 +116,14 @@ const Home = () => {
       
       {/* 위치 드롭다운 */}
       {locationOpen && (
-        <div className="absolute bottom-[158px] left-0 right-0 z-20 bg-white border-b border-[#E6E6E6] flex flex-col shadow-lg max-h-[300px] overflow-y-auto">
+        <div className="absolute left-0 right-0 bottom-0 h-[490px] bg-white rounded-t-xl flex flex-col items-center pb-[34px] gap-[10px] z-20 shadow-lg">
           <div className="px-6 py-3 text-[16px] font-semibold text-[#111] border-b border-[#F0F0F0]">
             위치
           </div>
           {LOCATION_LIST.map((location) => (
             <button
               key={location}
-              className={`w-full px-6 py-3 text-left text-[15px] hover:bg-blue-50 ${selectedLocation === location ? 'font-bold text-blue-600 bg-blue-50' : 'text-[#111]'}`}
+              className={`w-[90%] flex flex-row items-center gap-3 px-4 py-3 rounded-lg text-[16px] font-medium transition text-left ${selectedLocation === location ? 'font-bold text-blue-600 bg-blue-50' : 'text-[#111]'}`}
               onClick={() => handleLocationSelect(location)}
             >
               {location}
