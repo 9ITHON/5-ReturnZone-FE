@@ -12,7 +12,7 @@ export default function InputField({ label, type, value, onChange, placeholder, 
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`my-[8px] h-[56px] px-[16px] py-[14px] font-normal border-[#B8B8B8] border-[1px] rounded-[8px] focus:outline-none focus:ring-2 focus:ring-black focus:shadow-md placeholder-[#808080] ${className}`}
+                className={`my-[8px] w-full h-[56px] px-[16px] py-[14px] font-normal border-[#B8B8B8] border-[1px] rounded-[8px] focus:outline-none focus:ring-2 focus:ring-black focus:shadow-md placeholder-[#B8B8B8] ${className}`}
                 required
             />
             {/* 오류메시지 출력 영역 */}

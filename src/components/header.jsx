@@ -10,7 +10,7 @@ export default function Header({title,className=""}) {
     }
 
     return (
-        <div className={`w-full h-[64px] px-[8px] py-[16px] flex flex-col items-center justify-center ${className}`}>
+        <div className={`w-full h-[120px] px-[8px] py-[16px] flex flex-col items-center justify-center ${className}`}>
             <img src={HeaderIcon} alt="ReturnZone 로고" onClick={handleLogoClick}
                 className=' cursor-pointer' />
             <h1 className=' text-[32px] text-[#111111] font-semibold'>

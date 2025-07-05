@@ -22,7 +22,7 @@ export default function UnderNavbar() {
         navigate('/Mypage');
     }
     return(
-        <div className='w-full h-[88px] flex fixed bottom-[67px]'>
+        <div className='w-full h-[88px] flex fixed bottom-[120px]'>
             <img src={HomeIcon} alt="홈아이콘" onClick={handleHomeClick} className=' cursor-pointer'/>
             <img src={RegisterIcon} alt="등록아이콘" onClick={handleRegisterClick} className=' cursor-pointer'/>
             <img src={ChatIcon} alt="채팅아이콘" onClick={handleChatClick} className=' cursor-pointer'/>

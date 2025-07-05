@@ -39,3 +39,20 @@ svg{
   overflow: hidden;
   background-color: #ffffff;
 }
+/* 스크롤 바 숨기기 */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+/* 스핀 버튼 숨기기 */
+.hide-number-spin::-webkit-outer-spin-button,
+.hide-number-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hide-number-spin[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}

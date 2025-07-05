@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import Button from "../components/button"
 import Header from "../components/header"
 import InputField from "../components/input-field"
@@ -20,8 +21,10 @@ export default function SignUp() {
     const [passwordError, setPasswordError] = useState(""); // 비번
     const [passwordConfirmError, setPasswordConfirmError] = useState(""); // 비번 확인
     const [isEmailChecked, setIsEmailChecked] = useState(false); // 사용자가 중복 확인을 하지 않고 회원가입 버튼을 누른 경우
-    // 이동 관련
-    const navigate = useNavigate();
+
+    const navigate = useNavigate(); // 이동 관련
+    const isKeyboardOpen = UseKeyboardOpen(); // 키보드 상태
+
 
     // 회원가입 로직
     const handleSignUp = async () => {
@@ -120,11 +123,11 @@ export default function SignUp() {
             </Link>
             <Header title="회원가입" />
             {/* 사용자 입력창 */}
-            <div className="w-[370px] mt-4 flex flex-col gap-4 mb-[36px]">
+            <div className="w-full mt-4 flex flex-col mx-auto gap-4 mb-[36px] px-[24px]">
                 <InputField label="이름" type="text" value={username} onChange={(e) => setName(e.target.value)} placeholder="이름을입력해주세요" />
                 {/* 이메일 입력 란 */}
                 <div className="relative">
-                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess} className="!w-[354px]"
+                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess}
                         onChange={(e) => {
                             setEmail(e.target.value);
                             setIsEmailChecked(false);
@@ -132,7 +135,7 @@ export default function SignUp() {
                             setEmailSuccess(""); // 메시지 상태 초기화
                         }}
                     />
-                    <Button label="중복 확인" className="absolute right-[30px] top-1/2 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111]" onClick={handleCheckEmail} />
+                    <Button label="중복 확인" className="absolute right-[10px] top-1/2 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111]" onClick={handleCheckEmail} />
                 </div>
                 <InputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
                 <InputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
@@ -144,8 +147,11 @@ export default function SignUp() {
                     />
                     약관 동의하기
                 </label> */}
+
             </div>
-            <Button label="회원가입" onClick={handleSignUp} />
+            <div className={`fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
+                <Button label="회원가입" onClick={handleSignUp}  />
+            </div>
         </div>
     );
 }

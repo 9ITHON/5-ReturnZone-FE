@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import SignUp from './pages/signup';
 import MainPage from './pages/main-page'; //임시 메인 페이지
 import RegisterPage from './pages/register-page';
+import RegisterLocation from './pages/register-location';
 
 // 라우터 설정 함수
 function AppRoute(){
@@ -10,6 +11,7 @@ function AppRoute(){
       <Route path='/' element={<MainPage/>}></Route>
       <Route path='/SignUp' element={<SignUp/>}></Route>
       <Route path='/Register' element={<RegisterPage/>}></Route>
+      <Route path='/RegisterLocation' element={<RegisterLocation/>}/>
       {/* 존재하지 않는 경로에 대한 설정 */}
       {/* <Route path="*" element={<NotFound />} />  */}
     </Routes>
