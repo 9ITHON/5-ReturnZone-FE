@@ -1,11 +1,10 @@
 import './index.css'
+import Home from './pages/Home.jsx';
 
-// 메인 페이지
 function App() {
-
-  return (
-    <div>메인 페이지 입니다.</div>
-  )
+  return <Home />;
 }
 
-export default App
+export default App;
+
+
