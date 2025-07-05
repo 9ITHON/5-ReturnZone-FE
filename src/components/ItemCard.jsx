@@ -21,7 +21,7 @@ const ItemCard = ({
       )}
       {/* 상태 뱃지 */}
       {status && (
-        <div className={`absolute left-2 top-2 px-2 py-0.5 rounded-md text-xs font-semibold ${status === '주인 찾아요' ? 'bg-[#E6FBEE] text-[#00D455]' : 'bg-[#F9EAE0] text-[#FF5900]'}`}>{status}</div>
+        <div className={`absolute left-2 top-2 px-2 py-0.5 rounded-md text-xs font-semibold border ${status === '주인찾아요' ? 'bg-[#E6FBEE] text-[#00D455] border-[#E6FBEE]' : 'bg-[#F9EAE0] text-[#FF5900] border-[#F9EAE0]'}`}>{status}</div>
       )}
     </div>
     {/* 텍스트 영역 */}
@@ -30,7 +30,9 @@ const ItemCard = ({
         {title}
       </div>
       <div className="flex flex-row items-center gap-1 text-xs h-5 mt-1">
-        <span className="flex items-center px-2 py-0.5 bg-blue-50 text-[#0066FF] font-semibold rounded-md text-[11px] h-5">{tag}</span>
+        {tag && ( // 즉시 정산 가능에서 태그가 없는 데이터는 안 뜨도록 함.
+          <span className="flex items-center px-2 py-0.5 bg-blue-50 text-[#0066FF] font-semibold rounded-md text-[11px] h-5">{tag}</span>
+        )}
         <span className="text-[#808080] text-[13px] ml-1">{location}</span>
         {distance !== null && (
           <>

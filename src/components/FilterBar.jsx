@@ -35,13 +35,6 @@ const FilterBar = ({ onFilter, onLocationButton, selectedFilters = [], onCategor
   return (
     <div className="w-full h-12 px-6 bg-white absolute top-[110px] left-0 right-0 z-10">
       <div className="inline-flex flex-row items-center gap-x-2 whitespace-nowrap overflow-x-auto scrollbar-hide relative">
-        {/* 카테고리 세팅 버튼 */}
-        <button
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-[#F5F5F5] border border-black mr-2 flex-shrink-0"
-          onClick={() => {}}
-        >
-          <img src={categorySettingsIcon} alt="카테고리 세팅" className="w-6 h-6" />
-        </button>
         {/* 필터 버튼들 */}
         {FILTERS.map(f => {
           const isCategorySelected = f.key === 'category' && selectedCategory;

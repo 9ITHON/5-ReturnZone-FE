@@ -5,7 +5,7 @@ import ItemCard from '../components/ItemCard.jsx';
 import BottomNav from '../components/BottomNav.jsx';
 import LocationPermission from '../components/LocationPermission.jsx';
 import { useLocationData } from '../hooks/useLocationData';
-import categoryIcon from '../assets/category.svg';
+
 import LocationMapModal from '../components/LocationMapModal.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 
@@ -17,9 +17,8 @@ const Home = () => {
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState(null);
   const [selectedLocation, setSelectedLocation] = React.useState('전체');
-  const [selectedFilters, setSelectedFilters] = React.useState(['latest']);
+  const [selectedFilters, setSelectedFilters] = React.useState(['']);
   const [mapOpen, setMapOpen] = React.useState(false);
-  const [customLocation, setCustomLocation] = React.useState(null);
 
   // Use the location data hook
   const {
@@ -66,8 +65,6 @@ const Home = () => {
 
   // 지도에서 위치 선택 시
   const handleMapSelect = (pos) => {
-    setCustomLocation(pos);
-    // 선택된 좌표로 API 호출
     filterItems(selectedCategory, selectedLocation, selectedFilters[0], pos);
   };
 
@@ -155,7 +152,7 @@ const Home = () => {
         </div>
       )}
 
-      <div className="flex flex-col items-center px-0 pt-[158px] pb-[88px] flex-1 w-full overflow-y-scroll">
+      <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
         <div className="flex flex-col gap-4 w-[342px]">
           {/* Show location permission status */}
           {locationPermission === 'denied' && (
@@ -177,7 +174,9 @@ const Home = () => {
           
           {/* Items list */}
           {items.length > 0 ? (
-            items.map(item => <ItemCard key={item.id} {...item} />)
+            items
+              .filter(item => !selectedFilters.includes('instant') || item.tag === '즉시 정산 가능') // 즉시 정산 가능 필터
+              .map(item => <ItemCard key={item.id} {...item} />)
           ) : (
             <div className="text-center py-8 text-gray-500">
               <p>표시할 항목이 없습니다.</p>

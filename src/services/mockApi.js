@@ -17,7 +17,7 @@ export const mockApiService = {
     {
       id: 2,
       title: '에어팟 프로 2세대 분실했습니다',
-      tag: '즉시 정산 가능',
+      tag: '',
       location: '월계2동',
       time: '15분 전',
       reward: '15,000원',
@@ -29,7 +29,7 @@ export const mockApiService = {
     {
       id: 3,
       title: '지갑을 잃어버렸습니다',
-      tag: '즉시 정산 가능',
+      tag: '',
       location: '상계1동',
       time: '30분 전',
       reward: '20,000원',
