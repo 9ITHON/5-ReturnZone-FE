@@ -1,4 +1,5 @@
 import React from 'react';
+import categoryIcon from '../assets/category.svg';
 
 const categories = ['전자기기', '지갑', '의류', '가방', '소지품', '서류', '반려동물','기타'];
 
@@ -17,7 +18,7 @@ const CategoryFilter = ({ onCategorySelect, selectedCategory }) => (
       >
         <span>{cat}</span>
         {selectedCategory === cat && (
-          <span className="ml-2 text-blue-600 text-lg font-bold">✔</span>
+          <img src={categoryIcon} alt="선택됨" className="ml-2 w-6 h-6" />
         )}
       </button>
     ))}
