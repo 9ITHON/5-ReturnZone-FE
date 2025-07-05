@@ -123,7 +123,7 @@ const Home = () => {
         selectedCategory={selectedCategory}
       />
       {categoryOpen && (
-        <div className="fixed inset-0 z-30 flex items-end justify-center">
+        <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto bg-black/20 backdrop-blur-sm">
           <div className="w-full max-w-[390px] bg-white rounded-t-xl z-40">
             <div className="w-full flex flex-col items-center pt-6 pb-4 border-b border-[#F0F0F0]">
               <div className="w-12 h-1.5 bg-gray-200 rounded-full mb-4" />
