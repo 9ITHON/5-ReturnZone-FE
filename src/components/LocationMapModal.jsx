@@ -10,8 +10,8 @@ const LocationMapModal = ({ open, onClose, onSelect }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-end justify-end bg-black bg-opacity-40">
-      <div className="w-full max-w-md mx-auto bg-white rounded-t-xl p-4 shadow-lg">
+    <div className="fixed inset-0 z-50 flex flex-col items-end justify-end w-full max-w-[390px] mx-auto bg-black/20 backdrop-blur-sm">
+      <div className="w-full max-w-[390px] mx-auto bg-white rounded-t-xl p-4 shadow-lg">
         <div className="flex items-center mb-2">
           <span className="font-bold text-lg flex-1">위치 설정</span>
           <button onClick={onClose}>닫기</button>
