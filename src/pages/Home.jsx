@@ -40,14 +40,16 @@ const Home = () => {
     filterItems(selectedCategory, selectedLocation, sortBy);
   };
 
-  // const [categoryOpen, setCategoryOpen] = React.useState(false);
-  // const [selectedCategory, setSelectedCategory] = React.useState(null);
 
   const handleCategorySelect = (cat) => {
-    setSelectedCategory(cat);
+    if (selectedCategory === cat) {
+      setSelectedCategory(null);
+      filterItems(null, selectedLocation, selectedFilters[0]);
+    } else {
+      setSelectedCategory(cat);
+      filterItems(cat, selectedLocation, selectedFilters[0]);
+    }
     setCategoryOpen(false);
-    filterItems(cat, selectedLocation, selectedFilters[0]);
-    console.log('카테고리 선택:', cat);
   };
 
   const handleLocationSelect = (location) => {
