@@ -1,6 +1,6 @@
-import UnderNavbar from "../components/under-navbar"
+
 export default function MainPage(){
     return(
-        <div><UnderNavbar/></div>
+        <div>메인페이지 입니다</div>
     )
 }

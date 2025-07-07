@@ -104,7 +104,7 @@ export default function RegisterLocation() {
                 setTimeout(checkKakaoAndInitialize, 100);
             }
         };
-
+        
         checkKakaoAndInitialize();
     }, []);
 
