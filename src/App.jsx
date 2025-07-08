@@ -1,11 +1,11 @@
-import './App.css'
+import './index.css'
+// import Home from './pages/Home.jsx';
+import SearchPage from './pages/search-page';
 
-// 메인 페이지
 function App() {
-
-  return (
-    <div>메인 페이지 입니다.</div>
-  )
+  return <SearchPage />;
 }
 
-export default App
+export default App;
+
+
