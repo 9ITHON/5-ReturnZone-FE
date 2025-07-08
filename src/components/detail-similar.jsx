@@ -5,7 +5,7 @@ export default function DetailSimilar({ post }) {
     return (
         <div>
             <img
-                src={post.imageUrls}
+                src={post.mainImageUrl}
                 alt="이미지"
                 className="h-[167px] w-[167px] rounded-[12px]"
             />
@@ -21,10 +21,10 @@ export default function DetailSimilar({ post }) {
                 {post.registrationType === 'LOST' ? '분실했어요' : '주인 찾아요'}
             </span>
             <p className="text-[14px] text-[#808080]">
-                {post.lostLocationDong} · {post.timeAgo}
+                {post.location} · {post.timeAgo}
             </p>
-            <p className="text-[18px] text-[#111111]">
-                현상금 {post.reward.toLocaleString()}원
+            <p className="text-[18px] text-[#111111] font-bold">
+                <span className='font-medium'>현상금</span> {post.reward.toLocaleString()}원
             </p>
         </div>
     );

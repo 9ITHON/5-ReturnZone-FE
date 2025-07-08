@@ -21,12 +21,15 @@ export default function DetailedPage() {
     const [post, setPost] = useState(DetailTest);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [similarPosts, setSimilarPosts] = useState([]); // 유사한 페이지
     const useMock = import.meta.env.VITE_USE_MOCK === 'true';
+
     // 분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
             if (useMock) {
                 setPost(DetailTest);
+                setSimilarPosts(DetailTest.similarLostPosts || []);
                 setLoading(false);
                 return;
             }
@@ -38,10 +41,12 @@ export default function DetailedPage() {
                     },
                 });
                 setPost(response.data);
+                setSimilarPosts(response.data.similarLostPosts || []); // 유사 페이지
             } catch (err) {
                 console.error(err);
                 setError("데이터를 불러오는 데 실패했습니다.");
                 setPost(DetailTest);
+                setSimilarPosts(DetailTest.similarLostPosts || []);
             } finally {
                 setLoading(false);
             }
@@ -128,14 +133,16 @@ export default function DetailedPage() {
                 </div>
 
                 {/* 비슷한 다른 글 */}
-                <div>
-                    <p className=" mb-[10px] text-[#111111] text-[18px] font-bold ">비슷한 다른 글</p>
-                    <div className="grid grid-cols-2 gap-[16px]">
-                        {[...Array(6)].map((_, idx) => (
-                            <DetailSimilar key={idx} post={post} />
-                        ))}
+                {similarPosts.length > 0 && (
+                    <div>
+                        <p className=" mb-[10px] text-[#111111] text-[18px] font-bold ">비슷한 다른 글</p>
+                        <div className="grid grid-cols-2 gap-[16px]">
+                            {similarPosts.map((item) => (
+                                <DetailSimilar key={item.lostPostId} post={item} />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
             {/* 하단 버튼 */}
             <div className=" pt-[12px] pb-[42px] px-[24px]">
