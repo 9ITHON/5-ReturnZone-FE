@@ -81,7 +81,7 @@ const ChatroomList = () => {
     navigate(`/chat/${id}`);
   };
   return (
-    <div className="bg-white min-h-screen">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-[88px] bg-white">
       <h2 className="text-xl font-bold px-4 py-3">채팅</h2>
       <div>
         {chatrooms.map((room) => (
