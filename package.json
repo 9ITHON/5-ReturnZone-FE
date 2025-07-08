@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "returnzone-fe",
   "private": true,
@@ -35,3 +36,5 @@
     "vite-plugin-svgr": "^4.3.0"
   }
 }
+=======
+>>>>>>> 47cf5e438b4858196676c09e668e9a830321a8ce
