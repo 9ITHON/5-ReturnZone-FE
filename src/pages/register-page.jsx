@@ -47,7 +47,7 @@ export default function RegisterPage() {
     const dateLabel = selectedTag === "주인을 찾아요" ? "획득 날짜" : "분실 날짜";
     const timeLabel = selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간";
     const detailLabel = selectedTag === "주인을 찾아요" ? "획득한 분실품 특징 (최대 5개)" : "분실품 특징 (최대 5개)";
-    
+
     // RegisterLocation에서 온 주소 수신
     useEffect(() => {
         if (location.state?.address) {
@@ -96,7 +96,7 @@ export default function RegisterPage() {
     const handleDeleteQuestion = (index) => {
         setQuestions(prev => prev.filter((_, i) => i !== index));
     };
-    // API 연결
+    // 분실물 등록
     const handleRegister = async () => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
@@ -111,22 +111,19 @@ export default function RegisterPage() {
             const lostDateTimeStart = new Date(`${date}T${startTime}`);
             const lostDateTimeEnd = new Date(`${date}T${endTime}`);
 
-            const payload = {
-                lostPostId: 1, // 추후 실제 ID 대응 필요
-                imageUrls: "https://your-bucket.s3.ap-northeast-2.amazonaws.com/lostPosts/lostpost1.jpg", // 임시 URL 
+            // 바디 정의
+            const requestDto = {
                 registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
                 title,
-                nickname: "유저 1", // 실제 사용자 정보 바인딩 필요
-                timeAgo: "방금 전",
+                description,
+                category: selectedCategory,
+                itemName,
                 lostLocationDong: selectedLocation,
                 detailedLocation: detailLocation,
                 latitude: lat,
                 longitude: lng,
                 reward: Number(reward),
                 instantSettlement: true,
-                description,
-                category: selectedCategory,
-                itemName,
                 feature1: questions[0] || "",
                 feature2: questions[1] || "",
                 feature3: questions[2] || "",
@@ -136,16 +133,26 @@ export default function RegisterPage() {
                 lostDateTimeEnd: lostDateTimeEnd.toISOString(),
             };
 
-            const response = await axios.post(`${apiBase}/api/v1/lostPosts`, {
-                headers: {
-                    Authorization: `Bearer ${user?.token}`
-                },
-                validateStatus: () => true // 응답 코드를 catch로 넘기지 않도록 처리
+            // 이미지 처리 및 요청 바디 결합
+            const formData = new FormData();
+            formData.append(
+                "requestDto",
+                new Blob([JSON.stringify(requestDto)], { type: "application/json" })
+            );
+            images.forEach((img) => {
+                formData.append("images", img);
             });
-            console.log("등록 성공:", response.data);
-            alert("등록 완료!");
-            navigate("/"); // 완료 후 이동할 페이지
 
+            // POST 요청
+            const response = await axios.post(`${apiBase}/api/v1/lostPosts`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data", // optional (axios가 자동 지정함)
+                    "X-USER-ID": user?.id, // 명세에 따라 로그인한 사용자 ID 전달
+                },
+                validateStatus: () => true,
+            });
+
+            // 응답 처리
             if (response.status === 201) {
                 alert("등록이 완료되었습니다.");
                 navigate("/");
@@ -155,12 +162,12 @@ export default function RegisterPage() {
             } else {
                 alert(`서버 오류 (${response.status})가 발생했습니다. 잠시 후 다시 시도해 주세요.`);
             }
+
         } catch (error) {
             console.error("등록 요청 실패:", error);
             alert("요청 중 예외가 발생했습니다.");
         }
     };
-
 
     return (
         <div>
