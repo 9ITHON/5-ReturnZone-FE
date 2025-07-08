@@ -62,7 +62,7 @@ export default function SignUp() {
             console.log('비밀번호:', password);
             console.log('비밀번호 확인:', passwordConfirm);
             console.log('약관 동의:', agree);
-            const response = await axios.post(`${apiBase}/api/members/signup`, { // api 호출은 api 명세에 따라 수정 필요(env 형식으로 관리 필요)
+            const response = await axios.post(`${apiBase}/api/v1/members/signup`, { // api 호출은 api 명세에 따라 수정 필요(env 형식으로 관리 필요)
                 username,
                 email,
                 password,
@@ -80,6 +80,7 @@ export default function SignUp() {
             alert("회원가입에 실패했습니다.");
         }
     };
+    //이메일 중복 검사
     const handleCheckEmail = async () => {
         // 이메일 형식 확인
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -91,7 +92,7 @@ export default function SignUp() {
             const response = await axios.get(`${apiBase}/api/v1/members/email/${email}`);
 
             // 사용 가능 (200 OK)
-            if (response.data === true) {
+            if (response.data === true || response.data === "true") {
                 setEmailError("");
                 setEmailSuccess("사용가능한 이메일입니다!");
                 setIsEmailChecked(true);
