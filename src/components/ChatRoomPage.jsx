@@ -2,11 +2,35 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const WS_URL = "ws://15.164.234.32:8080/ws/chat"; // 실제 ws 주소/포트/프로토콜에 맞게 수정
+const WS_URL = "ws://15.164.234.32:8080/ws/chat";
 const MARK_READ_URL = "http://15.164.234.32:8080/api/chat/markRead";
 
 const chatRoomId = "1"; // TODO: 실제 채팅방 id로 대체
 const userId = "user1"; // TODO: 실제 로그인 유저 id로 대체
+
+// 더미 데이터
+const initialMessages = [
+  {
+    id: 1,
+    from: "user2",
+    content: "안녕하세요! 헤드셋 정말 잃어버리신 거 맞나요?",
+    time: "오후 2:30",
+    avatar: "/src/assets/user.svg"
+  },
+  {
+    id: 2,
+    from: "user1", 
+    content: "네 맞습니다. 혹시 찾으셨나요?",
+    time: "오후 2:32"
+  },
+  {
+    id: 3,
+    from: "user2",
+    content: "네! 역삼역 근처에서 발견했어요. 언제 받으실 수 있나요?",
+    time: "오후 2:35",
+    avatar: "/src/assets/user.svg"
+  }
+];
 
 function ConfirmModal({ open, title, desc, confirmText, onConfirm, onCancel }) {
   if (!open) return null;
@@ -48,23 +72,40 @@ const ChatRoomPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null });
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
+  const [wsError, setWsError] = useState(false);
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const ws = useRef(null);
 
-  // 웹소켓 연결 및 메시지 수신
+  // WebSocket 연결 및 fallback
   useEffect(() => {
-    ws.current = new WebSocket(`${WS_URL}/${chatRoomId}`);
-    ws.current.onopen = () => {
-      // 입장 시 markRead
-      axios.post(MARK_READ_URL, { chatRoomId, userId });
-    };
-    ws.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      setMessages((prev) => [...prev, msg]);
-      // 새 메시지 읽음 처리
-      axios.post(MARK_READ_URL, { chatRoomId, userId });
-    };
+    let didFallback = false;
+    try {
+      ws.current = new window.WebSocket(`${WS_URL}/${chatRoomId}`);
+      ws.current.onopen = () => {
+        axios.post(MARK_READ_URL, { chatRoomId, userId });
+        setMessages([]); // 서버 연결 성공 시 빈 채팅(혹은 서버에서 불러오기)
+      };
+      ws.current.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        setMessages((prev) => [...prev, msg]);
+        axios.post(MARK_READ_URL, { chatRoomId, userId });
+      };
+      ws.current.onerror = () => {
+        setWsError(true);
+        setMessages(initialMessages);
+        didFallback = true;
+      };
+      ws.current.onclose = () => {
+        if (!didFallback) {
+          setWsError(true);
+          setMessages(initialMessages);
+        }
+      };
+    } catch {
+      setWsError(true);
+      setMessages(initialMessages);
+    }
     return () => {
       ws.current && ws.current.close();
     };
@@ -76,17 +117,40 @@ const ChatRoomPage = () => {
 
   // 메시지 전송
   const handleSend = () => {
-    if (!input.trim() || !ws.current || ws.current.readyState !== 1) return;
-    ws.current.send(JSON.stringify({
-      chatRoomId,
-      userId,
-      content: input,
-      // 기타 필요한 필드
-    }));
+    if (!input.trim()) return;
+    if (ws.current && ws.current.readyState === 1 && !wsError) {
+      ws.current.send(JSON.stringify({
+        chatRoomId,
+        userId,
+        content: input,
+      }));
+    } else {
+      // fallback: 더미 메시지 추가
+      const newMsg = {
+        id: Date.now(),
+        from: userId,
+        content: input,
+        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, newMsg]);
+      // 더미 답장
+      setTimeout(() => {
+        const quickReplies = ["알겠습니다!", "네네", "좋아요!", "ㅎㅎ"];
+        const randomReply = quickReplies[Math.floor(Math.random() * quickReplies.length)];
+        const replyMsg = {
+          id: Date.now() + 1,
+          from: "user2",
+          content: randomReply,
+          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          avatar: "/src/assets/user.svg"
+        };
+        setMessages(prev => [...prev, replyMsg]);
+      }, 1000 + Math.random() * 2000);
+    }
     setInput("");
   };
 
-  // 메뉴/모달 핸들러 (기존과 동일)
+  // 메뉴/모달 핸들러
   const openModal = (type) => {
     setMenuOpen(false);
     setModal({ open: true, type });
@@ -98,6 +162,11 @@ const ChatRoomPage = () => {
     } else if (modal.type === "block") {
       setToast({ open: true, message: "상대방이 차단되었습니다.", type: "success" });
     } else if (modal.type === "exit") {
+      const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
+      if (!exited.includes(chatRoomId)) {
+        exited.push(chatRoomId);
+        localStorage.setItem("exitedChats", JSON.stringify(exited));
+      }
       setToast({ open: true, message: "채팅방을 나갔습니다.", type: "success" });
       setTimeout(() => navigate("/chat"), 1000);
     }
@@ -113,9 +182,9 @@ const ChatRoomPage = () => {
         <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b bg-white" style={{minHeight:'56px'}}>
           <div className="flex items-center">
             <button className="mr-2 text-2xl" onClick={() => navigate(-1)}>&#8592;</button>
-            <span className="font-bold text-lg">유저1</span>
+            <span className="font-bold text-lg">유저2</span>
           </div>
-          <div className="relative">
+          <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <button className="text-2xl" onClick={() => setMenuOpen((v) => !v)}>
               <span className="inline-block w-6 h-6 flex items-center justify-center">⋮</span>
             </button>
@@ -150,15 +219,17 @@ const ChatRoomPage = () => {
         <div className="w-full bg-gray-100 text-gray-700 rounded-lg py-3 font-semibold text-base text-center mt-2 mb-2">물건을 잘 받았어요</div>
         {/* 메시지 영역 */}
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-white">
+          {wsError && (
+            <div className="text-center text-xs text-red-500 mb-2">서버 연결에 실패하여 더미 채팅으로 표시 중입니다.</div>
+          )}
           {messages.map((msg, i) => {
-            // 예시: type, from, content 등 서버 명세에 맞게 분기 필요
             if (msg.from === userId) {
               return (
                 <div key={i} className="flex flex-col items-end">
                   <div className="bg-blue-600 text-white text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">
-                    {msg.content || (msg.text && msg.text.map((t, idx) => <div key={idx}>{t}</div>))}
+                    {msg.content}
                   </div>
-                  <div className="text-xs text-gray-400 mr-2">{msg.time || msg.createdAt}</div>
+                  <div className="text-xs text-gray-400 mr-2">{msg.time}</div>
                 </div>
               );
             } else {
@@ -166,8 +237,8 @@ const ChatRoomPage = () => {
                 <div key={i} className="flex items-start gap-2">
                   <img src={msg.avatar || "/src/assets/user.svg"} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
                   <div>
-                    <div className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{msg.content || (msg.text && msg.text[0])}</div>
-                    <div className="text-xs text-gray-400 ml-1">{msg.time || msg.createdAt}</div>
+                    <div className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{msg.content}</div>
+                    <div className="text-xs text-gray-400 ml-1">{msg.time}</div>
                   </div>
                 </div>
               );
@@ -198,9 +269,21 @@ const ChatRoomPage = () => {
         </div>
         <ConfirmModal
           open={modal.open}
-          title={modal.type === 'report' ? '이 사용자를 신고하시겠습니까?' : modal.type === 'block' ? '상대방을 차단하시겠습니까?' : modal.type === 'exit' ? '채팅방을 나가시겠습니까?' : ''}
-          desc={modal.type === 'report' ? '신고는 운영팀에 전달되며, 허위 신고 시 제재될 수 있습니다.' : modal.type === 'block' ? '차단 시 더 이상 메시지를 주고받을 수 없습니다.' : modal.type === 'exit' ? '나가면 더 이상 대화를 주고받을 수 없습니다.' : ''}
-          confirmText={modal.type === 'report' ? '신고하기' : modal.type === 'block' ? '차단하기' : modal.type === 'exit' ? '나가기' : ''}
+          title={
+            modal.type === "report" ? "신고하기" :
+            modal.type === "block" ? "차단하기" :
+            modal.type === "exit" ? "채팅방 나가기" : ""
+          }
+          desc={
+            modal.type === "report" ? "정말 신고하시겠습니까?" :
+            modal.type === "block" ? "정말 차단하시겠습니까?" :
+            modal.type === "exit" ? "정말 나가시겠습니까?" : ""
+          }
+          confirmText={
+            modal.type === "report" ? "신고하기" :
+            modal.type === "block" ? "차단하기" :
+            modal.type === "exit" ? "나가기" : ""
+          }
           onConfirm={handleConfirm}
           onCancel={closeModal}
         />
