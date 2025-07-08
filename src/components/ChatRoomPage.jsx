@@ -1,8 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import BottomNav from "./BottomNav.jsx";
+import axios from "axios";
 
-const ROLE = "loser"; // 'loser' = 분실자, 'finder' = 습득자
+const WS_URL = "ws://15.164.234.32:8080/ws/chat"; // 실제 ws 주소/포트/프로토콜에 맞게 수정
+const MARK_READ_URL = "http://15.164.234.32:8080/api/chat/markRead";
+
+const chatRoomId = "1"; // TODO: 실제 채팅방 id로 대체
+const userId = "user1"; // TODO: 실제 로그인 유저 id로 대체
 
 function ConfirmModal({ open, title, desc, confirmText, onConfirm, onCancel }) {
   if (!open) return null;
@@ -38,73 +42,51 @@ function Toast({ open, message, type }) {
   );
 }
 
-const STATUS_FLOW = ["waiting", "delivering", "delivered", "reward"];
-const STATUS_LABEL = {
-  waiting: { label: "물건 전달 중", color: "text-blue-500", sub: "물건 전달 중", info: "물건을 전달 중 주인을 찾아 포인트를 받아보세요!" },
-  delivering: { label: "전달을 기다리고 있어요", color: "text-blue-500", sub: "물건 전달 중", info: "전달을 기다리고 있어요" },
-  delivered: { label: "거래 완료", color: "text-gray-500", sub: "거래 완료", info: "" },
-  reward: { label: "500포인트 지급 완료", color: "text-blue-600", sub: "거래 완료", info: "500포인트 지급 완료" },
-};
-const STATUS_GUIDE = {
-  waiting: { icon: "📦", text: "물건 전달이 시작되었습니다.\n물건을 받으셨다면, 상단의 버튼을 눌러주세요.\n버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  delivering: { icon: "😀", text: "주인을 찾았어요! 이제 물건을 전달해 주세요.\n분실자가 수령을 확인하면 포인트가 자동 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  delivered: { icon: "📦", text: "물건 전달이 시작되었습니다.\n물건을 받으셨다면, 상단의 버튼을 눌러주세요.\n버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  reward: { icon: "🎉", text: "전달 완료! 주인이 물건을 잘 받았어요.\n약속된 500포인트가 지급되었습니다. 감사합니다!", color: "border-blue-300 bg-blue-50 text-blue-800" },
-};
-
-const CHAT_ID = '1'; // 실제로는 props나 useParams 등에서 받아야 함
-const STORAGE_KEY = `chat_messages_${CHAT_ID}`;
-
-const initialMessages = [
-  {
-    id: 1,
-    type: "question",
-    from: "finder",
-    text: [
-      "아래는 습득자가 등록한 분실물 특징입니다.\n분실물과 비교하여 정확하게 답변해 주세요.",
-      "1. 아이폰 상단에 흠집이 있나요?",
-      "2. 아이폰 케이스는 어떤건가요?",
-      "3. 어디서 잃어버리셨나요?",
-    ],
-    time: "12:40 읽음",
-  },
-  {
-    id: 2,
-    type: "answer",
-    from: "loser",
-    avatar: "/src/assets/user.svg",
-    text: [
-      "상단에 흠집 있습니다, 케이스는 짱구 케이스에요",
-      "주민센터 앞에서 잃어버렸어요",
-    ],
-    time: "12:40 읽음",
-  },
-];
-
 const ChatRoomPage = () => {
-  // localStorage에서 불러오기
-  const getStoredMessages = () => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return initialMessages;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return initialMessages;
-    }
-  };
-  const [messages, setMessages] = useState(getStoredMessages);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null });
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
+  const ws = useRef(null);
+
+  // 웹소켓 연결 및 메시지 수신
+  useEffect(() => {
+    ws.current = new WebSocket(`${WS_URL}/${chatRoomId}`);
+    ws.current.onopen = () => {
+      // 입장 시 markRead
+      axios.post(MARK_READ_URL, { chatRoomId, userId });
+    };
+    ws.current.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      setMessages((prev) => [...prev, msg]);
+      // 새 메시지 읽음 처리
+      axios.post(MARK_READ_URL, { chatRoomId, userId });
+    };
+    return () => {
+      ws.current && ws.current.close();
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 메뉴/모달 핸들러
+  // 메시지 전송
+  const handleSend = () => {
+    if (!input.trim() || !ws.current || ws.current.readyState !== 1) return;
+    ws.current.send(JSON.stringify({
+      chatRoomId,
+      userId,
+      content: input,
+      // 기타 필요한 필드
+    }));
+    setInput("");
+  };
+
+  // 메뉴/모달 핸들러 (기존과 동일)
   const openModal = (type) => {
     setMenuOpen(false);
     setModal({ open: true, type });
@@ -121,24 +103,6 @@ const ChatRoomPage = () => {
     }
     setTimeout(() => setToast({ open: false, message: "", type: "success" }), 2000);
     closeModal();
-  };
-
-  // 메시지 전송
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const newMessages = [
-      ...messages,
-      {
-        id: messages.length + 1,
-        type: "question",
-        from: "finder",
-        text: [input],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " 읽음",
-      },
-    ];
-    setMessages(newMessages);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newMessages));
-    setInput("");
   };
 
   return (
@@ -187,30 +151,27 @@ const ChatRoomPage = () => {
         {/* 메시지 영역 */}
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-white">
           {messages.map((msg, i) => {
-            if (msg.type === "question") {
+            // 예시: type, from, content 등 서버 명세에 맞게 분기 필요
+            if (msg.from === userId) {
               return (
                 <div key={i} className="flex flex-col items-end">
                   <div className="bg-blue-600 text-white text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">
-                    {msg.text.map((t, idx) => <div key={idx}>{t}</div>)}
+                    {msg.content || (msg.text && msg.text.map((t, idx) => <div key={idx}>{t}</div>))}
                   </div>
-                  <div className="text-xs text-gray-400 mr-2">{msg.time}</div>
+                  <div className="text-xs text-gray-400 mr-2">{msg.time || msg.createdAt}</div>
                 </div>
               );
-            }
-            if (msg.type === "answer") {
+            } else {
               return (
                 <div key={i} className="flex items-start gap-2">
-                  <img src={msg.avatar} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
+                  <img src={msg.avatar || "/src/assets/user.svg"} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
                   <div>
-                    {msg.text.map((t, idx) => (
-                      <div key={idx} className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{t}</div>
-                    ))}
-                    <div className="text-xs text-gray-400 ml-1">{msg.time}</div>
+                    <div className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{msg.content || (msg.text && msg.text[0])}</div>
+                    <div className="text-xs text-gray-400 ml-1">{msg.time || msg.createdAt}</div>
                   </div>
                 </div>
               );
             }
-            return null;
           })}
           <div ref={messagesEndRef} />
         </div>
