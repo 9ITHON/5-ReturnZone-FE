@@ -1,31 +1,39 @@
-import React from 'react';
+import React from "react";
 import homeIcon from '../assets/home.svg';
-import plusIcon from '../assets/plus-rectangle.svg';
 import chatIcon from '../assets/chat.svg';
-import mypageIcon from '../assets/user.svg';
+import userIcon from '../assets/user.svg';
+import plusRectangleIcon from '../assets/plus-rectangle.svg';
 
 const BottomNav = () => (
-  <nav className="fixed left-0 right-0 bottom-0 w-full max-w-[390px] mx-auto h-[88px] bg-white border-t border-t-[#B8B8B8] border-opacity-50 z-50 flex items-center justify-center">
-    <div className="mx-auto max-w-[390px] w-full h-[88px] flex flex-row justify-center items-center p-0">
-      <button className="flex-1 flex flex-col items-center justify-center gap-0.5">
-        <img src={homeIcon} alt="홈" className="w-6 h-6" />
-        <div className="w-[55px] h-[17px] text-[12px] font-normal text-[#111] leading-[17px]">홈</div>
-      </button>
-      <button className="flex-1 flex flex-col items-center justify-center gap-0.5">
-        <img src={plusIcon} alt="분실물 등록" className="w-6 h-6" />
-        <div className="w-[55px] h-[17px] text-[12px] font-normal text-[#111] leading-[17px]">분실물 등록</div>
-      </button>
-      <button className="flex-1 flex flex-col items-center justify-center gap-0.5 relative">
-        <img src={chatIcon} alt="채팅" className="w-6 h-6" />
-        <span className="absolute -top-1 right-3 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">9</span>
-        <div className="w-[55px] h-[17px] text-[12px] font-normal text-[#111] leading-[17px]">채팅</div>
-      </button>
-      <button className="flex-1 flex flex-col items-center justify-center gap-0.5">
-        <img src={mypageIcon} alt="마이페이지" className="w-6 h-6" />
-        <div className="w-[55px] h-[17px] text-[12px] font-normal text-[#111] leading-[17px]">마이페이지</div>
-      </button>
+  <div className="flex flex-col justify-start items-center w-[390px] h-[88px] bg-white border-t-[0.5px] border-r-0 border-b-0 border-l-0 border-[#b8b8b8]">
+    <div className="flex justify-center items-center self-stretch flex-grow">
+      {/* 홈 */}
+      <div className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]">
+        <img src={homeIcon} alt="홈" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" />
+        <p className="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-[#111]">홈</p>
+      </div>
+      {/* 분실물 등록 */}
+      <div className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]">
+        <img src={plusRectangleIcon} alt="분실물 등록" className="w-6 h-6" />
+        <p className="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-[#111]">분실물 등록</p>
+      </div>
+      {/* 채팅 */}
+      <div className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]">
+        <div className="flex-grow-0 flex-shrink-0 w-6 h-6 relative">
+          <img src={chatIcon} alt="채팅" className="absolute left-[1.88px] top-[1.88px] w-[20px] h-[20px]" />
+          <div className="flex justify-center items-center h-3.5 absolute left-[13px] top-[-3px] gap-2.5 px-[3px] rounded-xl bg-[#f00]">
+            <p className="flex-grow-0 flex-shrink-0 text-xs text-center text-white">9</p>
+          </div>
+        </div>
+        <p className="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-[#111]">채팅</p>
+      </div>
+      {/* 마이페이지 */}
+      <div className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]">
+        <img src={userIcon} alt="마이페이지" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" />
+        <p className="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-[#111]">마이페이지</p>
+      </div>
     </div>
-  </nav>
+  </div>
 );
 
 export default BottomNav; 
