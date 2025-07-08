@@ -37,8 +37,10 @@ export default function RegisterPage() {
     const [description, setDescription] = useState(""); // 글 본문
     const [itemName, setItemName] = useState(""); // 물품명
     const [reward, setReward] = useState(""); // 현상금
+    const calendarRef = useRef(null); // 캘린더 영역 참조
+    const timePickerRef = useRef(null); // 시간 영역 참조
 
-    const navigate = useNavigate("");
+    const navigate = useNavigate();
     const location = useLocation();
     const isKeyboardOpen = UseKeyboardOpen();
 
@@ -96,10 +98,23 @@ export default function RegisterPage() {
     const handleDeleteQuestion = (index) => {
         setQuestions(prev => prev.filter((_, i) => i !== index));
     };
+    // 숫자 콤마 추가
+    const formatWithComma = (value) => {
+        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+    // 쉼표 제거 → 숫자만 추출
+    const unformatComma = (value) => {
+        return value.replace(/,/g, "");
+    };
     // 분실물 등록
     const handleRegister = async () => {
         try {
+            // 로그인 유효성 검사 진행
             const user = JSON.parse(localStorage.getItem("user"));
+            if (!user?.id) {
+                alert("로그인이 필요한 기능입니다.");
+                return;
+            }
             const { lat, lng } = location.state || {};
             if (!lat || !lng) return alert("위치를 선택해주세요.");
             if (!selectedDate) return alert("날짜를 선택해주세요.");
@@ -168,6 +183,22 @@ export default function RegisterPage() {
             alert("요청 중 예외가 발생했습니다.");
         }
     };
+    // 외부클릭으로 모달 닫기
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isCalendarOpen && calendarRef.current && !calendarRef.current.contains(e.target)) {
+                setIsCalendarOpen(false);
+            }
+            if (isTimePickerOpen && timePickerRef.current && !timePickerRef.current.contains(e.target)) {
+                setIsTimePickerOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isCalendarOpen, isTimePickerOpen]);
 
     return (
         <div>
@@ -359,8 +390,15 @@ export default function RegisterPage() {
                                     금액은 입력값과 일치해야 하며, 입금자명은 계정명과 동일해야 합니다.
                                 </p>
                                 <div className="flex items-center border border-[#D0D0D0] rounded-[8px] px-[16px] py-[14px]">
-                                    <input type="number" placeholder="금액을 입력해주세요" value={reward} onChange={(e) => setReward(e.target.value)}
-                                        className=" flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin" />
+                                    <input
+                                        type="text" placeholder="금액을 입력해주세요" value={formatWithComma(reward)}
+                                        onChange={(e) => {
+                                            const raw = unformatComma(e.target.value);
+                                            if (!/^\d*$/.test(raw)) return; // 숫자만 허용
+                                            setReward(raw);
+                                        }}
+                                        className="flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin"
+                                    />
                                     <span className="text-[#888] text-[14px]" >(원)</span>
                                 </div>
                             </div>
@@ -388,19 +426,23 @@ export default function RegisterPage() {
             <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
                 <Button label="등록 하기" onClick={handleRegister} />
             </div>
-            {/* 캘린더 모달 조건 렌더링 */}
+            {/* 캘린더 모달 조건부 렌더링 */}
             {isCalendarOpen && (
-                <CalendarModal
-                    onClose={() => setIsCalendarOpen(false)}
-                    onSelect={(date) => setSelectedDate(date)}
-                />
+                <div ref={calendarRef}>
+                    <CalendarModal
+                        onClose={() => setIsCalendarOpen(false)}
+                        onSelect={(date) => setSelectedDate(date)}
+                    />
+                </div>
             )}
-            {/* 시간선택 모달 조건 렌더링 */}
+            {/* 시간선택 모달 조건부 렌더링 */}
             {isTimePickerOpen && (
-                <TimePickerModal
-                    onClose={() => setIsTimePickerOpen(false)}
-                    onSelect={(times) => setSelectedTimes(times)}
-                />
+                <div ref={timePickerRef}>
+                    <TimePickerModal
+                        onClose={() => setIsTimePickerOpen(false)}
+                        onSelect={(times) => setSelectedTimes(times)}
+                    />
+                </div>
             )}
         </div>
     )
