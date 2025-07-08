@@ -7,6 +7,8 @@ import ModifyPage from './pages/modify-page';
 import RegisterPage from './pages/register-page';
 import SearchPage from './pages/search-page';
 import Login from './pages/Login'
+import Chat from './pages/Chat';
+import ChatList from './pages/ChatList';
 
 // 라우터 설정 함수
 function AppRoute(){
@@ -15,6 +17,8 @@ function AppRoute(){
       <Route path='/' element={<Home/>}></Route>
       <Route path='/LogIn' element={<Login/>}></Route>
       <Route path='/SignUp' element={<SignUp/>}></Route>
+      <Route path='/Chat' element={<Chat/>}></Route>
+      <Route path='/ChatList' element={<ChatList/>}></Route>
       <Route path='/RegisterLocation' element={<RegisterLocation/>}/>
       <Route path='/Register' element={<RegisterPage/>}></Route>
       <Route path="/lost/:lostPostId" element={<DetailedPage />} />

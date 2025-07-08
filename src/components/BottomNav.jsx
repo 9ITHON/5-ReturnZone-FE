@@ -19,7 +19,7 @@ const BottomNav = () => {
   }
   // 채팅페이지로 이동
   const handleChatClick = () => {
-    navigate('/Chat');
+    navigate('/ChatList');
   }
   // 마이페이지로 이동
   const handleMyPageClick = () => {
