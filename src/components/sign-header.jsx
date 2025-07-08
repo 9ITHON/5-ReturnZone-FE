@@ -1,25 +1,21 @@
-import React from 'react';
-import logo from '../assets/logo.svg';
-import searchIcon from '../assets/Search.svg';
+import { useNavigate } from 'react-router-dom'
+import HeaderIcon from '../assets/logo.svg'
+// 로고랑 타이틀을 반환하는 컴포넌트 입니다.
+// 스타일 덮어 쓰기로 배치 속성 다시 적용할 수 있습니다.
+export default function Header({title,className=""}) {
+    const navigate = useNavigate();
+    // 로고 클릭하면 메인 페이지로 이동
+    const handleLogoClick = () => {
+        navigate('/');
+    }
 
-const Header = () => {
-  return (
-    <header className=" w-[390px] bg-white flex flex-col items-center select-none">
-      {/* Status Bar (고정) */}
-      <div className="w-full h-[54px] flex items-center justify-between px-4 bg-white select-none">
-        <div className="flex gap-2" />
-      </div>
-      {/* Main Header */}
-      <div className="relative w-[390px] h-[56px] flex items-center bg-white px-6">
-        <img src={logo} alt="Return Zone Logo" className="h-[42px] w-[96px] object-contain" />
-        <img
-          src={searchIcon}
-          alt="검색"
-          className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 cursor-pointer"
-        />
-      </div>
-    </header>
-  );
-};
-
-export default Header; 
+    return (
+        <div className={`w-full h-[120px] px-[8px] py-[16px] flex flex-col items-center justify-center ${className}`}>
+            <img src={HeaderIcon} alt="ReturnZone 로고" onClick={handleLogoClick}
+                className=' cursor-pointer' />
+            <h1 className=' text-[32px] text-[#111111] font-semibold'>
+                {title}
+            </h1>
+        </div>
+    )
+}

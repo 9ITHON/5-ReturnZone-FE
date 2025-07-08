@@ -73,7 +73,7 @@ export default function SignUp() {
             if (response.status === 201) { // 로그인 성공 시 
                 console.log("로그인 성공");
                 alert("회원가입에 성공했습니다.");
-                navigate("/SignIn"); // 로그인 페이지로 이동
+                navigate("/LogIn"); // 로그인 페이지로 이동
             } else {
                 console.error("회원가입 오류 발생");
                 alert("회원가입 중 오류가 발생하였습니다.");
