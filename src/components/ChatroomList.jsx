@@ -80,11 +80,14 @@ const ChatroomList = () => {
   const handleClick = (id) => {
     navigate(`/chat/${id}`);
   };
+  // 나간 채팅방 제외
+  const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
+  const filteredRooms = chatrooms.filter(room => !exited.includes(String(room.id)) && !exited.includes(room.id));
   return (
     <div className="flex-1 min-h-0 overflow-y-auto pb-[88px] bg-white">
       <h2 className="text-xl font-bold px-4 py-3">채팅</h2>
       <div>
-        {chatrooms.map((room) => (
+        {filteredRooms.map((room) => (
           <ChatroomItem key={room.id} {...room} onClick={handleClick} />
         ))}
       </div>

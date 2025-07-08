@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 // import BottomNav from "./BottomNav.jsx";
 
 // 상태: waiting(전달대기), delivering(전달중), delivered(전달완료), reward(포인트지급)
@@ -62,12 +62,40 @@ const dummyMessages = [
   },
 ];
 
-const ChatRoomPage = () => {
+// 공통 모달 컴포넌트
+function ConfirmModal({ open, title, desc, confirmText, cancelText, onConfirm, onCancel }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-xl w-[85vw] max-w-xs p-6 text-center shadow-xl animate-fadein">
+        <div className="text-base font-semibold mb-2">{title}</div>
+        <div className="text-xs text-gray-500 mb-6 whitespace-pre-line">{desc}</div>
+        <div className="flex gap-2">
+          <button className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold" onClick={onCancel}>{cancelText}</button>
+          <button className="flex-1 py-2 rounded-lg bg-blue-600 text-white font-semibold" onClick={onConfirm}>{confirmText}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Toast({ open, message, type }) {
+  if (!open) return null;
+  return (
+    <div className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg text-white text-sm font-semibold ${type === 'success' ? 'bg-blue-600' : 'bg-gray-800'}`}>{message}</div>
+  );
+}
+
+const ChatRoomPage = ({ chatId }) => {
   const [messages, setMessages] = useState(dummyMessages);
   const [input, setInput] = useState("");
   const [statusIdx, setStatusIdx] = useState(0); // 상태 전환용
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [modal, setModal] = useState({ type: null, open: false });
+  const [toast, setToast] = useState({ open: false, message: "", type: "success" });
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const status = STATUS_FLOW[statusIdx];
   const statusInfo = STATUS_LABEL[status];
@@ -120,17 +148,86 @@ const ChatRoomPage = () => {
     if (statusIdx < STATUS_FLOW.length - 1) setStatusIdx(statusIdx + 1);
   };
 
+  // 메뉴/모달 핸들러
+  const openModal = (type) => {
+    setMenuOpen(false);
+    setModal({ type, open: true });
+  };
+  const closeModal = () => setModal({ type: null, open: false });
+  const handleConfirm = () => {
+    if (modal.type === "report") {
+      setToast({ open: true, message: "신고가 접수되었습니다.", type: "success" });
+    } else if (modal.type === "block") {
+      setToast({ open: true, message: "상대방이 차단되었습니다.", type: "success" });
+    } else if (modal.type === "exit") {
+      setToast({ open: true, message: "채팅방을 나갔습니다.", type: "success" });
+      // localStorage에 나간 채팅방 id 저장
+      const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
+      if (!exited.includes(chatId || id)) {
+        exited.push(chatId || id);
+        localStorage.setItem("exitedChats", JSON.stringify(exited));
+      }
+      setTimeout(() => navigate("/chat"), 1000);
+    }
+    setTimeout(() => setToast({ open: false, message: "", type: "success" }), 2000);
+    closeModal();
+  };
+
+  // 모달별 텍스트
+  const modalText = {
+    report: {
+      title: "이 사용자를 신고하시겠습니까?",
+      desc: "신고는 운영팀에 전달되며, 허위 신고 시 제재될 수 있습니다.",
+      confirm: "신고하기",
+      cancel: "취소",
+    },
+    block: {
+      title: "상대방을 차단하시겠습니까?",
+      desc: "차단 시 더 이상 메시지를 주고받을 수 없습니다.",
+      confirm: "차단하기",
+      cancel: "취소",
+    },
+    exit: {
+      title: "채팅방을 나가시겠습니까?",
+      desc: "나가면 더 이상 대화를 주고받을 수 없습니다.",
+      confirm: "나가기",
+      cancel: "취소",
+    },
+  };
+
   // 상단 시스템 메시지 정보
   const system = messages.find((m) => m.type === "system");
 
   return (
     <div className="relative w-full min-h-screen bg-gray-50 flex flex-col items-center">
-      <div className="w-full max-w-[390px] h-screen bg-white flex flex-col mx-auto overflow-hidden shadow-lg">
+      <Toast open={toast.open} message={toast.message} type={toast.type} />
+      <div className="w-full max-w-[390px] h-screen bg-white flex flex-col mx-auto overflow-hidden shadow-lg relative">
         {/* 상단 정보 */}
-        <div className="bg-white px-4 py-3 border-b flex items-center flex-shrink-0" style={{minHeight:'56px'}}>
+        <div className="bg-white px-4 py-3 border-b flex items-center flex-shrink-0 relative" style={{minHeight:'56px'}}>
           <button className="mr-2 text-2xl" onClick={() => navigate(-1)}>&#8592;</button>
           <div className="font-semibold text-base flex-1">유저1</div>
-          <button className="ml-2 text-xl">&#8942;</button>
+          <button className="ml-2 text-xl relative" onClick={() => setMenuOpen((v) => !v)}>
+            <span className="inline-block w-6 h-6 flex items-center justify-center">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>
+            </span>
+            {/* 드롭다운 메뉴 */}
+            {menuOpen && (
+              <div className="absolute right-0 top-8 w-44 bg-white rounded-xl shadow-lg border z-20 animate-fadein">
+                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('report')}>
+                  <span className="mr-2"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 2v2M9 14v2M4.22 4.22l1.42 1.42M13.36 13.36l1.42 1.42M2 9h2m10 0h2M4.22 13.78l1.42-1.42M13.36 4.64l1.42-1.42"/></svg></span>
+                  신고하기
+                </button>
+                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('block')}>
+                  <span className="mr-2"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="9" r="7"/><line x1="5" y1="5" x2="13" y2="13"/></svg></span>
+                  차단하기
+                </button>
+                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('exit')}>
+                  <span className="mr-2"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 12V9a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-3z"/><polyline points="9 15 12 12 9 9"/></svg></span>
+                  채팅방 나가기
+                </button>
+              </div>
+            )}
+          </button>
         </div>
         {/* 시스템 메시지 (현상/상태/안내/버튼) */}
         {system && (
@@ -241,7 +338,16 @@ const ChatRoomPage = () => {
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
-        {/* BottomNav 제거됨 */}
+        {/* 공통 모달 */}
+        <ConfirmModal
+          open={modal.open}
+          title={modalText[modal.type]?.title}
+          desc={modalText[modal.type]?.desc}
+          confirmText={modalText[modal.type]?.confirm}
+          cancelText={modalText[modal.type]?.cancel}
+          onConfirm={handleConfirm}
+          onCancel={closeModal}
+        />
       </div>
     </div>
   );
