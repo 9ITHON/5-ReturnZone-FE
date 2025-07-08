@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import Button from "./button";
 
 const AM_TIMES = [
     "12:00", "1:00", "2:00", "3:00", "4:00", "5:00",
     "6:00", "7:00", "8:00", "9:00", "10:00", "11:00"
 ];
-const PM_TIMES = [...AM_TIMES]; // 동일하게 사용
+const PM_TIMES = [...AM_TIMES];
 
 const timeTo24Hour = (period, time) => {
     let hour = parseInt(time);
@@ -14,15 +14,26 @@ const timeTo24Hour = (period, time) => {
     return hour;
 };
 
-export default function TimePickerModal({ onClose, onSelect }) {
+const TimePickerModal = forwardRef(({ onClose, onSelect }, ref) => {
     const [selectedTimes, setSelectedTimes] = useState([]);
     const [period, setPeriod] = useState("오전");
+
+    // 외부 클릭 감지 로직
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [ref, onClose]);
 
     const handleTimeClick = (time) => {
         const key = `${period} ${time}`;
         let updated = [...selectedTimes];
 
-        // 선택 0 또는 2개일 경우 초기화
         if (updated.length >= 2) {
             updated = [key];
         } else if (updated.includes(key)) {
@@ -80,12 +91,11 @@ export default function TimePickerModal({ onClose, onSelect }) {
 
     return (
         <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#11111180]">
-            <div className="bg-white rounded-t-[20px] w-full max-w-md px-6 pt-5 pb-8">
-                <div className="w-full h-[68px] flex flex-col justify-center ">
+            <div ref={ref} className="bg-white rounded-t-[20px] w-full max-w-md px-6 pt-5 pb-8">
+                <div className="w-full h-[68px] flex flex-col justify-center">
                     <h2 className="text-center font-semibold text-[16px]">시간선택</h2>
                     <p className="text-center text-[16px] text-[#808080]">(중복 선택 가능)</p>
                 </div>
-                {/* 오전/오후 탭 */}
                 <div className="flex justify-center mb-6">
                     {["오전", "오후"].map((p) => (
                         <button
@@ -98,16 +108,16 @@ export default function TimePickerModal({ onClose, onSelect }) {
                     ))}
                 </div>
 
-                {/* 시간 그리드 */}
                 <div className="grid grid-cols-3 gap-1 justify-items-center font-semibold text-[16px]">
                     {renderTimes(period === "오전" ? AM_TIMES : PM_TIMES)}
                 </div>
 
-                {/* 버튼 */}
                 <div className="mt-6 flex justify-center">
                     <Button label="선택 완료" onClick={handleSelect} />
                 </div>
             </div>
         </div>
     );
-}
+});
+
+export default TimePickerModal;

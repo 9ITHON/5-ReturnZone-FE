@@ -7,7 +7,7 @@ import DetailedHeader from "../components/detailed-header";
 import DetailImg from "../components/detail-img";
 import DetailMap from "../components/detail-map";
 import DetailSimilar from "../components/detail-similar";
-import { DetailTest } from "../test/detailTest";
+import { DetailTest } from "../test/detailTest"; //더미 데이터
 import { DetailDate } from "../utils/detail-date";
 
 import ProductIcon from '../assets/상품.svg'
@@ -16,14 +16,21 @@ import LocationIcon from '../assets/상세위치.svg'
 
 export default function DetailedPage() {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-
+    // const post = DetailTest;
     const { lostPostId } = useParams(); //
-    const [post, setPost] = useState(null);
+    const [post, setPost] = useState(DetailTest);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const useMock = import.meta.env.VITE_USE_MOCK === 'true';
     // 분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
+            if (useMock) {
+                setPost(DetailTest);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
                     headers: {
@@ -34,41 +41,40 @@ export default function DetailedPage() {
             } catch (err) {
                 console.error(err);
                 setError("데이터를 불러오는 데 실패했습니다.");
+                setPost(DetailTest);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchPost();
-    }, [lostPostId, apiBase]);
+    }, [lostPostId, apiBase, useMock]);
 
     if (loading) return <p>불러오는 중...</p>;
-    if (error) return <p>{error}</p>;
-    if (!post) return null; // 예외 방어
+    if (!post) return <p>{error || "데이터 없음"}</p>;
 
     return (
         <div>
             <DetailedHeader />
             <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-[20px]">
+                <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
                     <div>
                         <DetailImg images={post.imageUrls} />
                     </div>
                     {/* 분실/제보 태그 */}
-                    <div>
-                        <span
-                            className={`rounded-[6px] p-[2px] text-[14px] ${post.registrationType === 'LOST'
-                                ? 'bg-[#F9EAE0] text-[#FF5900]'
-                                : 'bg-[#98f1bc] text-[#00D455]'
-                                }`}
-                        >
-                            {post.registrationType === 'LOST' ? '분실했어요' : '주인 찾아요'}
-                        </span>
-                    </div>
-
-                    {/* 제목, 현상금, 카테고리 */}
-                    <div>
+                    <div className="flex flex-col gap-[8px]">
+                        <div>
+                            <span
+                                className={`rounded-[6px] py-[3px] px-[4px] text-[14px] ${post.registrationType === 'LOST'
+                                    ? 'bg-[#F9EAE0] text-[#FF5900]'
+                                    : 'bg-[#d3ffe5] text-[#00D455]'
+                                    }`}
+                            >
+                                {post.registrationType === 'LOST' ? '분실했어요' : '주인 찾아요'}
+                            </span>
+                        </div>
+                        {/* 제목, 현상금, 카테고리 */}
                         <h1 className="text-[22px] text-[#111111] font-semibold">{post.title}</h1>
                         <p className="text-[22px] text-[#111111] font-semibold">현상금 {post.reward.toLocaleString()}원</p>
                     </div>

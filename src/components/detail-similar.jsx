@@ -15,7 +15,7 @@ export default function DetailSimilar({ post }) {
             <span
                 className={`rounded-[6px] p-[2px] text-[11px] ${post.registrationType === 'LOST'
                         ? 'bg-[#F9EAE0] text-[#FF5900]'
-                        : 'bg-[#98f1bc] text-[#00D455]'
+                        : 'bg-[#d3ffe5] text-[#00D455]'
                     }`}
             >
                 {post.registrationType === 'LOST' ? '분실했어요' : '주인 찾아요'}

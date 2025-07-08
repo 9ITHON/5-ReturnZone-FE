@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 
 import InputField from "../components/input-field";
@@ -37,7 +37,10 @@ export default function ModifyPage() {
     const [description, setDescription] = useState(""); // 글 본문
     const [itemName, setItemName] = useState(""); // 물품명
     const [reward, setReward] = useState(""); // 현상금
+    const calendarRef = useRef(null); // 캘린더 영역 참조
+    const timePickerRef = useRef(null); // 시간 영역 참조
 
+    const { lostPostId } = useParams(); // URL로 정보 받기
     const navigate = useNavigate("");
     const location = useLocation();
     const isKeyboardOpen = UseKeyboardOpen();
@@ -47,7 +50,40 @@ export default function ModifyPage() {
     const dateLabel = selectedTag === "주인을 찾아요" ? "획득 날짜" : "분실 날짜";
     const timeLabel = selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간";
     const detailLabel = selectedTag === "주인을 찾아요" ? "획득한 분실품 특징 (최대 5개)" : "분실품 특징 (최대 5개)";
-    
+    // 기존 데이터 불러오기
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                const res = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`);
+                const data = res.data;
+
+                setSelectedTag(data.registrationType === "LOST" ? "분실했어요" : "주인을 찾아요");
+                setTitle(data.title);
+                setSelectedCategory(data.category);
+                setItemName(data.itemName);
+                setSelectedLocation(data.lostLocationDong);
+                setDetailLocation(data.detailedLocation);
+                setReward(data.reward.toString());
+                setDescription(data.description);
+                setQuestions([
+                    data.feature1, data.feature2, data.feature3, data.feature4, data.feature5
+                ].filter(Boolean));
+
+                setSelectedDate(new Date(data.lostDateTimeStart));
+                setSelectedTimes([
+                    new Date(data.lostDateTimeStart).toTimeString().slice(0, 5),
+                    new Date(data.lostDateTimeEnd).toTimeString().slice(0, 5),
+                ]);
+
+                setImages([]); // 이미지는 URL이므로 미리보기 필요시 별도 처리
+            } catch (err) {
+                console.error("불러오기 실패", err);
+                alert("게시글 정보를 불러오지 못했습니다.");
+            }
+        };
+        fetchPost();
+    }, [lostPostId]);
+
     // RegisterLocation에서 온 주소 수신
     useEffect(() => {
         if (location.state?.address) {
@@ -96,27 +132,47 @@ export default function ModifyPage() {
     const handleDeleteQuestion = (index) => {
         setQuestions(prev => prev.filter((_, i) => i !== index));
     };
-    // API 연결
-    const handleRegister = async () => {
+    // 숫자 콤마 추가
+    const formatWithComma = (value) => {
+        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+    // 쉼표 제거 → 숫자만 추출
+    const unformatComma = (value) => {
+        return value.replace(/,/g, "");
+    };
+    // 외부클릭으로 모달 닫기
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isCalendarOpen && calendarRef.current && !calendarRef.current.contains(e.target)) {
+                setIsCalendarOpen(false);
+            }
+            if (isTimePickerOpen && timePickerRef.current && !timePickerRef.current.contains(e.target)) {
+                setIsTimePickerOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isCalendarOpen, isTimePickerOpen]);
+    // 수정하기
+    const handleUpdate = async () => {
         try {
-            const user = JSON.parse(localStorage.getItem("user"));
+            const userId = localStorage.getItem("userId");
             const { lat, lng } = location.state || {};
-            if (!lat || !lng) return alert("위치를 선택해주세요.");
-            if (!selectedDate) return alert("날짜를 선택해주세요.");
 
             const date = selectedDate?.toISOString().split("T")[0];
             const startTime = selectedTimes[0] || "00:00";
             const endTime = selectedTimes[1] || "00:00";
-
             const lostDateTimeStart = new Date(`${date}T${startTime}`);
             const lostDateTimeEnd = new Date(`${date}T${endTime}`);
 
-            const payload = {
-                lostPostId: 1, // 추후 실제 ID 대응 필요
-                imageUrls: "https://your-bucket.s3.ap-northeast-2.amazonaws.com/lostPosts/lostpost1.jpg", // 임시 URL 
+            const formData = new FormData();
+            formData.append("requestDto", new Blob([JSON.stringify({
                 registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
                 title,
-                nickname: "유저 1", // 실제 사용자 정보 바인딩 필요
+                nickname: "유저 1",
                 timeAgo: "방금 전",
                 lostLocationDong: selectedLocation,
                 detailedLocation: detailLocation,
@@ -133,33 +189,27 @@ export default function ModifyPage() {
                 feature4: questions[3] || "",
                 feature5: questions[4] || "",
                 lostDateTimeStart: lostDateTimeStart.toISOString(),
-                lostDateTimeEnd: lostDateTimeEnd.toISOString(),
-            };
+                lostDateTimeEnd: lostDateTimeEnd.toISOString()
+            })], { type: "application/json" }));
 
-            const response = await axios.post(`${apiBase}/api/v1/lostPosts`, {
+            // 이미지 파일 추가
+            images.forEach((img) => formData.append("images", img));
+
+            const response = await axios.put(`${apiBase}/api/v1/lostPosts/${lostPostId}`, formData, {
                 headers: {
-                    Authorization: `Bearer ${user?.token}`
-                },
-                validateStatus: () => true // 응답 코드를 catch로 넘기지 않도록 처리
+                    'X-USER-ID': userId,
+                    'Content-Type': 'multipart/form-data'
+                }
             });
-            console.log("등록 성공:", response.data);
-            alert("등록 완료!");
-            navigate("/"); // 완료 후 이동할 페이지
 
-            if (response.status === 201) {
-                alert("등록이 완료되었습니다.");
-                navigate("/");
-            } else if (response.status === 400) {
-                const msg = response.data?.message || "입력값을 다시 확인해 주세요.";
-                alert(`요청 오류: ${msg}`);
-            } else {
-                alert(`서버 오류 (${response.status})가 발생했습니다. 잠시 후 다시 시도해 주세요.`);
-            }
+            alert("수정이 완료되었습니다.");
+            navigate(`/lost/${lostPostId}`);
         } catch (error) {
-            console.error("등록 요청 실패:", error);
-            alert("요청 중 예외가 발생했습니다.");
+            console.error("수정 실패", error);
+            alert("수정 중 오류가 발생했습니다.");
         }
     };
+
 
 
     return (
@@ -352,9 +402,15 @@ export default function ModifyPage() {
                                     금액은 입력값과 일치해야 하며, 입금자명은 계정명과 동일해야 합니다.
                                 </p>
                                 <div className="flex items-center border border-[#D0D0D0] rounded-[8px] px-[16px] py-[14px]">
-                                    <input type="number" placeholder="금액을 입력해주세요" value={reward} onChange={(e) => setReward(e.target.value)}
-                                        className=" flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin" />
-                                    <span className="text-[#888] text-[14px]" >(원)</span>
+                                    <input
+                                        type="text" placeholder="금액을 입력해주세요" value={formatWithComma(reward)}
+                                        onChange={(e) => {
+                                            const raw = unformatComma(e.target.value);
+                                            if (!/^\d*$/.test(raw)) return; // 숫자만 허용
+                                            setReward(raw);
+                                        }}
+                                        className="flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin"
+                                    />
                                 </div>
                             </div>
 
@@ -379,18 +435,19 @@ export default function ModifyPage() {
                 </div>
             </div>
             <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
-                <Button label="등록 하기" onClick={handleRegister} />
+                <Button label="저장하기" onClick={handleUpdate} />
             </div>
-            {/* 캘린더 모달 조건 렌더링 */}
+            {/* 캘린더 모달 조건부 렌더링 */}
             {isCalendarOpen && (
                 <CalendarModal
+                    ref={calendarRef}
                     onClose={() => setIsCalendarOpen(false)}
                     onSelect={(date) => setSelectedDate(date)}
                 />
             )}
-            {/* 시간선택 모달 조건 렌더링 */}
+            {/* 시간선택 모달 조건부 렌더링 */}
             {isTimePickerOpen && (
-                <TimePickerModal
+                <TimePickerModal ref={timePickerRef}
                     onClose={() => setIsTimePickerOpen(false)}
                     onSelect={(times) => setSelectedTimes(times)}
                 />
