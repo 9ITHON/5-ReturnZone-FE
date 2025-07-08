@@ -12,6 +12,7 @@ createRoot(document.getElementById("root")).render(
       <Route element={<App />}>
         <Route path="" element={<Home />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="chat/:id" element={<Chat />} />
       </Route>
     </Routes>
   </BrowserRouter>

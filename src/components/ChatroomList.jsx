@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 // 더미 데이터
 const chatrooms = [
@@ -52,8 +53,8 @@ const chatrooms = [
   },
 ];
 
-const ChatroomItem = ({ profile, name, lastMessage, time, unread }) => (
-  <div className="flex items-center px-4 py-3 border-b">
+const ChatroomItem = ({ id, profile, name, lastMessage, time, unread, onClick }) => (
+  <div className="flex items-center px-4 py-3 border-b cursor-pointer hover:bg-gray-50" onClick={() => onClick(id)}>
     <img
       src={profile}
       alt="profile"
@@ -74,15 +75,21 @@ const ChatroomItem = ({ profile, name, lastMessage, time, unread }) => (
   </div>
 );
 
-const ChatroomList = () => (
-  <div className="bg-white min-h-screen">
-    <h2 className="text-xl font-bold px-4 py-3">채팅</h2>
-    <div>
-      {chatrooms.map((room) => (
-        <ChatroomItem key={room.id} {...room} />
-      ))}
+const ChatroomList = () => {
+  const navigate = useNavigate();
+  const handleClick = (id) => {
+    navigate(`/chat/${id}`);
+  };
+  return (
+    <div className="bg-white min-h-screen">
+      <h2 className="text-xl font-bold px-4 py-3">채팅</h2>
+      <div>
+        {chatrooms.map((room) => (
+          <ChatroomItem key={room.id} {...room} onClick={handleClick} />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ChatroomList; 
