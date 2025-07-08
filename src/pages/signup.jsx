@@ -83,6 +83,7 @@ export default function SignUp() {
             alert("회원가입에 실패했습니다.");
         }
     };
+    //이메일 중복 검사
     const handleCheckEmail = async () => {
         // 이메일 형식 확인
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,7 +95,7 @@ export default function SignUp() {
             const response = await axios.get(`${apiBase}/api/v1/members/email/${email}`);
 
             // 사용 가능 (200 OK)
-            if (response.data === true) {
+            if (response.data === true || response.data === "true") {
                 setEmailError("");
                 setEmailSuccess("사용가능한 이메일입니다!");
                 setIsEmailChecked(true);

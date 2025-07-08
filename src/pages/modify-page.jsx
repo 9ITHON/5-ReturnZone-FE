@@ -75,7 +75,7 @@ export default function ModifyPage() {
                     new Date(data.lostDateTimeEnd).toTimeString().slice(0, 5),
                 ]);
 
-                setImages([]); // 이미지는 URL이므로 미리보기 필요시 별도 처리
+                setImages([data.imageUrls || []]); // 이미지는 URL이므로 미리보기 필요시 별도 처리
             } catch (err) {
                 console.error("불러오기 실패", err);
                 alert("게시글 정보를 불러오지 못했습니다.");
@@ -180,9 +180,6 @@ export default function ModifyPage() {
                 longitude: lng,
                 reward: Number(reward),
                 instantSettlement: true,
-                description,
-                category: selectedCategory,
-                itemName,
                 feature1: questions[0] || "",
                 feature2: questions[1] || "",
                 feature3: questions[2] || "",
@@ -209,7 +206,22 @@ export default function ModifyPage() {
             alert("수정 중 오류가 발생했습니다.");
         }
     };
+    // 외부클릭으로 모달 닫기
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isCalendarOpen && calendarRef.current && !calendarRef.current.contains(e.target)) {
+                setIsCalendarOpen(false);
+            }
+            if (isTimePickerOpen && timePickerRef.current && !timePickerRef.current.contains(e.target)) {
+                setIsTimePickerOpen(false);
+            }
+        };
 
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isCalendarOpen, isTimePickerOpen]);
 
 
     return (
