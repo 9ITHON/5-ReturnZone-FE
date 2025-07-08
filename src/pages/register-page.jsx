@@ -428,21 +428,18 @@ export default function RegisterPage() {
             </div>
             {/* 캘린더 모달 조건부 렌더링 */}
             {isCalendarOpen && (
-                <div ref={calendarRef}>
-                    <CalendarModal
-                        onClose={() => setIsCalendarOpen(false)}
-                        onSelect={(date) => setSelectedDate(date)}
-                    />
-                </div>
+                <CalendarModal
+                    ref={calendarRef}
+                    onClose={() => setIsCalendarOpen(false)}
+                    onSelect={(date) => setSelectedDate(date)}
+                />
             )}
             {/* 시간선택 모달 조건부 렌더링 */}
             {isTimePickerOpen && (
-                <div ref={timePickerRef}>
-                    <TimePickerModal
-                        onClose={() => setIsTimePickerOpen(false)}
-                        onSelect={(times) => setSelectedTimes(times)}
-                    />
-                </div>
+                <TimePickerModal ref={timePickerRef}
+                    onClose={() => setIsTimePickerOpen(false)}
+                    onSelect={(times) => setSelectedTimes(times)}
+                />
             )}
         </div>
     )
