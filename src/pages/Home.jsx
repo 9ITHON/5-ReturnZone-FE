@@ -8,6 +8,7 @@ import { useLocationData } from "../hooks/useLocationData";
 import LocationMapModal from "../components/LocationMapModal.jsx";
 import CategoryFilter from "../components/CategoryFilter.jsx";
 import { useNavigate } from "react-router-dom";
+import categoryIcon from "../assets/category.svg";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -149,14 +150,59 @@ const Home = () => {
         permissionStatus={locationPermission}
       />
       <Header />
-      <FilterBar
-        onFilter={handleFilter}
-        selectedLocation={selectedLocation}
-        onLocationButton={handleLocationButton}
-        selectedFilters={selectedFilters}
-        onCategoryButton={() => setCategoryOpen(true)}
-        selectedCategory={selectedCategory}
-      />
+      {/* 상단 바: 필터바 + 검색 아이콘 */}
+      <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
+        <div className="flex items-center w-full h-12 px-4 gap-1.5">
+          <button 
+            onClick={() => handleFilter([""])}
+            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.length === 1 && selectedFilters[0] === "" ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
+          >
+            <p className={`text-[13px] font-medium ${selectedFilters.length === 1 && selectedFilters[0] === "" ? 'text-blue-500' : 'text-[#111]'}`}>
+              전체
+            </p>
+            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+          </button>
+          
+          <button 
+            onClick={handleLocationButton}
+            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedLocation !== "전체" ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
+          >
+            <p className={`text-[13px] font-medium ${selectedLocation !== "전체" ? 'text-blue-500' : 'text-[#111]'}`}>
+              위치
+            </p>
+            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => handleFilter(["latest"])}
+            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.includes("latest") ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
+          >
+            <p className={`text-[13px] font-medium ${selectedFilters.includes("latest") ? 'text-blue-500' : 'text-[#111]'}`}>
+              최신순
+            </p>
+            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => handleFilter(["instant"])}
+            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.includes("instant") ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
+          >
+            <p className={`text-[13px] font-medium ${selectedFilters.includes("instant") ? 'text-blue-500' : 'text-[#111]'}`}>
+              즉시정산
+            </p>
+          </button>
+
+          <button 
+            onClick={() => setCategoryOpen(true)}
+            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedCategory ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
+          >
+            <p className={`text-[13px] font-medium ${selectedCategory ? 'text-blue-500' : 'text-[#111]'}`}>
+              카테고리
+            </p>
+            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
       {categoryOpen && (
         <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto bg-black/20 backdrop-blur-sm">
           <div className="w-full max-w-[390px] bg-white rounded-t-xl z-40">
