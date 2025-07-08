@@ -25,7 +25,7 @@ a {
 body {
   margin: 0;
   min-width: 320px;
-  background-color: #ffffff;
+  background-color: #000000;
   font-family: 'Pretendard Variable', sans-serif;
 }
 
@@ -34,8 +34,35 @@ svg{
 }
 
 .app-viewport {
-  width: 402px;
-  height: 874px;
+  width: 390px;
+  height: 844px;
   margin: 0 auto;
   overflow: hidden;
+  background-color: #ffffff;
+}
+/* 스크롤 바 숨기기 */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+/* 스핀 버튼 숨기기 */
+.hide-number-spin::-webkit-outer-spin-button,
+.hide-number-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hide-number-spin[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+/* 연결 선택 */
+.rounded-left-none {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.rounded-right-none {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
