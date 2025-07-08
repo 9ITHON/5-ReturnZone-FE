@@ -7,6 +7,7 @@ import LocationPermission from "../components/LocationPermission.jsx";
 import { useLocationData } from "../hooks/useLocationData";
 import LocationMapModal from "../components/LocationMapModal.jsx";
 import CategoryFilter from "../components/CategoryFilter.jsx";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -42,6 +43,7 @@ const Home = () => {
   const [selectedLocation, setSelectedLocation] = React.useState("전체");
   const [selectedFilters, setSelectedFilters] = React.useState([""]);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   // Use the location data hook
   const {
@@ -225,7 +227,11 @@ const Home = () => {
                   !selectedFilters.includes("instant") ||
                   item.tag === "즉시 정산 가능"
               ) // 즉시 정산 가능 필터
-              .map((item) => <ItemCard key={item.id} {...item} />)
+              .map((item) => (
+                <div key={item.id} onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer">
+                  <ItemCard {...item} />
+                </div>
+              ))
           ) : (
             <div className="text-center py-8 text-gray-500">
               <p>표시할 항목이 없습니다.</p>

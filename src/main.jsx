@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Chat from "./pages/Chat.jsx";
+import ChatList from "./pages/ChatList.jsx";
 import Home from "./pages/Home.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -11,7 +12,7 @@ createRoot(document.getElementById("root")).render(
     <Routes>
       <Route element={<App />}>
         <Route path="" element={<Home />} />
-        <Route path="chat" element={<Chat />} />
+        <Route path="chat" element={<ChatList />} />
         <Route path="chat/:id" element={<Chat />} />
       </Route>
     </Routes>
