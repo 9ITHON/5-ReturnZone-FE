@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -18,8 +18,10 @@ export default function SearchPage() {
     const [searchResults, setSearchResults] = useState([]);
 
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+    // 유저의 정보 유지
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
 
-    const userId = 1; // 유저 아이디
     // 최근 검색어 불러오기
     const fetchRecentKeywords = async () => {
         try {
@@ -41,23 +43,34 @@ export default function SearchPage() {
     const handleKeyDown = async (e) => {
         if (e.key === 'Enter') {
             const trimmed = keyword.trim();
-            if (trimmed.length > 0) {
-                try {
-                    const res = await axios.get(`${apiBase}/api/v1/search/posts`, {
-                        headers: {
-                            'X-USER-ID': userId
-                        },
-                        params: {
-                            keyword: trimmed,
-                            includeReturned: includeCompleted
-                        }
-                    });
-                    setSubmittedKeyword(trimmed);
-                    setSearchResults(res.data);
-                    fetchRecentKeywords(); // 검색 성공 후 최근 검색어 갱신
-                } catch (error) {
-                    console.error('검색 실패:', error);
-                }
+
+            // 빈 검색어 처리
+            if (trimmed.length === 0) {
+                alert("검색어를 입력해주세요.");
+                return;
+            }
+
+            try {
+                const res = await axios.get(`${apiBase}/api/v1/search/posts`, {
+                    headers: {
+                        'X-USER-ID': userId
+                    },
+                    params: {
+                        keyword: trimmed,
+                        includeReturned: includeCompleted
+                    }
+                });
+
+                // 검색 결과 반영
+                setSubmittedKeyword(trimmed);
+                setSearchResults(res.data);
+
+                // 최근 검색어 갱신
+                fetchRecentKeywords();
+
+            } catch (error) {
+                console.error('검색 실패:', error);
+                alert("검색 중 오류가 발생했습니다.");
             }
         }
     };
