@@ -103,15 +103,6 @@ const Home = () => {
     }
   };
 
-  // 전체 버튼 클릭
-  const handleAllClick = () => {
-    console.log("전체 버튼 클릭");
-    setSelectedFilters(FILTERS);
-    setSelectedCategory(null);
-    setSelectedLocation('전체');
-    fetchItems();
-  };
-
   const handleCategorySelect = (cat) => {
     setSelectedCategory(selectedCategory === cat ? null : cat);
     setCategoryOpen(false);
@@ -190,7 +181,7 @@ const Home = () => {
                   className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
                 >
                   <span>{f.key === 'category' && selectedCategory ? selectedCategory : label}</span>
-                  {f.key === 'category' && <img src={categoryIcon} alt="arrow" className="w-4 h-4" />}
+                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
                 </button>
               );
             })}
@@ -208,28 +199,6 @@ const Home = () => {
               }}
             />
           </div>
-        </div>
-      )}
-
-      {/* 위치 드롭다운 */}
-      {locationOpen && (
-        <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto overflow-hidden gap-2.5 bg-[#111]/50">
-          <div className="px-6 py-3 text-[16px] font-semibold text-[#111] border-b border-[#F0F0F0]">
-            위치
-          </div>
-          {LOCATION_LIST.map((location) => (
-            <button
-              key={location}
-              className={`w-[90%] flex flex-row items-center gap-3 px-4 py-3 rounded-lg text-[16px] font-medium transition text-left ${
-                selectedLocation === location
-                  ? "font-bold text-blue-600 bg-blue-50"
-                  : "text-[#111]"
-              }`}
-              onClick={() => handleLocationSelect(location)}
-            >
-              {location}
-            </button>
-          ))}
         </div>
       )}
 
