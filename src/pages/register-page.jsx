@@ -232,14 +232,14 @@ export default function RegisterPage() {
     }, [isCalendarOpen, isTimePickerOpen]);
     return (
         <div>
-            {/* {!user && (
+            {!user && (
                 <UserMessageLogin
                     title="로그인이 필요합니다"
                     message="분실물 등록은 로그인 후 <br> 이용하실 수 있습니다."
                     path="/Login"
                     cancelPath={-1}
                 />
-            )} */}
+            )}
             <div>
                 <RegisterHeader title="분실물 등록" />
             </div>
