@@ -1,9 +1,9 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import homeIcon from '../assets/home.svg';
-import chatIcon from '../assets/chat.svg';
-import userIcon from '../assets/user.svg';
-import plusRectangleIcon from '../assets/plus.svg';
+import homeIcon from "../assets/home.svg";
+import chatIcon from "../assets/chat.svg";
+import userIcon from "../assets/user.svg";
+import plusRectangleIcon from "../assets/plus.svg";
 
 const BottomNav = ({ unreadCount = 0 }) => {
   const location = useLocation();
