@@ -6,19 +6,16 @@ export const useLocationData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
-  const [locationPermission, setLocationPermission] = useState('prompt');
+  // locationPermission 제거됨
   const getUserLocation = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const location = await apiService.getCurrentLocation();
       setUserLocation(location);
-      setLocationPermission('granted');
       return location;
-    } catch (err) {
-      console.error('Error getting user location:', err);
+    } catch {
       setError('위치 정보를 가져올 수 없습니다.');
-      setLocationPermission('denied');
       // Fallback to default location (Seoul)
       const defaultLocation = { lat: 37.5665, lng: 126.9780 };
       setUserLocation(defaultLocation);
@@ -28,41 +25,22 @@ export const useLocationData = () => {
     }
   }, []);
 
+  // getLostPosts만 사용하도록 통일, 응답이 content 필드에 있으면 그걸로 setItems
   const fetchItems = useCallback(async (filters = {}, customPos = null) => {
     try {
       setLoading(true);
       setError(null);
-      let fetchedItems = [];
-      if (customPos && filters.sortBy === 'distance') {
-        fetchedItems = await apiService.getItemsByDistance(
-          customPos.lat,
-          customPos.lng,
-          filters.radius || 5000
-        );
+      let params = { ...filters };
+      if (customPos) {
+        params.lat = customPos.lat;
+        params.lng = customPos.lng;
       } else if (userLocation && filters.sortBy === 'distance') {
-        fetchedItems = await apiService.getItemsByDistance(
-          userLocation.lat, 
-          userLocation.lng, 
-          filters.radius || 5000
-        );
-      } else if (filters.category) {
-        fetchedItems = await apiService.getItemsByCategory(filters.category);
-      } else if (filters.location && filters.location !== '전체') {
-        fetchedItems = await apiService.getItemsByLocation(filters.location);
-      } else {
-        fetchedItems = await apiService.getItems(filters);
+        params.lat = userLocation.lat;
+        params.lng = userLocation.lng;
       }
-      if ((customPos || userLocation) && filters.sortBy === 'distance' && fetchedItems.length > 0) {
-        const base = customPos || userLocation;
-        fetchedItems = apiService.sortItemsByDistance(
-          fetchedItems, 
-          base.lat, 
-          base.lng
-        );
-      }
-      setItems(fetchedItems);
-    } catch (err) {
-      console.error('Error fetching items:', err);
+      const fetched = await apiService.getLostPosts(params);
+      setItems(fetched.content || fetched || []);
+    } catch {
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
       setItems([]);
     } finally {
@@ -71,10 +49,8 @@ export const useLocationData = () => {
   }, [userLocation]);
 
   const initializeLocation = useCallback(async () => {
-    if (locationPermission === 'prompt') {
-      await getUserLocation();
-    }
-  }, [getUserLocation, locationPermission]);
+    await getUserLocation();
+  }, [getUserLocation]);
 
   const filterItems = useCallback((selectedCategory, selectedLocation, sortBy = 'latest', customPos = null) => {
     const filters = {};
@@ -84,8 +60,8 @@ export const useLocationData = () => {
     if (selectedLocation && selectedLocation !== '전체') {
       filters.location = selectedLocation;
     }
-    if (sortBy === 'distance') {
-      filters.sortBy = 'distance';
+    if (sortBy) {
+      filters.sortBy = sortBy;
     }
     fetchItems(filters, customPos);
   }, [fetchItems]);
@@ -103,7 +79,6 @@ export const useLocationData = () => {
     loading,
     error,
     userLocation,
-    locationPermission,
     getUserLocation,
     fetchItems,
     filterItems,

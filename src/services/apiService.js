@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://15.164.234.32.nip.io/api/v1';
 const API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT || 10000;
 const API_RETRY_COUNT = import.meta.env.VITE_API_RETRY_COUNT || 3;
 

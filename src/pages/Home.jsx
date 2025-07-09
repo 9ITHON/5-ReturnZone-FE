@@ -3,12 +3,12 @@ import Header from "../components/Header";
 import FilterBar from "../components/FilterBar.jsx";
 import ItemCard from "../components/ItemCard.jsx";
 import BottomNav from "../components/BottomNav.jsx";
-import LocationPermission from "../components/LocationPermission.jsx";
 import { useLocationData } from "../hooks/useLocationData";
 import LocationMapModal from "../components/LocationMapModal.jsx";
 import CategoryFilter from "../components/CategoryFilter.jsx";
 import { useNavigate } from "react-router-dom";
 import categoryIcon from "../assets/category.svg";
+import axios from "axios";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -52,7 +52,6 @@ const Home = () => {
     loading,
     error,
     userLocation,
-    locationPermission,
     filterItems,
     refreshData,
   } = useLocationData();
@@ -143,12 +142,6 @@ const Home = () => {
 
   return (
     <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
-      <LocationPermission
-        onRequestPermission={() =>
-          filterItems(selectedCategory, selectedLocation, selectedFilters[0])
-        }
-        permissionStatus={locationPermission}
-      />
       <Header />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
@@ -248,14 +241,6 @@ const Home = () => {
       <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
         <div className="flex flex-col gap-4 w-[342px]">
           {/* Show location permission status */}
-          {locationPermission === "denied" && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-              <p className="text-yellow-800 text-sm">
-                위치 권한이 거부되어 기본 위치로 정렬됩니다.
-              </p>
-            </div>
-          )}
-
           {/* Show distance info if sorting by distance */}
           {selectedFilters.includes("distance") && userLocation && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
@@ -285,7 +270,6 @@ const Home = () => {
           )}
         </div>
       </div>
-      <BottomNav />
       <LocationMapModal
         open={mapOpen}
         onClose={() => setMapOpen(false)}
