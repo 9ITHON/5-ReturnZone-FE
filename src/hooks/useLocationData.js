@@ -11,17 +11,14 @@ export const useLocationData = () => {
     try {
       setLoading(true);
       setError(null);
-      
       const location = await apiService.getCurrentLocation();
       setUserLocation(location);
       setLocationPermission('granted');
-      
       return location;
     } catch (err) {
       console.error('Error getting user location:', err);
       setError('위치 정보를 가져올 수 없습니다.');
       setLocationPermission('denied');
-      
       // Fallback to default location (Seoul)
       const defaultLocation = { lat: 37.5665, lng: 126.9780 };
       setUserLocation(defaultLocation);
@@ -35,10 +32,7 @@ export const useLocationData = () => {
     try {
       setLoading(true);
       setError(null);
-
       let fetchedItems = [];
-
-      // customPos가 있으면 해당 위치로 거리순 정렬
       if (customPos && filters.sortBy === 'distance') {
         fetchedItems = await apiService.getItemsByDistance(
           customPos.lat,
@@ -58,8 +52,6 @@ export const useLocationData = () => {
       } else {
         fetchedItems = await apiService.getItems(filters);
       }
-
-      // 거리순 정렬일 때만 거리 계산
       if ((customPos || userLocation) && filters.sortBy === 'distance' && fetchedItems.length > 0) {
         const base = customPos || userLocation;
         fetchedItems = apiService.sortItemsByDistance(
@@ -68,7 +60,6 @@ export const useLocationData = () => {
           base.lng
         );
       }
-
       setItems(fetchedItems);
     } catch (err) {
       console.error('Error fetching items:', err);
@@ -79,29 +70,23 @@ export const useLocationData = () => {
     }
   }, [userLocation]);
 
-  // Request location permission and fetch initial data
   const initializeLocation = useCallback(async () => {
     if (locationPermission === 'prompt') {
       await getUserLocation();
     }
   }, [getUserLocation, locationPermission]);
 
-  // Filter items based on selected filters
   const filterItems = useCallback((selectedCategory, selectedLocation, sortBy = 'latest', customPos = null) => {
     const filters = {};
-    
     if (selectedCategory && selectedCategory !== '전체') {
       filters.category = selectedCategory;
     }
-    
     if (selectedLocation && selectedLocation !== '전체') {
       filters.location = selectedLocation;
     }
-    
     if (sortBy === 'distance') {
       filters.sortBy = 'distance';
     }
-    
     fetchItems(filters, customPos);
   }, [fetchItems]);
 

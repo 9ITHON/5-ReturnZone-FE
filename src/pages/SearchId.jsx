@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { authAPI } from '../services/api';
 import logo from '../assets/logo.svg';
 import errorIcon from '../assets/에러아이콘.svg';
+import { apiService } from '../services/apiService';
 
 export default function Search_id() {
   const [name, setName] = useState('');
@@ -40,7 +40,7 @@ export default function Search_id() {
     }
 
     try {
-      const response = await authAPI.findId(name, email);
+      const response = await apiService.findId(name, email);
       console.log('아이디 찾기 성공:', response);
       setIsSubmitted(true);
     } catch (error) {

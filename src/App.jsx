@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import "./index.css";
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
@@ -24,5 +23,3 @@ function App() {
 }
 
 export default App;
-=======
->>>>>>> 47cf5e438b4858196676c09e668e9a830321a8ce

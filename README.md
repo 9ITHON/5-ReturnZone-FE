@@ -14,10 +14,6 @@ VITE_API_RETRY_COUNT=3
 
 # WebSocket Configuration
 VITE_WS_BASE_URL=ws://15.164.234.32:8080
-
-# Development Settings
-VITE_DEBUG_MODE=false
-VITE_ENABLE_MOCK_DATA=false
 ```
 
 ## 설치 및 실행

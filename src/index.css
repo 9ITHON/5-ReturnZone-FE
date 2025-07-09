@@ -1,12 +1,9 @@
-<<<<<<< HEAD
-@import "tailwindcss" ;
+@import "tailwindcss";
 
 :root {
   line-height: 1.5;
   font-weight: 400;
-
   /* color-scheme: light dark; */
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,8 +21,8 @@ body {
   min-height: 100vh;
 }
 
-svg{
-  fill : #000000;
+svg {
+  fill: #000000;
 }
 
 .app-viewport {
@@ -34,6 +31,3 @@ svg{
   margin: 0 auto;
   overflow: hidden;
 }
-
-=======
->>>>>>> 47cf5e438b4858196676c09e668e9a830321a8ce

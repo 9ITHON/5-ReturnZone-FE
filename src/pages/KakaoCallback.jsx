@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { apiService } from '../services/apiService';
 
 export default function KakaoCallback() {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export default function KakaoCallback() {
         }
 
         // 서버에 인증 코드 전송
-        const response = await authAPI.kakaoCallback(code);
+        const response = await apiService.kakaoCallback(code);
         
         if (response.token || response.accessToken) {
           localStorage.setItem('authToken', response.token || response.accessToken);
