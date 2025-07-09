@@ -146,7 +146,7 @@ const Home = () => {
   }
 
   return (
-    <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
+    <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen && (

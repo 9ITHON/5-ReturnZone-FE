@@ -15,10 +15,9 @@ a {
   text-decoration: none;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+html, body {
+  height: 100vh;
+  overflow: hidden;
 }
 
 svg {
