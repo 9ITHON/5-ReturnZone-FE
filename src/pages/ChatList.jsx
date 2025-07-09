@@ -9,7 +9,6 @@ const ChatList = () => {
   return (
     <>
       <ChatroomList />
-      <BottomNav unreadCount={unreadCount} />
     </>
   );
 };
