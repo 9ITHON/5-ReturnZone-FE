@@ -23,7 +23,8 @@ const CATEGORY_LIST = [
 const FILTERS = [
   { key: 'location', label: '위치' },
   { key: 'latest', label: '최신순' },
-  { key: 'instant', label: '즉시정산' },
+  { key: 'lost', label: '분실' },
+  { key: 'owner', label: '주인' },
   { key: 'category', label: '카테고리' },
 ];
 
@@ -229,15 +230,30 @@ const Home = () => {
           {items.length > 0 ? (
             items
               .filter(
-                (item) =>
-                  !selectedFilters.includes("instant") ||
-                  item.tag === "즉시 정산 가능"
-              ) // 즉시 정산 가능 필터
-              .map((item) => (
-                <div key={item.id} onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer">
-                  <ItemCard {...item} />
-                </div>
-              ))
+                (item) => {
+                  if (selectedFilters.includes("lost")) {
+                    return item.type === "분실";
+                  }
+                  if (selectedFilters.includes("owner")) {
+                    return item.type === "주인";
+                  }
+                  return true;
+                }
+              )
+              .map((item) => {
+                let status = "";
+                if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
+                else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
+                return (
+                  <div onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer">
+                    <ItemCard
+                      {...item}
+                      key={item.id}
+                      status={status}
+                    />
+                  </div>
+                );
+              })
           ) : (
             <div className="text-center py-8 text-gray-500">
               <p>표시할 항목이 없습니다.</p>
