@@ -57,7 +57,7 @@ const CategoryFilter = ({ onCategorySelect, selectedCategory }) => (
   <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 pb-[34px] rounded-tl-2xl rounded-tr-2xl bg-white">
     <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
       <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
-        <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
+        <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#111]/50" />
       </div>
       <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative overflow-hidden gap-2 px-6">
         <p className="flex-grow w-[342px] text-lg font-bold text-center text-[#111]">카테고리 설정</p>

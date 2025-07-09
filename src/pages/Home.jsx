@@ -179,7 +179,7 @@ const Home = () => {
         </div>
       )}
       {categoryOpen && (
-        <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto bg-black/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto overflow-hidden gap-2.5 bg-[#111]/50">
           <div className="w-full max-w-[390px] bg-white rounded-t-xl z-40">
             <CategoryFilter
               selectedCategory={selectedCategory}
@@ -194,7 +194,7 @@ const Home = () => {
 
       {/* 위치 드롭다운 */}
       {locationOpen && (
-        <div className="absolute left-0 right-0 bottom-0 h-[490px] bg-white rounded-t-xl flex flex-col items-center pb-[34px] gap-[10px] z-20 shadow-lg">
+        <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto overflow-hidden gap-2.5 bg-[#111]/50">
           <div className="px-6 py-3 text-[16px] font-semibold text-[#111] border-b border-[#F0F0F0]">
             위치
           </div>
@@ -229,17 +229,15 @@ const Home = () => {
           {/* Items list */}
           {items.length > 0 ? (
             items
-              .filter(
-                (item) => {
-                  if (selectedFilters.includes("lost")) {
-                    return item.type === "분실";
-                  }
-                  if (selectedFilters.includes("owner")) {
-                    return item.type === "주인";
-                  }
-                  return true;
+              .filter((item) => {
+                if (selectedFilters.includes("lost")) {
+                  return item.type === "분실" || item.registrationType === "LOST";
                 }
-              )
+                if (selectedFilters.includes("owner")) {
+                  return item.type === "주인" || item.registrationType === "FOUND";
+                }
+                return true;
+              })
               .map((item) => {
                 let status = "";
                 if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
