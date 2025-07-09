@@ -20,12 +20,19 @@ const CATEGORY_LIST = [
   "기타",
 ];
 
+const FILTERS = [
+  { key: 'location', label: '위치' },
+  { key: 'latest', label: '최신순' },
+  { key: 'instant', label: '즉시정산' },
+  { key: 'category', label: '카테고리' },
+];
+
 const Home = () => {
   const [categoryOpen, setCategoryOpen] = React.useState(false);
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState(null);
   const [selectedLocation, setSelectedLocation] = React.useState("전체");
-  const [selectedFilters, setSelectedFilters] = React.useState([""]);
+  const [selectedFilters, setSelectedFilters] = React.useState([]); // 초기값 []
   const [mapOpen, setMapOpen] = React.useState(false);
   const navigate = useNavigate();
 
@@ -36,15 +43,47 @@ const Home = () => {
     error,
     userLocation,
     filterItems,
+    fetchItems,
     refreshData,
   } = useLocationData();
 
-  const handleFilter = (filtersArr) => {
-    setSelectedFilters(filtersArr);
-    let sortBy = "latest";
-    if (filtersArr.includes("latest")) sortBy = "latest";
-    // 기타 필터(즉시정산 등)는 필요시 추가
-    filterItems(selectedCategory, selectedLocation, sortBy);
+  // selectedFilters, selectedCategory, selectedLocation이 바뀔 때마다 필터 적용
+  React.useEffect(() => {
+    if (userLocation) {
+      if (selectedFilters.length === 0) {
+        fetchItems();
+      } else {
+        let sortBy = selectedFilters.includes('latest') ? 'latest' : undefined;
+        filterItems(
+          selectedCategory,
+          selectedLocation,
+          sortBy
+        );
+      }
+    }
+  }, [userLocation, selectedFilters, selectedCategory, selectedLocation, fetchItems, filterItems]);
+
+  // 필터 버튼 클릭 핸들러 (중복 적용)
+  const handleFilterClick = (key) => {
+    if (key === 'category') {
+      setCategoryOpen(true);
+      return;
+    }
+    if (key === 'location') {
+      setMapOpen(true);
+      return;
+    }
+    setSelectedFilters((prev) =>
+      prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
+    );
+  };
+
+  // 전체 버튼 클릭
+  const handleAllClick = () => {
+    setSelectedFilters([]);
+    setSelectedCategory(null);
+    setSelectedLocation('전체');
+    fetchItems();
   };
 
   const handleCategorySelect = (cat) => {
@@ -65,11 +104,6 @@ const Home = () => {
     console.log("위치 선택:", location);
   };
 
-  // 위치 버튼 클릭 시 지도 모달 오픈
-  const handleLocationButton = () => {
-    setMapOpen(true);
-  };
-
   // 지도에서 위치 선택 시
   const handleMapSelect = (pos) => {
     filterItems(selectedCategory, selectedLocation, selectedFilters[0], pos);
@@ -79,12 +113,6 @@ const Home = () => {
     return (
       <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
         <MainHeader />
-        <FilterBar
-          onFilter={handleFilter}
-          selectedLocation={selectedLocation}
-          onLocationButton={handleLocationButton}
-          selectedFilters={selectedFilters}
-        />
         <div className="flex flex-col items-center px-0 pt-[158px] pb-[88px] flex-1 w-full overflow-y-scroll">
           <div className="flex flex-col gap-4 w-[342px] items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -101,12 +129,6 @@ const Home = () => {
     return (
       <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
         <MainHeader />
-        <FilterBar
-          onFilter={handleFilter}
-          selectedLocation={selectedLocation}
-          onLocationButton={handleLocationButton}
-          selectedFilters={selectedFilters}
-        />
         <div className="flex flex-col items-center px-0 pt-[158px] pb-[88px] flex-1 w-full overflow-y-scroll">
           <div className="flex flex-col gap-4 w-[342px] items-center justify-center">
             <p className="text-red-600 text-center">{error}</p>
@@ -127,67 +149,37 @@ const Home = () => {
     <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
-      <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
-        <div className="flex items-center w-full h-12 px-4 gap-1.5">
-          <button 
-            onClick={() => handleFilter([""])}
-            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.length === 1 && selectedFilters[0] === "" ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
-          >
-            <p className={`text-[13px] font-medium ${selectedFilters.length === 1 && selectedFilters[0] === "" ? 'text-blue-500' : 'text-[#111]'}`}>
-              전체
-            </p>
-            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
-          </button>
-          
-          <button 
-            onClick={handleLocationButton}
-            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedLocation !== "전체" ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
-          >
-            <p className={`text-[13px] font-medium ${selectedLocation !== "전체" ? 'text-blue-500' : 'text-[#111]'}`}>
-              위치
-            </p>
-            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={() => handleFilter(["latest"])}
-            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.includes("latest") ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
-          >
-            <p className={`text-[13px] font-medium ${selectedFilters.includes("latest") ? 'text-blue-500' : 'text-[#111]'}`}>
-              최신순
-            </p>
-            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={() => handleFilter(["instant"])}
-            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedFilters.includes("instant") ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
-          >
-            <p className={`text-[13px] font-medium ${selectedFilters.includes("instant") ? 'text-blue-500' : 'text-[#111]'}`}>
-              즉시정산
-            </p>
-          </button>
-
-          <button 
-            onClick={() => setCategoryOpen(true)}
-            className={`flex items-center h-[34px] gap-0.5 px-2.5 py-1.5 rounded-lg bg-white border ${selectedCategory ? 'border-blue-500' : 'border-[#e6e6e6]'} flex-shrink-0`}
-          >
-            <p className={`text-[13px] font-medium ${selectedCategory ? 'text-blue-500' : 'text-[#111]'}`}>
-              카테고리
-            </p>
-            <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
-          </button>
+      {!categoryOpen && (
+        <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
+          <div className="flex items-center w-full h-12 px-4 gap-1.5">
+             {/* 전체 버튼 */}
+            <button
+              onClick={handleAllClick}
+              className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 ${selectedFilters.length === 0 ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
+            >
+              <p className="text-[13px] font-medium">전체</p>
+            </button>
+             {/* 필터 버튼들 */}
+             {FILTERS.map((f) => {
+                const isCategorySelected = f.key === 'category' && selectedCategory;
+                const isSelected = selectedFilters.includes(f.key) || isCategorySelected;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => handleFilterClick(f.key)}
+                    className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
+                  >
+                    <span>{f.key === 'category' && selectedCategory ? selectedCategory : f.label}</span>
+                    {f.key === 'category' && <img src={categoryIcon} alt="arrow" className="w-4 h-4" />}
+                  </button>
+                );
+             })}
+          </div>
         </div>
-      </div>
+      )}
       {categoryOpen && (
         <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto bg-black/20 backdrop-blur-sm">
           <div className="w-full max-w-[390px] bg-white rounded-t-xl z-40">
-            <div className="w-full flex flex-col items-center pt-6 pb-4 border-b border-[#F0F0F0]">
-              <div className="w-12 h-1.5 bg-gray-200 rounded-full mb-4" />
-              <div className="text-[18px] font-semibold text-[#111]">
-                카테고리 설정
-              </div>
-            </div>
             <CategoryFilter
               selectedCategory={selectedCategory}
               onCategorySelect={(cat) => {
