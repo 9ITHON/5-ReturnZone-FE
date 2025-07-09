@@ -34,7 +34,7 @@ const Root = () => (
       </Route>
     </Routes>
     {/* BottomNav를 항상 하단에 노출 */}
-    <BottomNav />
+    
   </BrowserRouter>
 );
 

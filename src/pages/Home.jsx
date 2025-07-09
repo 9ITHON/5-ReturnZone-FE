@@ -277,7 +277,9 @@ const Home = () => {
         onClose={() => setMapOpen(false)}
         onSelect={handleMapSelect}
       />
+      <BottomNav />
     </div>
+    
   );
 };
 
