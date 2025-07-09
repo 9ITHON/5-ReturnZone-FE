@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 
 const LocationMapModal = ({ open, onClose }) => {
+  const [search, setSearch] = useState("");
+
+  // Placeholder for future place search logic
+  const searchPlace = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+    // TODO: Replace with actual place search and map update
+    console.log("검색어:", search);
+  };
+
   if (!open) return null;
 
   return (
@@ -20,7 +30,7 @@ const LocationMapModal = ({ open, onClose }) => {
           </div>
         </div>
         {/* Search bar */}
-        <div className="flex items-center gap-2 px-6 mb-4">
+        <form className="flex items-center gap-2 px-6 mb-4" onSubmit={searchPlace}>
           <div className="flex items-center flex-grow h-11 gap-3 px-3 rounded-lg bg-white border border-[#b8b8b8]">
             {/* Search icon - transparent inside */}
             <svg width={24} height={24} fill="none" className="w-6 h-6">
@@ -28,14 +38,16 @@ const LocationMapModal = ({ open, onClose }) => {
               <line x1="15.3" y1="15.3" x2="21" y2="21" stroke="#111" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <input
-              className="flex-grow text-base font-medium text-[#b8b8b8] placeholder-[#b8b8b8] outline-none bg-transparent"
+              className="flex-grow text-base font-medium text-[#111] placeholder-[#b8b8b8] outline-none bg-transparent"
               placeholder="예) 역삼동"
-              disabled
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoFocus
             />
           </div>
           {/* Location icon button */}
-          <button className="w-11 h-11 flex items-center justify-center rounded-full bg-[#f2f2f2]">
-            <svg
+          <button type="button" className="w-11 h-11 flex items-center justify-center rounded-full bg-[#f2f2f2]">
+          <svg
   width={24}
   height={24}
   viewBox="0 0 24 24"
@@ -54,10 +66,10 @@ const LocationMapModal = ({ open, onClose }) => {
   <circle cx={12} cy={12} r={1} fill="#111111" />
 </svg>
           </button>
-        </div>
+        </form>
         {/* Map area */}
         <div className="flex flex-col items-center w-full h-[200px] px-6">
-            {/* 지도 영역 (추후 지도 컴포넌트로 대체) */}
+          
         </div>
       </div>
     </div>
