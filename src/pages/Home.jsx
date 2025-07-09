@@ -8,6 +8,7 @@ import LocationMapModal from "../components/LocationMapModal.jsx";
 import CategoryFilter from "../components/CategoryFilter.jsx";
 import { useNavigate } from "react-router-dom";
 import categoryIcon from "../assets/category.svg";
+import AllFilterModal from "../components/AllFilterModal.jsx";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -21,10 +22,9 @@ const CATEGORY_LIST = [
 ];
 
 const FILTERS = [
+  { key: 'all', label: '전체' },
   { key: 'location', label: '위치' },
   { key: 'latest', label: '최신순' },
-  { key: 'lost', label: '분실' },
-  { key: 'owner', label: '주인' },
   { key: 'category', label: '카테고리' },
 ];
 
@@ -32,10 +32,12 @@ const Home = () => {
   const [categoryOpen, setCategoryOpen] = React.useState(false);
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState(null);
-  const [selectedLocation, setSelectedLocation] = React.useState("전체");
+  const [selectedLocation, setSelectedLocation] = React.useState("");
   const [selectedFilters, setSelectedFilters] = React.useState([]); // 초기값 []
   const [mapOpen, setMapOpen] = React.useState(false);
   const navigate = useNavigate();
+  const [allFilterOpen, setAllFilterOpen] = React.useState(false);
+  const [allFilterValue, setAllFilterValue] = React.useState("all");
 
   // Use the location data hook
   const {
@@ -66,6 +68,10 @@ const Home = () => {
 
   // 필터 버튼 클릭 핸들러 (중복 적용)
   const handleFilterClick = (key) => {
+    if (key === "all") {
+      setAllFilterOpen(true);
+      return;
+    }
     if (key === 'category') {
       setCategoryOpen(true);
       return;
@@ -79,9 +85,32 @@ const Home = () => {
     );
   };
 
+  const handleAllFilterSelect = (value) => {
+    setAllFilterValue(value);
+    setAllFilterOpen(false);
+    // value에 따라 필터 적용
+    if (value === "all") {
+      setSelectedCategory(null);
+      setSelectedLocation("");
+      setSelectedFilters([]);
+      fetchItems();
+    } else if (value === "lost") {
+      setSelectedCategory(null);
+      setSelectedLocation("");
+      setSelectedFilters([]);
+      filterItems("분실", "", undefined);
+    } else if (value === "found") {
+      setSelectedCategory(null);
+      setSelectedLocation("");
+      setSelectedFilters([]);
+      filterItems("주인", "", undefined);
+    }
+  };
+
   // 전체 버튼 클릭
   const handleAllClick = () => {
-    setSelectedFilters([]);
+    console.log("전체 버튼 클릭");
+    setSelectedFilters(FILTERS);
     setSelectedCategory(null);
     setSelectedLocation('전체');
     fetchItems();
@@ -150,31 +179,31 @@ const Home = () => {
     <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
-      {!categoryOpen && (
+      {!categoryOpen && !locationOpen && !allFilterOpen && (
         <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
           <div className="flex items-center w-full h-12 px-4 gap-1.5">
-             {/* 전체 버튼 */}
-            <button
-              onClick={handleAllClick}
-              className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 ${selectedFilters.length === 0 ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
-            >
-              <p className="text-[13px] font-medium">전체</p>
-            </button>
-             {/* 필터 버튼들 */}
-             {FILTERS.map((f) => {
-                const isCategorySelected = f.key === 'category' && selectedCategory;
-                const isSelected = selectedFilters.includes(f.key) || isCategorySelected;
-                return (
-                  <button
-                    key={f.key}
-                    onClick={() => handleFilterClick(f.key)}
-                    className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
-                  >
-                    <span>{f.key === 'category' && selectedCategory ? selectedCategory : f.label}</span>
-                    {f.key === 'category' && <img src={categoryIcon} alt="arrow" className="w-4 h-4" />}
-                  </button>
-                );
-             })}
+            {/* 필터 버튼들 */}
+            {FILTERS.map((f) => {
+              let label = f.label;
+              if (f.key === 'all') {
+                if (allFilterValue === 'lost') label = '분실';
+                else if (allFilterValue === 'found') label = '주인';
+                else label = '전체';
+              }
+              const isCategorySelected = f.key === 'category' && selectedCategory;
+              const isAllSelected = f.key === 'all' && allFilterValue !== 'all';
+              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => handleFilterClick(f.key)}
+                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
+                >
+                  <span>{f.key === 'category' && selectedCategory ? selectedCategory : label}</span>
+                  {f.key === 'category' && <img src={categoryIcon} alt="arrow" className="w-4 h-4" />}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -214,6 +243,14 @@ const Home = () => {
         </div>
       )}
 
+      {/* 전체 필터 바텀시트 */}
+      <AllFilterModal
+        open={allFilterOpen}
+        selected={allFilterValue}
+        onSelect={handleAllFilterSelect}
+        onClose={() => setAllFilterOpen(false)}
+      />
+
       <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
         <div className="flex flex-col gap-4 w-[342px]">
           {/* Show location permission status */}
@@ -227,36 +264,37 @@ const Home = () => {
           )}
 
           {/* Items list */}
-          {items.length > 0 ? (
-            items
-              .filter((item) => {
-                if (selectedFilters.includes("lost")) {
-                  return item.type === "분실" || item.registrationType === "LOST";
-                }
-                if (selectedFilters.includes("owner")) {
-                  return item.type === "주인" || item.registrationType === "FOUND";
-                }
-                return true;
-              })
-              .map((item) => {
+          {(() => {
+            let filteredItems = items;
+            if (allFilterValue === "lost") {
+              filteredItems = items.filter(
+                (item) => item.type === "분실" || item.registrationType === "LOST" || item.status === "분실했어요"
+              );
+            } else if (allFilterValue === "found") {
+              filteredItems = items.filter(
+                (item) => item.type === "주인" || item.registrationType === "FOUND" || item.status === "주인 찾아요"
+              );
+            }
+            return filteredItems.length > 0 ? (
+              filteredItems.map((item) => {
                 let status = "";
                 if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
                 else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
                 return (
-                  <div onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer">
+                  <div onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer" key={item.id}>
                     <ItemCard
                       {...item}
-                      key={item.id}
                       status={status}
                     />
                   </div>
                 );
               })
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>표시할 항목이 없습니다.</p>
-            </div>
-          )}
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>표시할 항목이 없습니다.</p>
+              </div>
+            );
+          })()}
         </div>
       </div>
       <LocationMapModal
