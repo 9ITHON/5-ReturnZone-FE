@@ -15,9 +15,9 @@ export default function MainHeader({className=""}) {
     }
 
     return (
-        <div className={`w-[390px] h-[56px] px-[24px] py-[16px] flex items-center justify-between ${className}`}>
+        <div className={`flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 relative overflow-hidden px-6 bg-white ${className}`}>
             <img src={HeaderIcon} alt="ReturnZone 로고" onClick={handleLogoClick}
-                className=' cursor-pointer' />
+                className=' cursor-pointer flex-grow-0 flex-shrink-0 w-24 h-[42px] relative' />
             <img src={SearchIcon} alt="검색" onClick={handleSearchClick} className=' cursor-pointer' />
         </div>
     )
