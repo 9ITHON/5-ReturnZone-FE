@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../components/Header";
+import MainHeader from "../components/main-header";
 import FilterBar from "../components/FilterBar.jsx";
 import ItemCard from "../components/ItemCard.jsx";
 import BottomNav from "../components/BottomNav.jsx";
@@ -8,7 +8,6 @@ import LocationMapModal from "../components/LocationMapModal.jsx";
 import CategoryFilter from "../components/CategoryFilter.jsx";
 import { useNavigate } from "react-router-dom";
 import categoryIcon from "../assets/category.svg";
-import axios from "axios";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -19,22 +18,6 @@ const CATEGORY_LIST = [
   "서류",
   "반려동물",
   "기타",
-];
-const LOCATION_LIST = [
-  "전체",
-  "월계1동",
-  "월계2동",
-  "월계3동",
-  "상계1동",
-  "상계2동",
-  "상계3동",
-  "상계4동",
-  "상계5동",
-  "상계6동",
-  "상계7동",
-  "상계8동",
-  "상계9동",
-  "상계10동",
 ];
 
 const Home = () => {
@@ -95,7 +78,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
-        <Header />
+        <MainHeader />
         <FilterBar
           onFilter={handleFilter}
           selectedLocation={selectedLocation}
@@ -117,7 +100,7 @@ const Home = () => {
   if (error) {
     return (
       <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
-        <Header />
+        <MainHeader />
         <FilterBar
           onFilter={handleFilter}
           selectedLocation={selectedLocation}
@@ -142,7 +125,7 @@ const Home = () => {
 
   return (
     <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
-      <Header />
+      <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
         <div className="flex items-center w-full h-12 px-4 gap-1.5">
