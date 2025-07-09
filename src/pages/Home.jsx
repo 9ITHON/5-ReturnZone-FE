@@ -9,6 +9,7 @@ import CategoryFilter from "../components/CategoryFilter.jsx";
 import { useNavigate } from "react-router-dom";
 import categoryIcon from "../assets/category.svg";
 import AllFilterModal from "../components/AllFilterModal.jsx";
+import LatestFilterModal from "../components/LatestFilterModal.jsx";
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -30,7 +31,7 @@ const FILTERS = [
 
 const Home = () => {
   const [categoryOpen, setCategoryOpen] = React.useState(false);
-  const [locationOpen, setLocationOpen] = React.useState(false);
+  const [locationOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState(null);
   const [selectedLocation, setSelectedLocation] = React.useState("");
   const [selectedFilters, setSelectedFilters] = React.useState([]); // 초기값 []
@@ -38,6 +39,8 @@ const Home = () => {
   const navigate = useNavigate();
   const [allFilterOpen, setAllFilterOpen] = React.useState(false);
   const [allFilterValue, setAllFilterValue] = React.useState("all");
+  const [latestFilterOpen, setLatestFilterOpen] = React.useState(false);
+  const [latestFilterValue, setLatestFilterValue] = React.useState("latest");
 
   // Use the location data hook
   const {
@@ -76,6 +79,10 @@ const Home = () => {
       setMapOpen(true);
       return;
     }
+    if (key === 'latest') {
+      setLatestFilterOpen(true);
+      return;
+    }
     setSelectedFilters((prev) =>
       prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
     );
@@ -108,16 +115,20 @@ const Home = () => {
     setCategoryOpen(false);
   };
 
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setLocationOpen(false);
-    filterItems(selectedCategory, location, selectedFilters[0]);
-    console.log("위치 선택:", location);
-  };
-
   // 지도에서 위치 선택 시
   const handleMapSelect = (pos) => {
     filterItems(selectedCategory, selectedLocation, selectedFilters[0], pos);
+  };
+
+  // 최신순 필터 선택 핸들러
+  const handleLatestFilterSelect = (value) => {
+    setLatestFilterValue(value);
+    setLatestFilterOpen(false);
+    // 최신순/거리순 필터 적용
+    setSelectedFilters((prev) => {
+      let arr = prev.filter(f => f !== 'latest' && f !== 'distance');
+      return value === 'latest' ? [...arr, 'latest'] : [...arr, 'distance'];
+    });
   };
 
   if (loading) {
@@ -160,7 +171,7 @@ const Home = () => {
     <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
-      {!categoryOpen && !locationOpen && !allFilterOpen && (
+      {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
         <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
           <div className="flex items-center w-full h-12 px-4 gap-1.5">
             {/* 필터 버튼들 */}
@@ -171,9 +182,13 @@ const Home = () => {
                 else if (allFilterValue === 'found') label = '주인';
                 else label = '전체';
               }
+              if (f.key === 'latest') {
+                label = latestFilterValue === 'distance' ? '현재 위치와 가까운 순' : '최신순';
+              }
               const isCategorySelected = f.key === 'category' && selectedCategory;
               const isAllSelected = f.key === 'all' && allFilterValue !== 'all';
-              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected;
+              const isLatestSelected = f.key === 'latest' && (latestFilterValue === 'distance' || latestFilterValue === 'latest');
+              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected;
               return (
                 <button
                   key={f.key}
@@ -210,17 +225,18 @@ const Home = () => {
         onClose={() => setAllFilterOpen(false)}
       />
 
+      {/* 최신순 필터 모달 */}
+      <LatestFilterModal
+        open={latestFilterOpen}
+        selected={latestFilterValue}
+        onSelect={handleLatestFilterSelect}
+        onClose={() => setLatestFilterOpen(false)}
+      />
+
       <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
         <div className="flex flex-col gap-4 w-[342px]">
           {/* Show location permission status */}
           {/* Show distance info if sorting by distance */}
-          {selectedFilters.includes("distance") && userLocation && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-              <p className="text-blue-800 text-sm">
-                현재 위치 기준으로 가까운 순으로 정렬됩니다.
-              </p>
-            </div>
-          )}
 
           {/* Items list */}
           {(() => {
