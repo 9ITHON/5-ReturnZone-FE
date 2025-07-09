@@ -9,7 +9,7 @@ const BottomNav = ({ unreadCount = 0 }) => {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-0 flex flex-col justify-start items-center w-[390px] h-[88px] bg-white border-t-[0.5px] border-r-0 border-b-0 border-l-0 border-[#b8b8b8]">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col justify-start items-center w-[390px] h-[88px] bg-white border-t-[0.5px] border-r-0 border-b-0 border-l-0 border-[#b8b8b8]">
       <div className="flex justify-center items-center self-stretch flex-grow">
         {/* 홈 */}
         <Link
