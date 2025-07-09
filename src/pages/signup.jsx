@@ -4,7 +4,7 @@ import axios from "axios";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import Button from "../components/button"
 import Header from "../components/sign-header"
-import InputField from "../components/input-field"
+import InputField from "../components/InputField"
 // import UserHeader from "../components/user-header";
 import GoLogin from "../assets/로그인가기.svg"
 

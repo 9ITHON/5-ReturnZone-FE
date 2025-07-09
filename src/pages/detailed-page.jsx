@@ -7,33 +7,23 @@ import DetailedHeader from "../components/detailed-header";
 import DetailImg from "../components/detail-img";
 import DetailMap from "../components/detail-map";
 import DetailSimilar from "../components/detail-similar";
-import { DetailTest } from "../test/detailTest"; //더미 데이터
 import { DetailDate } from "../utils/detail-date";
 
 import ProductIcon from '../assets/상품.svg'
 import TimeIcon from '../assets/상세시간.svg'
 import LocationIcon from '../assets/상세위치.svg'
 
-export default function DetailedPage() {
+export default function DetailedPage(props) {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    // const post = DetailTest;
     const { lostPostId } = useParams(); //
-    const [post, setPost] = useState(DetailTest);
+    const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [similarPosts, setSimilarPosts] = useState([]); // 유사한 페이지
-    const useMock = import.meta.env.VITE_USE_MOCK === 'true';
 
     // 분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
-            if (useMock) {
-                setPost(DetailTest);
-                setSimilarPosts(DetailTest.similarLostPosts || []);
-                setLoading(false);
-                return;
-            }
-
             try {
                 const response = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
                     headers: {
@@ -45,15 +35,13 @@ export default function DetailedPage() {
             } catch (err) {
                 console.error(err);
                 setError("데이터를 불러오는 데 실패했습니다.");
-                setPost(DetailTest);
-                setSimilarPosts(DetailTest.similarLostPosts || []);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchPost();
-    }, [lostPostId, apiBase, useMock]);
+    }, [lostPostId, apiBase]);
 
     if (loading) return <p>불러오는 중...</p>;
     if (!post) return <p>{error || "데이터 없음"}</p>;

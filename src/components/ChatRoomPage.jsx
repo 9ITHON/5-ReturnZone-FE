@@ -1,8 +1,35 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import BottomNav from "./BottomNav.jsx";
+import { apiService } from "../services/apiService";
 
-const ROLE = "loser"; // 'loser' = 분실자, 'finder' = 습득자
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://15.164.234.32:8080";
+const WS_URL = `${WS_BASE_URL}/ws/chat`;
+
+const userId = "user1"; // TODO: 실제 로그인 유저 id로 대체
+
+// 더미 데이터
+const initialMessages = [
+  {
+    id: 1,
+    from: "user2",
+    content: "안녕하세요! 헤드셋 정말 잃어버리신 거 맞나요?",
+    time: "오후 2:30",
+    avatar: "/src/assets/user.svg"
+  },
+  {
+    id: 2,
+    from: "user1", 
+    content: "네 맞습니다. 혹시 찾으셨나요?",
+    time: "오후 2:32"
+  },
+  {
+    id: 3,
+    from: "user2",
+    content: "네! 역삼역 근처에서 발견했어요. 언제 받으실 수 있나요?",
+    time: "오후 2:35",
+    avatar: "/src/assets/user.svg"
+  }
+];
 
 function ConfirmModal({ open, title, desc, confirmText, onConfirm, onCancel }) {
   if (!open) return null;
@@ -38,71 +65,90 @@ function Toast({ open, message, type }) {
   );
 }
 
-const STATUS_FLOW = ["waiting", "delivering", "delivered", "reward"];
-const STATUS_LABEL = {
-  waiting: { label: "물건 전달 중", color: "text-blue-500", sub: "물건 전달 중", info: "물건을 전달 중 주인을 찾아 포인트를 받아보세요!" },
-  delivering: { label: "전달을 기다리고 있어요", color: "text-blue-500", sub: "물건 전달 중", info: "전달을 기다리고 있어요" },
-  delivered: { label: "거래 완료", color: "text-gray-500", sub: "거래 완료", info: "" },
-  reward: { label: "500포인트 지급 완료", color: "text-blue-600", sub: "거래 완료", info: "500포인트 지급 완료" },
-};
-const STATUS_GUIDE = {
-  waiting: { icon: "📦", text: "물건 전달이 시작되었습니다.\n물건을 받으셨다면, 상단의 버튼을 눌러주세요.\n버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  delivering: { icon: "😀", text: "주인을 찾았어요! 이제 물건을 전달해 주세요.\n분실자가 수령을 확인하면 포인트가 자동 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  delivered: { icon: "📦", text: "물건 전달이 시작되었습니다.\n물건을 받으셨다면, 상단의 버튼을 눌러주세요.\n버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.", color: "border-blue-300 bg-blue-50 text-blue-800" },
-  reward: { icon: "🎉", text: "전달 완료! 주인이 물건을 잘 받았어요.\n약속된 500포인트가 지급되었습니다. 감사합니다!", color: "border-blue-300 bg-blue-50 text-blue-800" },
-};
-
-const CHAT_ID = '1'; // 실제로는 props나 useParams 등에서 받아야 함
-const STORAGE_KEY = `chat_messages_${CHAT_ID}`;
-
-const initialMessages = [
-  {
-    id: 1,
-    type: "question",
-    from: "finder",
-    text: [
-      "아래는 습득자가 등록한 분실물 특징입니다.\n분실물과 비교하여 정확하게 답변해 주세요.",
-      "1. 아이폰 상단에 흠집이 있나요?",
-      "2. 아이폰 케이스는 어떤건가요?",
-      "3. 어디서 잃어버리셨나요?",
-    ],
-    time: "12:40 읽음",
-  },
-  {
-    id: 2,
-    type: "answer",
-    from: "loser",
-    avatar: "/src/assets/user.svg",
-    text: [
-      "상단에 흠집 있습니다, 케이스는 짱구 케이스에요",
-      "주민센터 앞에서 잃어버렸어요",
-    ],
-    time: "12:40 읽음",
-  },
-];
-
-const ChatRoomPage = () => {
-  // localStorage에서 불러오기
-  const getStoredMessages = () => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return initialMessages;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return initialMessages;
-    }
-  };
-  const [messages, setMessages] = useState(getStoredMessages);
+const ChatRoomPage = ({ chatRoomId, onMessageRead }) => {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null });
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
+  const [wsError, setWsError] = useState(false);
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
+  const ws = useRef(null);
+
+  // WebSocket 연결 및 fallback
+  useEffect(() => {
+    let didFallback = false;
+    try {
+      ws.current = new window.WebSocket(`${WS_URL}/${chatRoomId}`);
+      ws.current.onopen = () => {
+        apiService.markMessageAsRead(chatRoomId, userId);
+        setMessages([]); // 서버 연결 성공 시 빈 채팅(혹은 서버에서 불러오기)
+        onMessageRead && onMessageRead(chatRoomId);
+      };
+      ws.current.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        setMessages((prev) => [...prev, msg]);
+        apiService.markMessageAsRead(chatRoomId, userId);
+      };
+      ws.current.onerror = () => {
+        setWsError(true);
+        setMessages(initialMessages);
+        didFallback = true;
+      };
+      ws.current.onclose = () => {
+        if (!didFallback) {
+          setWsError(true);
+          setMessages(initialMessages);
+        }
+      };
+    } catch {
+      setWsError(true);
+      setMessages(initialMessages);
+    }
+    return () => {
+      ws.current && ws.current.close();
+    };
+  }, [chatRoomId, onMessageRead]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // 메시지 전송
+  const handleSend = () => {
+    if (!input.trim()) return;
+    if (ws.current && ws.current.readyState === 1 && !wsError) {
+      ws.current.send(JSON.stringify({
+        chatRoomId,
+        userId,
+        content: input,
+      }));
+    } else {
+      // fallback: 더미 메시지 추가
+      const newMsg = {
+        id: Date.now(),
+        from: userId,
+        content: input,
+        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, newMsg]);
+      // 더미 답장
+      setTimeout(() => {
+        const quickReplies = ["알겠습니다!", "네네", "좋아요!", "ㅎㅎ"];
+        const randomReply = quickReplies[Math.floor(Math.random() * quickReplies.length)];
+        const replyMsg = {
+          id: Date.now() + 1,
+          from: "user2",
+          content: randomReply,
+          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          avatar: "/src/assets/user.svg"
+        };
+        setMessages(prev => [...prev, replyMsg]);
+      }, 1000 + Math.random() * 2000);
+    }
+    setInput("");
+  };
 
   // 메뉴/모달 핸들러
   const openModal = (type) => {
@@ -116,29 +162,16 @@ const ChatRoomPage = () => {
     } else if (modal.type === "block") {
       setToast({ open: true, message: "상대방이 차단되었습니다.", type: "success" });
     } else if (modal.type === "exit") {
+      const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
+      if (!exited.includes(chatRoomId)) {
+        exited.push(chatRoomId);
+        localStorage.setItem("exitedChats", JSON.stringify(exited));
+      }
       setToast({ open: true, message: "채팅방을 나갔습니다.", type: "success" });
       setTimeout(() => navigate("/chat"), 1000);
     }
     setTimeout(() => setToast({ open: false, message: "", type: "success" }), 2000);
     closeModal();
-  };
-
-  // 메시지 전송
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const newMessages = [
-      ...messages,
-      {
-        id: messages.length + 1,
-        type: "question",
-        from: "finder",
-        text: [input],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " 읽음",
-      },
-    ];
-    setMessages(newMessages);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newMessages));
-    setInput("");
   };
 
   return (
@@ -149,9 +182,9 @@ const ChatRoomPage = () => {
         <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b bg-white" style={{minHeight:'56px'}}>
           <div className="flex items-center">
             <button className="mr-2 text-2xl" onClick={() => navigate(-1)}>&#8592;</button>
-            <span className="font-bold text-lg">유저1</span>
+            <span className="font-bold text-lg">유저2</span>
           </div>
-          <div className="relative">
+          <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <button className="text-2xl" onClick={() => setMenuOpen((v) => !v)}>
               <span className="inline-block w-6 h-6 flex items-center justify-center">⋮</span>
             </button>
@@ -182,35 +215,32 @@ const ChatRoomPage = () => {
             </div>
           </div>
         </div>
-        {/* 상태 안내(회색 박스) */}
-        <div className="w-full bg-gray-100 text-gray-700 rounded-lg py-3 font-semibold text-base text-center mt-2 mb-2">물건을 잘 받았어요</div>
         {/* 메시지 영역 */}
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-white">
+          {wsError && (
+            <div className="text-center text-xs text-red-500 mb-2">서버 연결에 실패하여 더미 채팅으로 표시 중입니다.</div>
+          )}
           {messages.map((msg, i) => {
-            if (msg.type === "question") {
+            if (msg.from === userId) {
               return (
                 <div key={i} className="flex flex-col items-end">
                   <div className="bg-blue-600 text-white text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">
-                    {msg.text.map((t, idx) => <div key={idx}>{t}</div>)}
+                    {msg.content}
                   </div>
                   <div className="text-xs text-gray-400 mr-2">{msg.time}</div>
                 </div>
               );
-            }
-            if (msg.type === "answer") {
+            } else {
               return (
                 <div key={i} className="flex items-start gap-2">
-                  <img src={msg.avatar} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
+                  <img src={msg.avatar || "/src/assets/user.svg"} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
                   <div>
-                    {msg.text.map((t, idx) => (
-                      <div key={idx} className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{t}</div>
-                    ))}
+                    <div className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{msg.content}</div>
                     <div className="text-xs text-gray-400 ml-1">{msg.time}</div>
                   </div>
                 </div>
               );
             }
-            return null;
           })}
           <div ref={messagesEndRef} />
         </div>
@@ -237,9 +267,21 @@ const ChatRoomPage = () => {
         </div>
         <ConfirmModal
           open={modal.open}
-          title={modal.type === 'report' ? '이 사용자를 신고하시겠습니까?' : modal.type === 'block' ? '상대방을 차단하시겠습니까?' : modal.type === 'exit' ? '채팅방을 나가시겠습니까?' : ''}
-          desc={modal.type === 'report' ? '신고는 운영팀에 전달되며, 허위 신고 시 제재될 수 있습니다.' : modal.type === 'block' ? '차단 시 더 이상 메시지를 주고받을 수 없습니다.' : modal.type === 'exit' ? '나가면 더 이상 대화를 주고받을 수 없습니다.' : ''}
-          confirmText={modal.type === 'report' ? '신고하기' : modal.type === 'block' ? '차단하기' : modal.type === 'exit' ? '나가기' : ''}
+          title={
+            modal.type === "report" ? "신고하기" :
+            modal.type === "block" ? "차단하기" :
+            modal.type === "exit" ? "채팅방 나가기" : ""
+          }
+          desc={
+            modal.type === "report" ? "정말 신고하시겠습니까?" :
+            modal.type === "block" ? "정말 차단하시겠습니까?" :
+            modal.type === "exit" ? "정말 나가시겠습니까?" : ""
+          }
+          confirmText={
+            modal.type === "report" ? "신고하기" :
+            modal.type === "block" ? "차단하기" :
+            modal.type === "exit" ? "나가기" : ""
+          }
           onConfirm={handleConfirm}
           onCancel={closeModal}
         />

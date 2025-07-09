@@ -4,9 +4,7 @@
 :root {
   line-height: 1.5;
   font-weight: 400;
-
   /* color-scheme: light dark; */
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,15 +19,13 @@ a {
   text-decoration: none;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  background-color: #000000;
-  font-family: 'Pretendard Variable', sans-serif;
+html, body {
+  height: 100vh;
+  overflow: hidden;
 }
 
-svg{
-  fill : #000000;
+svg {
+  fill: #000000;
 }
 
 .app-viewport {
