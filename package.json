@@ -19,6 +19,7 @@
     "react-kakao-maps-sdk": "^1.2.0",
     "react-router-dom": "^7.6.3",
     "react-swipeable": "^7.0.2",
+    "sockjs-client": "^1.6.1",
     "tailwindcss": "^4.1.11",
     "zustand": "^5.0.6"
   },
