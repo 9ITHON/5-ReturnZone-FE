@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRegisterStore } from "../stores/RegisterStore";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import InputField from "../components/input-field";
@@ -10,6 +11,7 @@ import RegisterTag from "../components/register-tag";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import CalendarModal from "../components/calendar-modal";
 import TimePickerModal from "../components/time-picker-modal";
+import UserMessageLogin from "../components/UserMessageLogin";
 
 import CameraIcon from '../assets/camera.svg'
 import WhiteX from '../assets/흰색x.svg'
@@ -22,27 +24,33 @@ import XButton from '../assets/x버튼.svg'
 
 export default function RegisterPage() {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    const [selectedTag, setSelectedTag] = useState(""); // 분실, 찾았어요 처리
-    const [selectedCategory, setSelectedCategory] = useState(""); // 카테고리
-    const [title, setTitle] = useState(""); // 제목
-    const [images, setImages] = useState([]); // 이미지 파일들 저장하는 상태 배열
-    const fileInputRef = useRef(null); // 파일 선택 창 접근
-    const [selectedLocation, setSelectedLocation] = useState(""); // 사용자 위치 저장
-    const [detailLocation, setDetailLocation] = useState(""); // 상세 주소
-    const [questions, setQuestions] = useState(["", ""]);  // 상세 특징(최소 2개)
+    const {
+        title, setTitle, // 제목
+        selectedTag, setSelectedTag, // 태그
+        selectedCategory, setSelectedCategory, // 카테고리
+        images, setImages, // 이미지 
+        selectedLocation, setSelectedLocation, // 위치
+        latitude,
+        longitude, //위도 경도 추가
+        detailLocation, setDetailLocation, // 상세 위치
+        questions, setQuestions, // 질문
+        selectedDate, setSelectedDate, // 날짜
+        selectedTimes, setSelectedTimes, // 시간
+        description, setDescription, // 설명
+        itemName, setItemName, // 상품명
+        reward, setReward, // 현상금
+        reset,
+    } = useRegisterStore();
     const [isCalendarOpen, setIsCalendarOpen] = useState(false); // 캘린더 열림 상태
-    const [selectedDate, setSelectedDate] = useState(null) // 날짜 저장
     const [isTimePickerOpen, setIsTimePickerOpen] = useState(false); // 시간 모달 열림 상태
-    const [selectedTimes, setSelectedTimes] = useState([]); // 시간 저장
-    const [description, setDescription] = useState(""); // 글 본문
-    const [itemName, setItemName] = useState(""); // 물품명
-    const [reward, setReward] = useState(""); // 현상금
+    const fileInputRef = useRef(null); // 파일 선택 창 접근
     const calendarRef = useRef(null); // 캘린더 영역 참조
     const timePickerRef = useRef(null); // 시간 영역 참조
 
     const navigate = useNavigate();
-    const location = useLocation();
     const isKeyboardOpen = UseKeyboardOpen();
+    const user = JSON.parse(localStorage.getItem("userId")); // 사용자의 아이디 가져오기
+    const isLoggedIn = user && user.id != null; // 사용자의 로그인 상태 저장
 
     // 분실/획득 시간 라벨 텍스트 동적 처리
     const locationLabel = selectedTag === "주인을 찾아요" ? "획득 장소" : "분실품 장소";
@@ -50,13 +58,13 @@ export default function RegisterPage() {
     const timeLabel = selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간";
     const detailLabel = selectedTag === "주인을 찾아요" ? "획득한 분실품 특징 (최대 5개)" : "분실품 특징 (최대 5개)";
 
-    // RegisterLocation에서 온 주소 수신
-    useEffect(() => {
-        if (location.state?.address) {
-            console.log("주소 수신:", location.state);
-            setSelectedLocation(location.state.address);
-        }
-    }, [location]);
+    // // RegisterLocation에서 온 주소 수신
+    // useEffect(() => {
+    //     if (location.state?.address) {
+    //         console.log("주소 수신:", location.state);
+    //         setSelectedLocation(location.state.address);
+    //     }
+    // }, [location]);
     // 이미지 등록 버튼 (최대 5개)
     const handleCameraClick = (e) => {
         if (images.length >= 5) {
@@ -79,8 +87,30 @@ export default function RegisterPage() {
     };
     // 위치창으로 이동
     const handleLocation = () => {
-        navigate('/RegisterLocation');
-    }
+        navigate('/RegisterLocation', {
+            state: {
+                path: '/Register',
+                title,
+                selectedTag,
+                selectedCategory,
+                description,
+                itemName,
+                selectedLocation,
+                detailLocation,
+                questions,
+                selectedDate,
+                selectedTimes,
+                reward,
+                images,
+            }
+        });
+    };
+    // 위치 받기
+    const handleConfirm = () => {
+        if (!address || latlng.lat === null || latlng.lng === null) return;
+        setSelectedLocation(address); // RegisterPage가 읽는 상태
+        navigate(path, { replace: true });
+    };
     // 상세 특징 업데이트
     const handleChange = (index, value) => {
         setQuestions((prev) => {
@@ -115,8 +145,8 @@ export default function RegisterPage() {
                 alert("로그인이 필요한 기능입니다.");
                 return;
             }
-            const { lat, lng } = location.state || {};
-            if (!lat || !lng) return alert("위치를 선택해주세요.");
+            const { latitude, longitude } = useRegisterStore.getState();
+            if (!latitude || !longitude) return alert("위치를 선택해주세요.");
             if (!selectedDate) return alert("날짜를 선택해주세요.");
 
             const date = selectedDate?.toISOString().split("T")[0];
@@ -170,7 +200,8 @@ export default function RegisterPage() {
             // 응답 처리
             if (response.status === 201) {
                 alert("등록이 완료되었습니다.");
-                navigate("/");
+                reset();
+                navigate('/');
             } else if (response.status === 400) {
                 const msg = response.data?.message || "입력값을 다시 확인해 주세요.";
                 alert(`요청 오류: ${msg}`);
@@ -199,9 +230,16 @@ export default function RegisterPage() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isCalendarOpen, isTimePickerOpen]);
-
     return (
         <div>
+            {/* {!user && (
+                <UserMessageLogin
+                    title="로그인이 필요합니다"
+                    message="분실물 등록은 로그인 후 <br> 이용하실 수 있습니다."
+                    path="/Login"
+                    cancelPath={-1}
+                />
+            )} */}
             <div>
                 <RegisterHeader title="분실물 등록" />
             </div>
@@ -262,7 +300,7 @@ export default function RegisterPage() {
                         <RegisterLabel label="등록 유형" />
                         <RegisterTag options={['분실했어요', '주인을 찾아요']} selected={selectedTag} onChange={setSelectedTag} />
                     </div>
-                    {/* 제목 함수*/}
+                    {/* 제목*/}
                     <div className="h-[78px]">
                         <InputField label="제목" placeholder="글 제목" type="text" value={title} onChange={e => setTitle(e.target.value)} ></InputField>
                     </div>
@@ -289,9 +327,9 @@ export default function RegisterPage() {
                     <div className="h-[78px]">
                         <InputField label="물품명" placeholder="ex) 아이폰 16" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} />
                     </div>
-                    {/* 분실품 장소 */}
+                    {/* 분실품 위치 */}
                     <div>
-                        <RegisterLabel label={locationLabel} />
+                        <RegisterLabel label={locationLabel} path='/Register' />
                         <button
                             onClick={handleLocation}
                             className={`w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedLocation ? "text-[#111111]" : "text-[#B8B8B8]"}`}
@@ -423,7 +461,7 @@ export default function RegisterPage() {
                     )}
                 </div>
             </div>
-            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
+            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-2 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
                 <Button label="등록 하기" onClick={handleRegister} />
             </div>
             {/* 캘린더 모달 조건부 렌더링 */}

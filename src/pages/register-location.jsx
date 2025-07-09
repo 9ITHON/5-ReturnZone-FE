@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
+import { useRegisterStore } from "../stores/RegisterStore";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
+
 import Button from "../components/button";
 import LeftArrow from "../assets/좌측꺽쇠.svg";
 import LocationIcon from "../assets/현재위치.svg";
 import SearchIcon from "../assets/search.svg";
 
 export default function RegisterLocation() {
+    const { setLocation } = useRegisterStore(); 
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const geocoderRef = useRef(null);
@@ -17,8 +20,11 @@ export default function RegisterLocation() {
     const [keyword, setKeyword] = useState("");
     const isKeyboardOpen = UseKeyboardOpen();
     const navigate = useNavigate();
+    const location = useLocation();
+    const path = location.state?.path || -1;
+    const previousState = location.state || {}; // 기존 상태 백업
 
-    const moveToCurrentLocation = (map, marker) => {
+    const moveToCurrentLocation = (map, marker, path) => {
         if (!navigator.geolocation) {
             alert("위치 정보를 사용할 수 없습니다.");
             return;
@@ -104,7 +110,7 @@ export default function RegisterLocation() {
                 setTimeout(checkKakaoAndInitialize, 100);
             }
         };
-        
+
         checkKakaoAndInitialize();
     }, []);
 
@@ -144,10 +150,23 @@ export default function RegisterLocation() {
             moveToCurrentLocation(map, marker);
         }
     };
-
+    // 주소 넘기기
     const handleConfirm = () => {
         if (!address || latlng.lat === null || latlng.lng === null) return;
-        navigate('/Register', { state: { address, lat: latlng.lat, lng: latlng.lng } });
+
+        // zustand에 저장
+        setLocation(address, latlng.lat, latlng.lng);
+
+        // 이전 상태 유지한 채 navigate
+        navigate(path, {
+            replace: true,
+            state: {
+                ...previousState,
+                address,
+                lat: latlng.lat,
+                lng: latlng.lng,
+            },
+        });
     };
 
     return (

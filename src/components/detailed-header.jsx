@@ -59,7 +59,7 @@ export default function DetailedHeader() {
             </div>
             {/* ✅ 삭제 확인 모달 */}
             {showConfirmModal && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-[#11111180] bg-opacity-50">
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-[#11111180]">
                     <div className="bg-[#e4e4e4] rounded-[14px] h-[148px] w-[270px] text-center">
                         <div className='px-[16px] py-[20px] h-[104px]'>
                             <p className="text-[18px] text-[#111111] font-bold">예치금 환불 및 삭제</p>

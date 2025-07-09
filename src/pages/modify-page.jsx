@@ -313,9 +313,9 @@ export default function ModifyPage() {
                     <div className="h-[78px]">
                         <InputField label="물품명" placeholder="ex) 아이폰 16" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} />
                     </div>
-                    {/* 분실품 장소 */}
+                    {/* 분실품 위치 */}
                     <div>
-                        <RegisterLabel label={locationLabel} />
+                        <RegisterLabel label={locationLabel} path="/lost/:lostPostId/edit" />
                         <button
                             onClick={handleLocation}
                             className={`w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedLocation ? "text-[#111111]" : "text-[#B8B8B8]"}`}
