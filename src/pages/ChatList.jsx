@@ -1,13 +1,13 @@
 import React from "react";
-import { useOutletContext } from "react-router-dom";
 import ChatroomList from "../components/ChatroomList";
 
 const ChatList = () => {
-  const { unreadCount } = useOutletContext();
+  // const { unreadCount } = useOutletContext() || {};
 
   return (
     <>
-      <ChatroomList /> 
+      <ChatroomList />
+      {/* <BottomNav /> 중복 렌더링 제거 */}
     </>
   );
 };
