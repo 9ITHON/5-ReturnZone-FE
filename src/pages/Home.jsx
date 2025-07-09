@@ -53,18 +53,14 @@ const Home = () => {
   // selectedFilters, selectedCategory, selectedLocation이 바뀔 때마다 필터 적용
   React.useEffect(() => {
     if (userLocation) {
-      if (selectedFilters.length === 0) {
-        fetchItems();
-      } else {
-        let sortBy = selectedFilters.includes('latest') ? 'latest' : undefined;
-        filterItems(
-          selectedCategory,
-          selectedLocation,
-          sortBy
-        );
-      }
+      let sortBy = selectedFilters.includes('latest') ? 'latest' : undefined;
+      filterItems(
+        selectedCategory,
+        selectedLocation,
+        sortBy
+      );
     }
-  }, [userLocation, selectedFilters, selectedCategory, selectedLocation, fetchItems, filterItems]);
+  }, [userLocation, selectedFilters, selectedCategory, selectedLocation, filterItems]);
 
   // 필터 버튼 클릭 핸들러 (중복 적용)
   const handleFilterClick = (key) => {
@@ -117,13 +113,7 @@ const Home = () => {
   };
 
   const handleCategorySelect = (cat) => {
-    if (selectedCategory === cat) {
-      setSelectedCategory(null);
-      filterItems(null, selectedLocation, selectedFilters[0]);
-    } else {
-      setSelectedCategory(cat);
-      filterItems(cat, selectedLocation, selectedFilters[0]);
-    }
+    setSelectedCategory(selectedCategory === cat ? null : cat);
     setCategoryOpen(false);
   };
 
