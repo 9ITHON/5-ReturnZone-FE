@@ -4,7 +4,7 @@ import axios from "axios";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import Button from "../components/button"
 import Header from "../components/sign-header"
-import InputField from "../components/InputField"
+import SHInputField from "../components/SHInputField"
 // import UserHeader from "../components/user-header";
 import GoLogin from "../assets/로그인가기.svg"
 
@@ -95,25 +95,17 @@ export default function SignUp() {
             const response = await axios.get(`${apiBase}/api/v1/members/email/${email}`);
 
             // 사용 가능 (200 OK)
-            if (response.data === true || response.data === "true") {
-                setEmailError("");
-                setEmailSuccess("사용가능한 이메일입니다!");
-                setIsEmailChecked(true);
-            } else {
-                setEmailError("이미 존재하는 이메일입니다");
-                setEmailSuccess("");
-                setIsEmailChecked(false);
-            }
+            setEmailError("");
+            setEmailSuccess("사용가능한 이메일입니다!");
+            setIsEmailChecked(true);
         } catch (error) {
             if (error.response?.status === 400) {
                 setEmailError("이미 존재하는 이메일입니다");
-                setEmailSuccess("");
-                setIsEmailChecked(false);
             } else {
                 setEmailError("서버 오류가 발생했습니다");
-                setEmailSuccess("");
-                setIsEmailChecked(false);
             }
+            setEmailSuccess("");
+            setIsEmailChecked(false);
         }
     };
 
@@ -125,10 +117,10 @@ export default function SignUp() {
             <Header title="회원가입" />
             {/* 사용자 입력창 */}
             <div className="w-full mt-4 flex flex-col mx-auto gap-4 mb-[36px] px-[24px]">
-                <InputField label="이름" type="text" value={username} onChange={(e) => setName(e.target.value)} placeholder="이름을입력해주세요" />
+                <SHInputField label="이름" type="text" value={username} onChange={(e) => setName(e.target.value)} placeholder="이름을입력해주세요" />
                 {/* 이메일 입력 란 */}
                 <div className="relative">
-                    <InputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess}
+                    <SHInputField label="이메일" type="email" value={email} placeholder="이메일을 입력해주세요" error={emailError} success={emailSuccess}
                         onChange={(e) => {
                             setEmail(e.target.value);
                             setIsEmailChecked(false);
@@ -136,10 +128,10 @@ export default function SignUp() {
                             setEmailSuccess(""); // 메시지 상태 초기화
                         }}
                     />
-                    <Button label="중복 확인" className="absolute right-[10px] bottom-0 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111] !text-[14px] font-medium" onClick={handleCheckEmail} />
+                    <Button label="중복 확인" className="absolute right-[10px] top-1/2 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111] !text-[14px] font-medium" onClick={handleCheckEmail} />
                 </div>
-                <InputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
-                <InputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
+                <SHInputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
+                <SHInputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
                 {/* <label className="flex items-center gap-2 text-sm">
                     <input
                         type="checkbox"
@@ -151,7 +143,7 @@ export default function SignUp() {
 
             </div>
             <div className={`fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
-                <Button label="회원가입" onClick={handleSignUp}  />
+                <Button label="회원가입" onClick={handleSignUp} />
             </div>
         </div>
     );

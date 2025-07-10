@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 
-import InputField from "../components/InputField";
+import SHInputField from "../components/SHInputField";
 import Button from "../components/button";
 import RegisterHeader from "../components/register-header";
 import RegisterLabel from "../components/register-label";
@@ -288,7 +288,7 @@ export default function ModifyPage() {
                     </div>
                     {/* 제목 함수*/}
                     <div className="h-[78px]">
-                        <InputField label="제목" placeholder="글 제목" type="text" value={title} onChange={e => setTitle(e.target.value)} ></InputField>
+                        <SHInputField label="제목" placeholder="글 제목" type="text" value={title} onChange={e => setTitle(e.target.value)} ></SHInputField>
                     </div>
                     {/* 자세한 내용 */}
                     <div>
@@ -311,7 +311,7 @@ export default function ModifyPage() {
                     </div>
                     {/* 물품명 */}
                     <div className="h-[78px]">
-                        <InputField label="물품명" placeholder="ex) 아이폰 16" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} />
+                        <SHInputField label="물품명" placeholder="ex) 아이폰 16" type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} />
                     </div>
                     {/* 분실품 위치 */}
                     <div>

@@ -3,7 +3,7 @@ import { useRegisterStore } from "../stores/RegisterStore";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import InputField from "../components/InputField";
+import SHInputField from "../components/SHInputField";
 import Button from "../components/button";
 import RegisterHeader from "../components/register-header";
 import RegisterLabel from "../components/register-label";
@@ -336,13 +336,13 @@ export default function RegisterPage() {
           </div>
           {/* 제목*/}
           <div className="h-[78px]">
-            <InputField
+            <SHInputField
               label="제목"
               placeholder="글 제목"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-            ></InputField>
+            ></SHInputField>
           </div>
           {/* 자세한 내용 */}
           <div>
@@ -379,7 +379,7 @@ export default function RegisterPage() {
           </div>
           {/* 물품명 */}
           <div className="h-[78px]">
-            <InputField
+            <SHInputField
               label="물품명"
               placeholder="ex) 아이폰 16"
               type="text"

@@ -99,7 +99,7 @@ export default function Login() {
   };
 
   const handleSignup = () => {
-    navigate('/signup');
+    navigate('/SignUp');
   };
 
   const handleKakaoLogin = async () => {

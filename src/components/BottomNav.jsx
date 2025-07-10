@@ -72,13 +72,13 @@ const BottomNav = ({ unreadCount = 0 }) => {
         </Link>
         {/* 마이페이지 */}
         <Link
-          to="/mypage"
+          to="/MyPage"
           className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]"
         >
           <img src={userIcon} alt="마이페이지" className="w-6 h-6" />
           <p
             className={`text-xs font-medium ${
-              location.pathname === "/mypage" ? "text-[#2D68FF]" : "text-[#111]"
+              location.pathname === "/MyPage" ? "text-[#2D68FF]" : "text-[#111]"
             }`}
           >
             마이페이지
