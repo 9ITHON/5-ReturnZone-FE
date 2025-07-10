@@ -7,7 +7,7 @@ import useMyPageFormStore from "../stores/useMyPageFormStore";
 import Button from "../components/button";
 import LeftArrow from "../assets/좌측꺽쇠.svg";
 import LocationIcon from "../assets/현재위치.svg";
-import SearchIcon from "../assets/search.svg";
+import SearchIcon from "../assets/Search.svg";
 
 export default function MyPageLocation() {
     const { setForm } = useMyPageFormStore();
