@@ -71,7 +71,7 @@ export default function SignUp() {
                 password,
             });
             if (response.status === 201) { // 로그인 성공 시 
-                console.log("로그인 성공");
+                console.log("회원가입 성공");
                 alert("회원가입에 성공했습니다.");
                 navigate("/LogIn"); // 로그인 페이지로 이동
             } else {
@@ -136,7 +136,7 @@ export default function SignUp() {
                             setEmailSuccess(""); // 메시지 상태 초기화
                         }}
                     />
-                    <Button label="중복 확인" className="absolute right-[10px] top-1/2 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111]" onClick={handleCheckEmail} />
+                    <Button label="중복 확인" className="absolute right-[10px] bottom-0 -translate-y-1/2 !w-[76px] !h-[35px] !border-[1px] !border-[#0066FF] !bg-[#0066FF26] !text-[#111111] !text-[14px] font-medium" onClick={handleCheckEmail} />
                 </div>
                 <InputField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상 입력해주세요" error={passwordError} />
                 <InputField label="비밀번호 확인" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호를 적어주세요" error={passwordConfirmError} />
