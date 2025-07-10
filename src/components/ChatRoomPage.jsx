@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { apiService } from "../services/apiService";
 import ReportHeader from "./ReportHeader";
 import ReportModal from "./ReportModal";
 import ChatRoomWebSocket from './ChatRoomWebSocket';
+import ItemCard from "./ItemCard";
 
 const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   <div
@@ -43,20 +44,58 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
 
 const ChatRoomPage = () => {
   const params = useParams();
-  const roomId = params.id;
+  const location = useLocation();
   const userId = localStorage.getItem('user_id') || '1';
   const navigate = useNavigate();
   const [showOption, setShowOption] = useState(false);
   const [reportModalType, setReportModalType] = useState(null);
-  console.log('roomId in ChatRoomPage:', roomId);
+  const [item, setItem] = useState(null);
+  const [roomId, setRoomId] = useState(params.id);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userName, setUserName] = useState('');
 
-  if (!roomId) {
-    return <div style={{padding: 32, color: 'red'}}>잘못된 접근입니다. (roomId 없음)</div>;
-  }
+  // itemId는 쿼리스트링 또는 params에서 추출
+  const searchParams = new URLSearchParams(location.search);
+  const lostPostId = searchParams.get('lostPostId') || params.lostPostId || params.itemId;
 
-  // 실제 데이터로 대체 필요: 예시/더미 데이터 제거
-  // const isOwner = true; // 분실자(내가 물건을 잃어버린 사람)
-  // const isFinder = false; // 습득자(내가 물건을 주운 사람)
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        // 1. 아이템 정보 불러오기
+        const itemData = lostPostId ? await apiService.getLostPost(lostPostId) : null;
+        setItem(itemData);
+        // 2. 등록자 이름(닉네임) 가져오기
+        if (itemData?.nickname) {
+          setUserName(itemData.nickname);
+        } else if (itemData?.memberId) {
+          // 만약 닉네임이 없고 memberId만 있으면, 유저 정보 추가 fetch 필요 (apiService.getUser 등)
+          // setUserName(await apiService.getUser(itemData.memberId).then(u => u.nickname || u.name));
+        }
+        // 3. 채팅방 정보 불러오기 or 생성
+        let chatRoomId = lostPostId;
+        const targetUserId = itemData?.memberId || itemData?.userId;
+        if (!params.id && lostPostId && targetUserId && userId !== targetUserId) {
+          // 채팅방이 없으면 생성 (본인 채팅방 방지)
+          await apiService.createChatRoom({ lostPostId, userId, targetUserId });
+          navigate(`/chat/${lostPostId}`);
+          return;
+        }
+        setRoomId(chatRoomId);
+      } catch {
+        setError('채팅방 정보를 불러오지 못했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+    // eslint-disable-next-line
+  }, [lostPostId, params.id]);
+
+  if (loading) return <div className="w-full h-full flex items-center justify-center">로딩중...</div>;
+  if (error) return <div className="w-full h-full flex items-center justify-center text-red-500">{error}</div>;
 
   return (
     <div className="flex flex-col justify-start items-center w-[390px] h-[630px] bg-white mx-auto">
@@ -68,7 +107,7 @@ const ChatRoomPage = () => {
               <path d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </svg>
           </div>
-          <p className="flex-grow-0 flex-shrink-0 text-[22px] font-semibold text-left text-[#111]">유저1</p>
+          <p className="flex-grow-0 flex-shrink-0 text-[20px] font-semibold text-left text-[#111]">{userName || '유저'}</p>
         </div>
         <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
           <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative cursor-pointer" preserveAspectRatio="none" onClick={() => setShowOption((v) => !v)}>
@@ -106,38 +145,25 @@ const ChatRoomPage = () => {
         <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 pt-4">
           <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
             {/* 상품 정보 */}
-            <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3">
-              <svg width={72} height={72} viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-[72px] h-[72px] relative" preserveAspectRatio="xMidYMid meet">
-                <rect width={72} height={72} rx={12} fill="#F2F2F2" />
-                <path d="M44.8534 38.9493L41.8179 35.9139C41.449 35.5451 40.9488 35.3379 40.4271 35.3379C39.9055 35.3379 39.4052 35.5451 39.0363 35.9139L30.0993 44.8509M29.1157 27.146H42.8861C43.9726 27.146 44.8534 28.0267 44.8534 29.1132V42.8837C44.8534 43.9702 43.9726 44.8509 42.8861 44.8509H29.1157C28.0292 44.8509 27.1484 43.9702 27.1484 42.8837V29.1132C27.1484 28.0267 28.0292 27.146 29.1157 27.146ZM35.0173 33.0476C35.0173 34.1341 34.1365 35.0148 33.0501 35.0148C31.9636 35.0148 31.0829 34.1341 31.0829 33.0476C31.0829 31.9612 31.9636 31.0804 33.0501 31.0804C34.1365 31.0804 35.0173 31.9612 35.0173 33.0476Z" stroke="#B8B8B8" strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
-              <div className="flex flex-col justify-start items-start flex-grow relative gap-1">
-                <p className="self-stretch flex-grow-0 flex-shrink-0 w-[258px] text-base font-medium text-left text-[#111]">소니 WH-1000XM4 헤드셋 찾아주세요</p>
-                <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                  <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">역삼1동</p>
-                  <svg width={4} height={4} viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0" preserveAspectRatio="none">
-                    <circle cx={2} cy={2} r={2} fill="#B8B8B8" />
-                  </svg>
-                  <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">10일 전</p>
-                </div>
-                <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#06f]">주인 찾는 중</p>
-              </div>
-            </div>
-            {/* 시스템 메시지: 실제 데이터가 있을 때만 렌더링 */}
-            {/* 예: props.systemMessage && (
-              <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]">
-                <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#111]">{props.systemMessage}</p>
-              </div>
-            ) */}
-            {/* 채팅 메시지 영역 */}
-            <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-4">
-              <ChatRoomWebSocket
-                roomId={roomId}
-                userId={userId}
-                subscribeTopic={`/topic/chat/${roomId}`}
-                sendDestination="/app/chat.send"
+            {item && (
+              <ItemCard
+                data={{
+                  title: item.title,
+                  reward: item.reward,
+                  imageUrl: item.mainImageUrl,
+                  timeAgo: item.timeAgo,
+                  registrationType: item.registrationType,
+                  status: item.status,
+                }}
               />
-            </div>
+            )}
+            {/* 채팅 메시지 영역 */}
+            <ChatRoomWebSocket
+              roomId={String(roomId || lostPostId || params.id || params.lostPostId)}
+              userId={String(userId)}
+              subscribeTopic={`/topic/chat/${String(roomId || lostPostId || params.id || params.lostPostId)}`}
+              sendDestination="/app/chat.send"
+            />
           </div>
         </div>
       </div>

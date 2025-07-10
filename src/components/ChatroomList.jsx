@@ -62,7 +62,7 @@ const ChatroomList = () => {
   return (
     <div>
       <div className="flex justify-between items-center w-[390px] h-14 relative overflow-hidden px-6 bg-white">
-        <p className="flex-grow w-[342px] text-xl font-semibold text-left text-[#111]">채팅</p>
+        <p className="flex-grow-0 flex-shrink-0 text-[20px] font-semibold text-left text-[#111]">채팅</p>
       </div>
       <div className="flex flex-col justify-start items-center w-[390px] h-[646px]">
         <div className="flex flex-col w-[390px]">

@@ -1,7 +1,7 @@
 import './index.css';
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import App from "./App.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
@@ -11,7 +11,6 @@ import SearchPage from "./pages/search-page.jsx";
 import Chat from "./pages/Chat.jsx";
 import ChatList from "./pages/ChatList.jsx";
 import RegisterLocation from "./pages/register-location.jsx";
-import BottomNav from "./components/BottomNav.jsx";
 import RegisterPage from './pages/register-page.jsx'
 import ModifyPage from './pages/modify-page.jsx'
 
