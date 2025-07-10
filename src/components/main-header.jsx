@@ -11,7 +11,7 @@ export default function MainHeader({className=""}) {
     }
     // 검색 클릭 시 검색창으로 이동
     const handleSearchClick =() =>{
-        navigate('/search')
+        navigate('/SearchPage')
     }
 
     return (

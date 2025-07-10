@@ -173,7 +173,7 @@ const Home = () => {
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
         <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
-          <div className="flex items-center w-full h-12 px-4 gap-1.5">
+          <div className="flex items-center w-full h-12 px-4 gap-1.5 overflow-x-auto hide-scrollbar">
             {/* 필터 버튼들 */}
             {FILTERS.map((f) => {
               let label = f.label;
