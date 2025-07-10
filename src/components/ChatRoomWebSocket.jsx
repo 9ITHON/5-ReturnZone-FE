@@ -90,6 +90,7 @@ const ChatRoomWebSocket = ({
         senderId: userId,
         content: input,
         type: 'TEXT',
+        createdAt: new Date().toISOString(), // UTC로 저장
       };
       clientRef.current.publish({
         destination: sendDestination,
@@ -104,24 +105,40 @@ const ChatRoomWebSocket = ({
       <div className="flex-1 overflow-y-auto px-3 py-2" style={{maxHeight: 400, minHeight: 300, background: '#fff'}}>
         {messages.map((msg, idx) => {
           const isMine = String(msg.senderId) === String(userId);
+          // 시간 포맷
+          function getTimeStr(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            // 한국 시간대 강제 적용
+            return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' });
+          }
+          // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
+          const isLastOfGroup =
+            idx === messages.length - 1 ||
+            String(messages[idx + 1]?.senderId) !== String(msg.senderId);
           return (
             <div
               key={msg.id || idx}
               className={`flex w-full mb-2 ${isMine ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-[75%] px-4 py-2 rounded-2xl text-[15px] whitespace-pre-line break-words ${
-                  isMine
-                    ? 'bg-[#0066FF] text-white rounded-br-md'
-                    : 'bg-[#F2F2F2] text-[#111] rounded-bl-md'
-                }`}
-                style={{ wordBreak: 'break-all' }}
-              >
-                {msg.content}
-                <div className="text-[11px] text-right mt-1 opacity-70">
-                  {/* 시간/읽음표시 예시, 실제 데이터에 맞게 수정 필요 */}
-                  12:40 읽음
+              <div className="flex flex-col items-end">
+                <div
+                  className={`max-w-[75%] px-4 py-2 rounded-2xl text-[15px] whitespace-pre-line break-words ${
+                    isMine
+                      ? 'bg-[#0066FF] text-white rounded-br-md'
+                      : 'bg-[#F2F2F2] text-[#111] rounded-bl-md'
+                  }`}
+                  style={{ wordBreak: 'break-all' }}
+                >
+                  {msg.content}
                 </div>
+                {/* 마지막 메시지 그룹에만 시간/읽음 표시 */}
+                {isLastOfGroup && (
+                  <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1 mt-1 mr-1">
+                    <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">{getTimeStr(msg.createdAt)}</p>
+                    <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">읽음</p>
+                  </div>
+                )}
               </div>
             </div>
           );
