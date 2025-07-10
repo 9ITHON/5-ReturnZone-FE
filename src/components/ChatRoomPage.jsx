@@ -49,6 +49,10 @@ const ChatRoomPage = () => {
   const [reportModalType, setReportModalType] = useState(null); // null | 'report' | 'block'
   // input, setInput 제거
 
+  // 예시: 실제로는 props나 API에서 분실자/습득자 여부를 받아야 함
+  const isOwner = true; // 분실자(내가 물건을 잃어버린 사람)
+  const isFinder = false; // 습득자(내가 물건을 주운 사람)
+
   useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true);
@@ -169,9 +173,20 @@ const ChatRoomPage = () => {
               </div>
             </div>
             {/* 시스템 메시지 */}
-            <div className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]">
-              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">물건을 잘 받았어요</p>
-            </div>
+            {isOwner && (
+              <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]">
+                <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#111]">
+                  물건을 잘 받았어요
+                </p>
+              </div>
+            )}
+            {isFinder && (
+              <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[134px] py-[9px] rounded-lg bg-[#06f]">
+                <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-white">
+                  물건 주인을 찾았어요
+                </p>
+              </div>
+            )}
             {/* 채팅 메시지 영역 */}
             <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-4 px-6 pt-4 pb-2 h-[420px] overflow-y-auto">
               {loading ? (
