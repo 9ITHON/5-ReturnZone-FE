@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { useRegisterStore } from "../stores/RegisterStore";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
+import useMyPageFormStore from "../stores/useMyPageFormStore";
 
 import Button from "../components/button";
 import LeftArrow from "../assets/좌측꺽쇠.svg";
 import LocationIcon from "../assets/현재위치.svg";
-import SearchIcon from "../assets/Search.svg";
+import SearchIcon from "../assets/search.svg";
 
-export default function RegisterLocation() {
-    const { setLocation } = useRegisterStore();
+export default function MyPageLocation() {
+    const { setForm } = useMyPageFormStore();
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const geocoderRef = useRef(null);
@@ -21,20 +21,19 @@ export default function RegisterLocation() {
     const isKeyboardOpen = UseKeyboardOpen();
     const navigate = useNavigate();
     const location = useLocation();
-    const path = location.state?.path || -1;
-    const previousState = location.state || {}; // 기존 상태 백업
+    const previousState = location.state || {};
+
     useEffect(() => {
         const script = document.createElement("script");
         script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=9d52e34fbb979fdd643ebcef1b43488a&autoload=false&libraries=services";
         script.async = true;
-        console.log(window.kakao); // 카카오 맵 확인
         script.onload = () => {
-            console.log("Kakao Maps script loaded");
             checkKakaoAndInitialize();
         };
         document.head.appendChild(script);
     }, []);
-    const moveToCurrentLocation = (map, marker, path) => {
+    //사용자 현재 위치 받기
+    const moveToCurrentLocation = (map, marker) => {
         if (!navigator.geolocation) {
             alert("위치 정보를 사용할 수 없습니다.");
             return;
@@ -49,7 +48,7 @@ export default function RegisterLocation() {
                 map.setCenter(latlng);
                 marker.setPosition(latlng);
                 setLatlng({ lat, lng });
-                console.log("현재 위치 →",address , lat, lng);
+
                 if (geocoderRef.current) {
                     geocoderRef.current.coord2Address(
                         lng,
@@ -68,15 +67,10 @@ export default function RegisterLocation() {
             }
         );
     };
-    // 사용자 현재 위치 받기
+
     const checkKakaoAndInitialize = () => {
-        if (
-            window.kakao &&
-            window.kakao.maps &&
-            typeof window.kakao.maps.load === "function"
-        ) {
+        if (window.kakao && window.kakao.maps && typeof window.kakao.maps.load === "function") {
             window.kakao.maps.load(() => {
-                // 기존 지도 초기화 로직
                 if (!mapRef.current) return;
 
                 const mapContainer = mapRef.current;
@@ -103,22 +97,21 @@ export default function RegisterLocation() {
                     map.setCenter(latlng);
                     setLatlng({ lat: latlng.getLat(), lng: latlng.getLng() });
 
-                    if (geocoderRef.current) {
-                        geocoderRef.current.coord2Address(
-                            latlng.getLng(),
-                            latlng.getLat(),
-                            function (result, status) {
-                                if (status === window.kakao.maps.services.Status.OK) {
-                                    const addr = result[0].address?.address_name;
-                                    setAddress(addr || "주소 미확인");
-                                }
+                    geocoderRef.current.coord2Address(
+                        latlng.getLng(),
+                        latlng.getLat(),
+                        function (result, status) {
+                            if (status === window.kakao.maps.services.Status.OK) {
+                                const addr = result[0].address?.address_name;
+                                setAddress(addr || "주소 미확인");
                             }
-                        );
-                    }
+                        }
+                    );
                 });
             });
         }
     };
+
 
     const handleSearch = () => {
         if (!keyword.trim() || !placesRef.current || !markerRef.current) return;
@@ -156,24 +149,24 @@ export default function RegisterLocation() {
             moveToCurrentLocation(map, marker);
         }
     };
-    // 주소 넘기기
     const handleConfirm = () => {
         if (!address || latlng.lat === null || latlng.lng === null) return;
-
-        // zustand에 저장
-        setLocation(address, latlng.lat, latlng.lng);
-
-        // 이전 상태 유지한 채 navigate
-        navigate(path, {
+        // zustand store에 반영
+        setForm({
+            location: address,
+            lat: latlng.lat,
+            lng: latlng.lng,
+        });
+        // 이전 경로로 복귀
+        navigate("/MyPageModify", {
             replace: true,
             state: {
                 ...previousState,
-                address,
-                lat: latlng.lat,
-                lng: latlng.lng,
+                selectedLocation: address,
             },
         });
     };
+
 
     return (
         <div className="relative w-full h-screen bg-white">
@@ -190,7 +183,7 @@ export default function RegisterLocation() {
             {/* 검색바 */}
             <div className="z-10 relative bg-white px-[16px] mb-[8px]">
                 <h2 className="text-[16px] font-semibold mb-[8px]">
-                    물품을 획득한 장소를 선택해주세요.
+                    고객님의 위치를 선택해주세요.
                 </h2>
                 <div className="flex gap-[8px]">
                     <div className="relative w-full">
