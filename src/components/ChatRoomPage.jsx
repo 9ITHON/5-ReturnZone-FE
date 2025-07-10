@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "../services/apiService";
+import { formatPrice } from "../utils/formatPrice";
 
 const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://15.164.234.32:8080";
 const WS_URL = `${WS_BASE_URL}/ws/chat`;
@@ -211,7 +212,7 @@ const ChatRoomPage = ({ chatRoomId, onMessageRead }) => {
               <div className="font-semibold text-base leading-tight">소니 WH-1000XM4 헤드셋 찾아가세요</div>
               <div className="text-xs text-gray-500">역삼1동 · 10일 전</div>
               <span className="text-blue-600 font-semibold">주인 찾는 중</span>
-              <span className="ml-2 text-black font-semibold">현상금 <span className="text-blue-700">10,000원</span></span>
+              <span className="ml-2 text-black font-semibold">현상금 <span className="text-blue-700">{formatPrice(10000)}</span></span>
             </div>
           </div>
         </div>
