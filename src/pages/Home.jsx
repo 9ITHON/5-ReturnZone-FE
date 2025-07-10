@@ -189,7 +189,7 @@ const Home = () => {
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
-        <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
+        <div className="sticky top-0 z-50 bg-white">
           <div className="flex items-center w-full h-12 px-4 gap-1.5">
             {/* 필터 라벨 버튼 */}
             <button
@@ -264,8 +264,8 @@ const Home = () => {
         onClose={() => setLatestFilterOpen(false)}
       />
 
-      <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
-        <div className="flex flex-col gap-4 w-[342px]">
+      <div className="flex flex-col items-center px-0 pt-[16px] pb-[88px] flex-1 w-full overflow-y-scroll">
+        <div className="flex flex-col gap-2 w-full px-6">
           {/* Show location permission status */}
           {/* Show distance info if sorting by distance */}
 
