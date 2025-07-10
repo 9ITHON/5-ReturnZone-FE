@@ -21,7 +21,7 @@ export default function DetailedPage(props) {
     const [error, setError] = useState(null);
     const [similarPosts, setSimilarPosts] = useState([]); // 유사한 페이지
 
-    // 분실물 정보 상세 조회
+    //분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
             try {
