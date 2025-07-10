@@ -23,7 +23,7 @@ const BottomNav = () => {
   }
   // 마이페이지로 이동
   const handleMyPageClick = () => {
-    navigate('/Mypage');
+    navigate('/MyPage');
   }
   return (
     <nav className="fixed left-0 right-0 bottom-0 w-full max-w-[390px] mx-auto h-[88px] bg-white border-t border-t-[#B8B8B8] border-opacity-50 z-50 flex items-center justify-center">

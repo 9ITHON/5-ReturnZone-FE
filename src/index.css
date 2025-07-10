@@ -32,6 +32,12 @@ svg{
   fill : #000000;
 }
 
+img{
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
 .app-viewport {
   width: 390px;
   height: 844px;
