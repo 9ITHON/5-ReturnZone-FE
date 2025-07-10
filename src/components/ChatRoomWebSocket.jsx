@@ -32,12 +32,8 @@ const ChatRoomWebSocket = ({
     // eslint-disable-next-line
   }, [roomId, userId]);
 
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+  // Store subscription ref
+  const subscriptionRef = useRef(null);
 
   const connect = () => {
     clientRef.current = new Client({
@@ -60,6 +56,10 @@ const ChatRoomWebSocket = ({
   };
 
   const disconnect = () => {
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+      subscriptionRef.current = null;
+    }
     if (clientRef.current) {
       clientRef.current.deactivate();
     }
@@ -67,9 +67,19 @@ const ChatRoomWebSocket = ({
 
   const subscribe = () => {
     if (!clientRef.current || !subscribeTopic) return;
-    clientRef.current.subscribe(subscribeTopic, (message) => {
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+      subscriptionRef.current = null;
+    }
+    subscriptionRef.current = clientRef.current.subscribe(subscribeTopic, (message) => {
       const receivedMessage = JSON.parse(message.body);
-      setMessages((prev) => [...prev, receivedMessage]);
+      setMessages((prev) => {
+        // 메시지 id가 있으면 중복 추가 방지
+        if (prev.some(m => m.id && receivedMessage.id && m.id === receivedMessage.id)) return prev;
+        // id가 없으면 content+createdAt로 임시 중복 방지
+        if (prev.some(m => m.content === receivedMessage.content && m.createdAt === receivedMessage.createdAt)) return prev;
+        return [...prev, receivedMessage];
+      });
     });
   };
 
