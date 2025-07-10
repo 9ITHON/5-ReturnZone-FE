@@ -1,96 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const chatrooms = [
-  {
-    roomId: 1,
-    profile1: "rectangle-3468137.jpeg",
-    profile2: "rectangle-3468138-2.png",
-    status: "거래 완료",
-    statusColor: "#808080",
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 22,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 2,
-    profile1: "rectangle-3468137.jpeg",
-    profile2: "rectangle-3468138.png",
-    status: "물건 전달 중",
-    statusColor: "#06f",
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 0,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 3,
-    profile1: null,
-    profile2: "rectangle-3468138.png",
-    status: null,
-    statusColor: null,
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 9,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 4,
-    profile1: null,
-    profile2: "rectangle-3468138.png",
-    status: null,
-    statusColor: null,
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 0,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 5,
-    profile1: null,
-    profile2: "rectangle-3468138.png",
-    status: "물건 전달 중",
-    statusColor: "#06f",
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 0,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 6,
-    profile1: null,
-    profile2: "rectangle-3468138.png",
-    status: "거래 완료",
-    statusColor: "#808080",
-    isInactive: false,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 0,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-  {
-    roomId: 7,
-    profile1: null,
-    profile2: "rectangle-3468138.png",
-    status: null,
-    statusColor: null,
-    isInactive: true,
-    nickname: "유저1",
-    time: "10분 전",
-    unread: 0,
-    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
-  },
-];
+import { apiService } from "../services/apiService";
 
 const ChatroomItem = ({ room, onClick }) => (
   <div
-    className={`flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 ${room.isInactive ? "opacity-50" : ""}`}
+    className={`flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 ${room.inactive ? "opacity-50" : ""}`}
     style={{ cursor: "pointer" }}
     onClick={() => onClick(room.roomId)}
   >
@@ -159,6 +73,23 @@ const ChatroomItem = ({ room, onClick }) => (
 
 const ChatroomList = () => {
   const navigate = useNavigate();
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true);
+      try {
+        const res = await apiService.getChatRooms();
+        setRooms(res.content || []);
+      } catch {
+        setRooms([]);
+      }
+      setLoading(false);
+    };
+    fetchRooms();
+  }, []);
+
   const handleClick = (roomId) => {
     navigate(`/chat/${roomId}`);
   };
@@ -171,9 +102,15 @@ const ChatroomList = () => {
       <div className="flex flex-col justify-start items-center w-[390px] h-[646px]">
         <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 py-4">
           <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-4">
-            {chatrooms.map((room) => (
-              <ChatroomItem key={room.roomId} room={room} onClick={handleClick} />
-            ))}
+            {loading ? (
+              <div className="text-center text-gray-400">채팅방 불러오는 중...</div>
+            ) : rooms.length === 0 ? (
+              <div className="text-center text-gray-400">채팅방이 없습니다.</div>
+            ) : (
+              rooms.map((room) => (
+                <ChatroomItem key={room.roomId} room={room} onClick={handleClick} />
+              ))
+            )}
           </div>
         </div>
       </div>
