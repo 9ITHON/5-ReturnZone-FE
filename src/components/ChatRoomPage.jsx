@@ -98,7 +98,7 @@ const ChatRoomPage = () => {
   if (error) return <div className="w-full h-full flex items-center justify-center text-red-500">{error}</div>;
 
   return (
-    <div className="flex flex-col justify-start items-center w-[390px] h-[630px] bg-white mx-auto">
+    <div className="flex flex-col justify-start items-center w-[390px] h-[630px] bg-white mx-auto relative"> {/* relative 추가 */}
       {/* 상단 헤더 */}
       <div className="flex justify-between items-center w-[390px] overflow-hidden px-6 py-1.5 bg-white">
         <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
