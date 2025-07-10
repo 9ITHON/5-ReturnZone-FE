@@ -224,10 +224,10 @@ const Home = () => {
                 <button
                   key={f.key}
                   onClick={() => handleFilterClick(f.key)}
-                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
+                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#111]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
                 >
                   <span>{f.key === 'category' && selectedCategory ? selectedCategory : label}</span>
-                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" style={{ filter: 'none' }} />
                 </button>
               );
             })}
