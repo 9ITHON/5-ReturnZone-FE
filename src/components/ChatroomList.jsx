@@ -1,95 +1,181 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-// 더미 데이터
 const chatrooms = [
   {
-    id: 1,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 1,
+    profile1: "rectangle-3468137.jpeg",
+    profile2: "rectangle-3468138-2.png",
+    status: "거래 완료",
+    statusColor: "#808080",
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 22,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
   {
-    id: 2,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 2,
+    profile1: "rectangle-3468137.jpeg",
+    profile2: "rectangle-3468138.png",
+    status: "물건 전달 중",
+    statusColor: "#06f",
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 0,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
   {
-    id: 3,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 3,
+    profile1: null,
+    profile2: "rectangle-3468138.png",
+    status: null,
+    statusColor: null,
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 9,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
   {
-    id: 4,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 4,
+    profile1: null,
+    profile2: "rectangle-3468138.png",
+    status: null,
+    statusColor: null,
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 0,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
   {
-    id: 5,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 5,
+    profile1: null,
+    profile2: "rectangle-3468138.png",
+    status: "물건 전달 중",
+    statusColor: "#06f",
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 0,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
   {
-    id: 6,
-    profile: "/src/assets/user.svg",
-    name: "유저1",
-    lastMessage: "메시지메시지메시지메시지메시지...",
+    roomId: 6,
+    profile1: null,
+    profile2: "rectangle-3468138.png",
+    status: "거래 완료",
+    statusColor: "#808080",
+    isInactive: false,
+    nickname: "유저1",
     time: "10분 전",
     unread: 0,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
+  },
+  {
+    roomId: 7,
+    profile1: null,
+    profile2: "rectangle-3468138.png",
+    status: null,
+    statusColor: null,
+    isInactive: true,
+    nickname: "유저1",
+    time: "10분 전",
+    unread: 0,
+    message: "메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지메세지"
   },
 ];
 
-const ChatroomItem = ({ id, profile, name, lastMessage, time, unread, onClick }) => (
-  <div className="flex items-center px-4 py-3 border-b cursor-pointer hover:bg-gray-50" onClick={() => onClick(id)}>
-    <img
-      src={profile}
-      alt="profile"
-      className="w-12 h-12 rounded-full object-cover mr-3 bg-gray-200"
-    />
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center">
-        <span className="font-semibold">{name}</span>
-        <span className="text-xs text-gray-400 ml-2">{time}</span>
-        {unread > 0 && (
-          <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-            {unread}
-          </span>
+const ChatroomItem = ({ room, onClick }) => (
+  <div
+    className={`flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 ${room.isInactive ? "opacity-50" : ""}`}
+    style={{ cursor: "pointer" }}
+    onClick={() => onClick(room.roomId)}
+  >
+    <div className="flex-grow-0 flex-shrink-0 w-16 h-16 relative rounded-xl">
+      {room.profile1 ? (
+        <img
+          src={room.profile1}
+          className="w-11 h-11 absolute left-[-1px] top-[-1px] rounded-[22px] object-cover"
+          alt="profile1"
+        />
+      ) : (
+        <svg
+          width={44}
+          height={44}
+          viewBox="0 0 44 44"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-11 h-11 absolute left-0 top-0"
+          preserveAspectRatio="none"
+        >
+          <g clipPath="url(#clip0)">
+            <rect width={44} height={44} rx={22} fill="#F2F2F2" />
+            <circle cx={22} cy={18} r={9} fill="#B8B8B8" fillOpacity="0.5" />
+            <ellipse cx={22} cy="38.5" rx={22} ry="8.5" fill="#B8B8B8" fillOpacity="0.5" />
+          </g>
+          <defs>
+            <clipPath id="clip0">
+              <rect width={44} height={44} rx={22} fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      )}
+      {room.profile2 && (
+        <img
+          src={room.profile2}
+          className="w-11 h-11 absolute left-[19px] top-[19px] rounded-md object-cover border border-white"
+          alt="profile2"
+        />
+      )}
+    </div>
+    <div className="flex flex-col justify-center items-start flex-grow relative gap-0.5">
+      {room.status && (
+        <p className="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left" style={{ color: room.statusColor }}>
+          {room.status}
+        </p>
+      )}
+      <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2">
+        <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-left text-[#111]">
+          {room.nickname}
+        </p>
+        <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">{room.time}</p>
+        {room.unread > 0 && (
+          <div className="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-4 relative overflow-hidden gap-2.5 px-1 rounded-[22px] bg-[#f00]">
+            <p className="self-stretch flex-grow-0 flex-shrink-0 w-3.5 text-xs text-center text-white">
+              {room.unread}
+            </p>
+          </div>
         )}
       </div>
-      <div className="text-sm text-gray-500 truncate">{lastMessage}</div>
+      <p className="self-stretch flex-grow-0 flex-shrink-0 w-[268px] text-base text-left text-[#808080]">
+        {room.message}
+      </p>
     </div>
   </div>
 );
 
 const ChatroomList = () => {
   const navigate = useNavigate();
-  const handleClick = (id) => {
-    navigate(`/chat/${id}`);
+  const handleClick = (roomId) => {
+    navigate(`/chat/${roomId}`);
   };
-  // 나간 채팅방 제외
-  const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
-  const filteredRooms = chatrooms.filter(room => !exited.includes(String(room.id)) && !exited.includes(room.id));
+
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-[88px] bg-white">
-      <h2 className="text-xl font-bold px-4 py-3">채팅</h2>
-      <div>
-        {filteredRooms.map((room) => (
-          <ChatroomItem key={room.id} {...room} onClick={handleClick} />
-        ))}
+    <div>
+      <div className="flex justify-between items-center w-[390px] h-14 relative overflow-hidden px-6 bg-white">
+        <p className="flex-grow w-[342px] text-xl font-semibold text-left text-[#111]">채팅</p>
+      </div>
+      <div className="flex flex-col justify-start items-center w-[390px] h-[646px]">
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 py-4">
+          <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-4">
+            {chatrooms.map((room) => (
+              <ChatroomItem key={room.roomId} room={room} onClick={handleClick} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

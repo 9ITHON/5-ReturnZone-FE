@@ -1,5 +1,6 @@
 import React from "react";
 import ChatroomList from "../components/ChatroomList";
+import BottomNav from "../components/BottomNav";
 
 const ChatList = () => {
   // const { unreadCount } = useOutletContext() || {};
@@ -7,7 +8,7 @@ const ChatList = () => {
   return (
     <>
       <ChatroomList />
-      {/* <BottomNav /> 중복 렌더링 제거 */}
+      <BottomNav />
     </>
   );
 };

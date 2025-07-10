@@ -46,6 +46,11 @@ const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
   }
 };
 
+function getUserId() {
+  // 실제 로그인 유저의 id를 가져오세요 (예: localStorage)
+  return localStorage.getItem('user_id') || '1';
+}
+
 export const apiService = {
   // Auth
   async login({ email, password }) {
@@ -59,7 +64,7 @@ export const apiService = {
   },
   async register(userData) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/auth/register', userData);
+      const response = await apiClient.post('/members/signup', userData);
       return response.data;
     });
   },
@@ -94,6 +99,18 @@ export const apiService = {
   async kakaoCallback(code) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/kakao/callback', { code });
+      return response.data;
+    });
+  },
+  async kakaoLoginCallback(code) {
+    return retryRequest(async () => {
+      const response = await apiClient.post("/auth/kakao/callback", { code });
+      return response.data;
+    });
+  },
+  async checkEmailDuplicate(email) {
+    return retryRequest(async () => {
+      const response = await apiClient.get(`/members/email/${email}`);
       return response.data;
     });
   },
@@ -136,10 +153,16 @@ export const apiService = {
       return response.data;
     });
   },
-  // 채팅
-  async getChatRooms() {
+  // 채팅방 목록 조회 (Swagger 기준)
+  async getChatRooms(page = 0) {
     return retryRequest(async () => {
-      const response = await apiClient.get('/chat/rooms');
+      const response = await apiClient.get(
+        '/chats/rooms',
+        {
+          params: { page },
+          headers: { 'X-USER-ID': getUserId() }
+        }
+      );
       return response.data;
     });
   },
@@ -149,9 +172,16 @@ export const apiService = {
       return response.data;
     });
   },
-  async getChatMessages(roomId, params = {}) {
+  // 채팅 메시지 조회 (Swagger 기준)
+  async getChatMessages(roomId, page = 0) {
     return retryRequest(async () => {
-      const response = await apiClient.get(`/chat/rooms/${roomId}/messages`, { params });
+      const response = await apiClient.get(
+        `/chats/rooms/${roomId}/messages`,
+        {
+          params: { page },
+          headers: { 'X-USER-ID': getUserId() }
+        }
+      );
       return response.data;
     });
   },
@@ -164,6 +194,29 @@ export const apiService = {
   async createChatRoom(roomData) {
     return retryRequest(async () => {
       const response = await apiClient.post('/chat/rooms', roomData);
+      return response.data;
+    });
+  },
+  async markMessageAsRead(roomId, userId) {
+    return retryRequest(async () => {
+      const response = await apiClient.put(`/chat/rooms/${roomId}/read`, { userId });
+      return response.data;
+    });
+  },
+  // 읽지 않은 메시지 수: 모든 채팅방 unreadCount 합산
+  async getUnreadCount() {
+    return retryRequest(async () => {
+      const rooms = await this.getChatRooms(0);
+      let total = 0;
+      if (rooms && rooms.content) {
+        total = rooms.content.reduce((sum, room) => sum + (room.unreadCount || 0), 0);
+      }
+      return { unreadCount: total };
+    });
+  },
+  async deleteChatRoom(roomId) {
+    return retryRequest(async () => {
+      const response = await apiClient.delete(`/chat/rooms/${roomId}`);
       return response.data;
     });
   },

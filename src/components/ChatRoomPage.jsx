@@ -1,291 +1,178 @@
-import { useEffect, useRef, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { apiService } from "../services/apiService";
-import { formatPrice } from "../utils/formatPrice";
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://15.164.234.32:8080";
-const WS_URL = `${WS_BASE_URL}/ws/chat`;
-
-const userId = "user1"; // TODO: 실제 로그인 유저 id로 대체
-
-// 더미 데이터
-const initialMessages = [
-  {
-    id: 1,
-    from: "user2",
-    content: "안녕하세요! 헤드셋 정말 잃어버리신 거 맞나요?",
-    time: "오후 2:30",
-    avatar: "/src/assets/user.svg"
-  },
-  {
-    id: 2,
-    from: "user1", 
-    content: "네 맞습니다. 혹시 찾으셨나요?",
-    time: "오후 2:32"
-  },
-  {
-    id: 3,
-    from: "user2",
-    content: "네! 역삼역 근처에서 발견했어요. 언제 받으실 수 있나요?",
-    time: "오후 2:35",
-    avatar: "/src/assets/user.svg"
-  }
-];
-
-function ConfirmModal({ open, title, desc, confirmText, onConfirm, onCancel }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-      <div className="w-full max-w-[390px] bg-white rounded-t-2xl p-6 pb-8 shadow-lg animate-slideup">
-        <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4" />
-        <div className="text-center mb-4">
-          <div className="text-base font-bold mb-2">{title}</div>
-          <div className="text-lg font-semibold mb-2">{desc}</div>
-        </div>
-        <button
-          className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold text-base"
-          onClick={onConfirm}
-        >
-          {confirmText}
-        </button>
-        <button
-          className="w-full mt-2 bg-gray-100 text-gray-700 rounded-lg py-3 font-semibold text-base"
-          onClick={onCancel}
-        >
-          취소
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Toast({ open, message, type }) {
-  if (!open) return null;
-  return (
-    <div className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg text-white text-sm font-semibold ${type === 'success' ? 'bg-blue-600' : 'bg-gray-800'}`}>{message}</div>
-  );
-}
-
-const ChatRoomPage = ({ chatRoomId, onMessageRead }) => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [modal, setModal] = useState({ open: false, type: null });
-  const [toast, setToast] = useState({ open: false, message: "", type: "success" });
-  const [wsError, setWsError] = useState(false);
+const ChatRoomPage = () => {
   const navigate = useNavigate();
-  const messagesEndRef = useRef(null);
-  const ws = useRef(null);
-
-  // WebSocket 연결 및 fallback
-  useEffect(() => {
-    let didFallback = false;
-    try {
-      ws.current = new window.WebSocket(`${WS_URL}/${chatRoomId}`);
-      ws.current.onopen = () => {
-        apiService.markMessageAsRead(chatRoomId, userId);
-        setMessages([]); // 서버 연결 성공 시 빈 채팅(혹은 서버에서 불러오기)
-        onMessageRead && onMessageRead(chatRoomId);
-      };
-      ws.current.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        setMessages((prev) => [...prev, msg]);
-        apiService.markMessageAsRead(chatRoomId, userId);
-      };
-      ws.current.onerror = () => {
-        setWsError(true);
-        setMessages(initialMessages);
-        didFallback = true;
-      };
-      ws.current.onclose = () => {
-        if (!didFallback) {
-          setWsError(true);
-          setMessages(initialMessages);
-        }
-      };
-    } catch {
-      setWsError(true);
-      setMessages(initialMessages);
-    }
-    return () => {
-      ws.current && ws.current.close();
-    };
-  }, [chatRoomId, onMessageRead]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // 메시지 전송
-  const handleSend = () => {
-    if (!input.trim()) return;
-    if (ws.current && ws.current.readyState === 1 && !wsError) {
-      ws.current.send(JSON.stringify({
-        chatRoomId,
-        userId,
-        content: input,
-      }));
-    } else {
-      // fallback: 더미 메시지 추가
-      const newMsg = {
-        id: Date.now(),
-        from: userId,
-        content: input,
-        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, newMsg]);
-      // 더미 답장
-      setTimeout(() => {
-        const quickReplies = ["알겠습니다!", "네네", "좋아요!", "ㅎㅎ"];
-        const randomReply = quickReplies[Math.floor(Math.random() * quickReplies.length)];
-        const replyMsg = {
-          id: Date.now() + 1,
-          from: "user2",
-          content: randomReply,
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-          avatar: "/src/assets/user.svg"
-        };
-        setMessages(prev => [...prev, replyMsg]);
-      }, 1000 + Math.random() * 2000);
-    }
-    setInput("");
-  };
-
-  // 메뉴/모달 핸들러
-  const openModal = (type) => {
-    setMenuOpen(false);
-    setModal({ open: true, type });
-  };
-  const closeModal = () => setModal({ open: false, type: null });
-  const handleConfirm = () => {
-    if (modal.type === "report") {
-      setToast({ open: true, message: "신고가 접수되었습니다.", type: "success" });
-    } else if (modal.type === "block") {
-      setToast({ open: true, message: "상대방이 차단되었습니다.", type: "success" });
-    } else if (modal.type === "exit") {
-      const exited = JSON.parse(localStorage.getItem("exitedChats") || "[]");
-      if (!exited.includes(chatRoomId)) {
-        exited.push(chatRoomId);
-        localStorage.setItem("exitedChats", JSON.stringify(exited));
-      }
-      setToast({ open: true, message: "채팅방을 나갔습니다.", type: "success" });
-      setTimeout(() => navigate("/chat"), 1000);
-    }
-    setTimeout(() => setToast({ open: false, message: "", type: "success" }), 2000);
-    closeModal();
-  };
 
   return (
-    <div className="relative w-full min-h-screen bg-gray-50 flex flex-col items-center">
-      <Toast open={toast.open} message={toast.message} type={toast.type} />
-      <div className="w-full max-w-[390px] h-screen bg-white flex flex-col mx-auto overflow-hidden shadow-lg relative">
-        {/* 상단: ← 유저명 ⋮ 메뉴 */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b bg-white" style={{minHeight:'56px'}}>
-          <div className="flex items-center">
-            <button className="mr-2 text-2xl" onClick={() => navigate(-1)}>&#8592;</button>
-            <span className="font-bold text-lg">유저2</span>
-          </div>
-          <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-            <button className="text-2xl" onClick={() => setMenuOpen((v) => !v)}>
-              <span className="inline-block w-6 h-6 flex items-center justify-center">⋮</span>
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-8 w-44 bg-white rounded-xl shadow-lg border z-20 animate-fadein">
-                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('report')}>
-                  <span className="mr-2">🚩</span> 신고하기
-                </button>
-                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('block')}>
-                  <span className="mr-2">⛔</span> 차단하기
-                </button>
-                <button className="flex w-full items-center px-4 py-3 text-sm hover:bg-gray-50" onClick={() => openModal('exit')}>
-                  <span className="mr-2">🚪</span> 채팅방 나가기
-                </button>
+    <div>
+      {/* 상단 헤더 */}
+      <div className="flex justify-between items-center w-[390px] overflow-hidden px-6 py-1.5 bg-white">
+  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative ">
+    <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 pr-3 py-2.5">
+      <svg
+        width={24}
+        height={24}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="flex-grow-0 flex-shrink-0 w-6 h-6 relative cursor-pointer"
+        preserveAspectRatio="none"
+        onClick={() => navigate("/chat")}
+      >
+        <path
+          d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852"
+          stroke="#111111"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+      </svg>
+    </div>
+    <p className="flex-grow-0 flex-shrink-0 text-xl font-semibold text-left text-[#111]">유저1</p>
+  </div>
+  <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+      preserveAspectRatio="none"
+    >
+      <path
+        d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z"
+        stroke="#111111"
+        stroke-width="1.5"
+        fill="none"
+      />
+    </svg>
+  </div>
+</div>
+      {/* 상단 상품 정보 및 시스템 메시지 */}
+      <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 pt-4">
+          <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
+            {/* 상품 정보 */}
+            <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3">
+              <svg width={72} height={72} viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-[72px] h-[72px] relative" preserveAspectRatio="xMidYMid meet">
+                <rect width={72} height={72} rx={12} fill="#F2F2F2" />
+                <path d="M44.8534 38.9493L41.8179 35.9139C41.449 35.5451 40.9488 35.3379 40.4271 35.3379C39.9055 35.3379 39.4052 35.5451 39.0363 35.9139L30.0993 44.8509M29.1157 27.146H42.8861C43.9726 27.146 44.8534 28.0267 44.8534 29.1132V42.8837C44.8534 43.9702 43.9726 44.8509 42.8861 44.8509H29.1157C28.0292 44.8509 27.1484 43.9702 27.1484 42.8837V29.1132C27.1484 28.0267 28.0292 27.146 29.1157 27.146ZM35.0173 33.0476C35.0173 34.1341 34.1365 35.0148 33.0501 35.0148C31.9636 35.0148 31.0829 34.1341 31.0829 33.0476C31.0829 31.9612 31.9636 31.0804 33.0501 31.0804C34.1365 31.0804 35.0173 31.9612 35.0173 33.0476Z" stroke="#B8B8B8" strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+              <div className="flex flex-col justify-start items-start flex-grow relative gap-1">
+                <p className="self-stretch flex-grow-0 flex-shrink-0 w-[258px] text-base font-medium text-left text-[#111]">
+                  소니 WH-1000XM4 헤드셋 찾아주세요
+                </p>
+                <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
+                  <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">역삼1동</p>
+                  <svg width={4} height={4} viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0" preserveAspectRatio="none">
+                    <circle cx={2} cy={2} r={2} fill="#B8B8B8" />
+                  </svg>
+                  <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">10일 전</p>
+                </div>
+                <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#06f]">주인 찾는 중</p>
               </div>
-            )}
-          </div>
-        </div>
-        {/* 분실물 정보 카드 */}
-        <div className="bg-white px-4 pt-4 pb-2 border-b flex flex-col flex-shrink-0">
-          <div className="flex items-center mb-2">
-            <div className="w-12 h-12 rounded bg-gray-200 mr-3" />
-            <div>
-              <div className="font-semibold text-base leading-tight">소니 WH-1000XM4 헤드셋 찾아가세요</div>
-              <div className="text-xs text-gray-500">역삼1동 · 10일 전</div>
-              <span className="text-blue-600 font-semibold">주인 찾는 중</span>
-              <span className="ml-2 text-black font-semibold">현상금 <span className="text-blue-700">{formatPrice(10000)}</span></span>
+            </div>
+            {/* 시스템 메시지 */}
+            <div className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]">
+              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">물건을 잘 받았어요</p>
+            </div>
+            {/* 채팅 메시지 영역 */}
+            <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-4">
+              {/* 파란색 시스템 메시지/질문 */}
+              <div className="flex justify-end items-start self-stretch flex-grow-0 flex-shrink-0 gap-1.5">
+                <div className="flex flex-col justify-start items-end flex-grow gap-1.5">
+                  <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+                    <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f]">
+                      <p className="self-stretch flex-grow-0 flex-shrink-0 w-[281px] text-base text-left text-white">
+                        <span className="self-stretch flex-grow-0 flex-shrink-0 w-[281px] text-base text-left text-white">
+                          아래는 습득자가 등록한 분실물 특징입니다.
+                        </span>
+                        <br />
+                        <span className="self-stretch flex-grow-0 flex-shrink-0 w-[281px] text-base text-left text-white">
+                          분실물과 비교하여 정확하게 답변해 주세요.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f]">
+                    <p className="self-stretch flex-grow-0 flex-shrink-0 w-[218px] text-base text-left text-white">
+                      아이폰 상단에 흠집이 있나요?
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f]">
+                    <p className="self-stretch flex-grow-0 flex-shrink-0 w-[214px] text-base text-left text-white">
+                      아이폰 케이스는 어떤건가요?
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f]">
+                    <p className="self-stretch flex-grow-0 flex-shrink-0 w-[181px] text-base text-left text-white">
+                      어디서 잃어버리셨나요?
+                    </p>
+                  </div>
+                  <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1">
+                    <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">12:40</p>
+                    <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">읽음</p>
+                  </div>
+                </div>
+              </div>
+              {/* 회색 유저 메시지 */}
+              <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-1.5">
+                <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
+                  <img src="rectangle-3468137.jpeg" className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover" />
+                </div>
+                <div className="flex flex-col justify-start items-start flex-grow gap-1.5">
+                  <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]">
+                    <p className="self-stretch flex-grow-0 flex-shrink-0 w-[268px] text-base text-left text-[#111]">
+                      상단에 흡집 있습니다, 케이스는 짱구 케이스에요
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]">
+                    <p className="self-stretch flex-grow-0 flex-shrink-0 w-[197px] text-base text-left text-[#111]">
+                      주민센터 앞에서 잃어버렸어요
+                    </p>
+                  </div>
+                  <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1">
+                    <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">12:40</p>
+                    <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">읽음</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        {/* 메시지 영역 */}
-        <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 bg-white">
-          {wsError && (
-            <div className="text-center text-xs text-red-500 mb-2">서버 연결에 실패하여 더미 채팅으로 표시 중입니다.</div>
-          )}
-          {messages.map((msg, i) => {
-            if (msg.from === userId) {
-              return (
-                <div key={i} className="flex flex-col items-end">
-                  <div className="bg-blue-600 text-white text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">
-                    {msg.content}
-                  </div>
-                  <div className="text-xs text-gray-400 mr-2">{msg.time}</div>
-                </div>
-              );
-            } else {
-              return (
-                <div key={i} className="flex items-start gap-2">
-                  <img src={msg.avatar || "/src/assets/user.svg"} alt="avatar" className="w-8 h-8 rounded-full mt-1" />
-                  <div>
-                    <div className="bg-gray-100 text-gray-800 text-sm rounded-2xl px-4 py-2 max-w-[80vw] mb-1 whitespace-pre-line break-words">{msg.content}</div>
-                    <div className="text-xs text-gray-400 ml-1">{msg.time}</div>
-                  </div>
-                </div>
-              );
-            }
-          })}
-          <div ref={messagesEndRef} />
+      </div>
+      {/* 입력창 */}
+      <div className="flex flex-col justify-start items-center w-[390px] gap-[38px] pt-3 pb-12 bg-white">
+        <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+          <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
+            {/* 카메라 아이콘 - 내부 투명 */}
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none">
+              <path d="M15 13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13C9 11.3431 10.3431 10 12 10C13.6569 10 15 11.3431 15 13Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <path d="M7.8523 5.34341L7.86169 5.31319C8.10539 4.52919 8.79233 4 9.56632 4L14.4337 4C15.2076 4 15.8946 4.52919 16.1383 5.31319L16.1477 5.34341C16.2695 5.7354 16.613 6 17 6L18 6C19.6569 6 21 7.34315 21 9V17C21 18.6569 19.6569 20 18 20H6C4.34315 20 3 18.6569 3 17L3 9C3 7.34315 4.34315 6 6 6L6.99999 6C7.38699 6 7.73045 5.7354 7.8523 5.34341Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
+          </div>
+          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[290px] h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
+            <div className="flex justify-center items-end self-stretch flex-grow relative overflow-hidden gap-2.5">
+              <p className="flex-grow w-[266px] text-base font-medium text-left text-[#b8b8b8]">메시지 보내기</p>
+            </div>
+          </div>
+          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
+            {/* 전송 아이콘 - 내부 투명 */}
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none">
+              <g clipPath="url(#clip0_652_10693)">
+                <path d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </g>
+              <defs>
+                <clipPath id="clip0_652_10693">
+                  <rect width={24} height={24} fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
         </div>
-        {/* 입력창 */}
-        <div className="bg-white px-2 py-2 border-t flex items-center flex-shrink-0">
-          <button className="mr-2">
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-camera"><circle cx="12" cy="12" r="10"/><path d="M8 15l4-4 4 4"/></svg>
-          </button>
-          <input
-            className="flex-1 border rounded-full px-4 py-2 mr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-            type="text"
-            placeholder="메시지 보내기"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-          />
-          <button
-            className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-50"
-            onClick={handleSend}
-            disabled={!input.trim()}
-          >
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-        <ConfirmModal
-          open={modal.open}
-          title={
-            modal.type === "report" ? "신고하기" :
-            modal.type === "block" ? "차단하기" :
-            modal.type === "exit" ? "채팅방 나가기" : ""
-          }
-          desc={
-            modal.type === "report" ? "정말 신고하시겠습니까?" :
-            modal.type === "block" ? "정말 차단하시겠습니까?" :
-            modal.type === "exit" ? "정말 나가시겠습니까?" : ""
-          }
-          confirmText={
-            modal.type === "report" ? "신고하기" :
-            modal.type === "block" ? "차단하기" :
-            modal.type === "exit" ? "나가기" : ""
-          }
-          onConfirm={handleConfirm}
-          onCancel={closeModal}
-        />
       </div>
     </div>
   );
