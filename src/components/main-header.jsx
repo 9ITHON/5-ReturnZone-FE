@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import HeaderIcon from '../assets/logo.svg'
-import SearchIcon from '../assets/search.svg'
+import SearchIcon from '../assets/Search.svg'
 // 메인페이지 헤더 부분 컴포넌트 입니다.
 // 스타일 덮어 쓰기로 배치 속성 다시 적용할 수 있습니다.
 export default function MainHeader({className=""}) {
