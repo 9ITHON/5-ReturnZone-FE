@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { apiService } from '../services/apiService';
 import { loginWithKakao } from '../utils/kakao';
 import kakaoIcon from '../assets/카카오.svg';
 
@@ -39,7 +39,7 @@ export default function Login() {
     }
 
     try {
-      const response = await authAPI.login(email, password);
+      const response = await apiService.login(email, password);
       
       console.log('로그인 성공:', response);
       
@@ -111,7 +111,7 @@ export default function Login() {
       console.log('카카오 로그인 결과:', kakaoResult);
 
       // 서버에 카카오 토큰 전송하여 우리 앱 토큰 받기
-      const serverResponse = await authAPI.kakaoLogin(
+      const serverResponse = await apiService.kakaoLogin(
         kakaoResult.accessToken,
         kakaoResult.userInfo
       );

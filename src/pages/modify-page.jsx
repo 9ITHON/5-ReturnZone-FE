@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 
-import InputField from "../components/input-field";
+import InputField from "../components/InputField";
 import Button from "../components/button";
 import RegisterHeader from "../components/register-header";
 import RegisterLabel from "../components/register-label";

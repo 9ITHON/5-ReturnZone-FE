@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import Button from "../components/button";
@@ -7,33 +7,27 @@ import DetailedHeader from "../components/detailed-header";
 import DetailImg from "../components/detail-img";
 import DetailMap from "../components/detail-map";
 import DetailSimilar from "../components/detail-similar";
-import { DetailTest } from "../test/detailTest"; //더미 데이터
 import { DetailDate } from "../utils/detail-date";
 
 import ProductIcon from '../assets/상품.svg'
 import TimeIcon from '../assets/상세시간.svg'
 import LocationIcon from '../assets/상세위치.svg'
 
-export default function DetailedPage() {
+export default function DetailedPage(props) {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    // const post = DetailTest;
     const { lostPostId } = useParams(); //
-    const [post, setPost] = useState(DetailTest);
+    const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [similarPosts, setSimilarPosts] = useState([]); // 유사한 페이지
-    const useMock = import.meta.env.VITE_USE_MOCK === 'true';
+    // const myId = localStorage.getItem("userId"); // 현재 로그인 중인 아이디
+    // const isAuthor = String(myId) === String(post.memberId); // 아이디가 같나요?
 
-    // 분실물 정보 상세 조회
+    const navigate = useNavigate();
+
+    //분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
-            if (useMock) {
-                setPost(DetailTest);
-                setSimilarPosts(DetailTest.similarLostPosts || []);
-                setLoading(false);
-                return;
-            }
-
             try {
                 const response = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
                     headers: {
@@ -45,22 +39,27 @@ export default function DetailedPage() {
             } catch (err) {
                 console.error(err);
                 setError("데이터를 불러오는 데 실패했습니다.");
-                setPost(DetailTest);
-                setSimilarPosts(DetailTest.similarLostPosts || []);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchPost();
-    }, [lostPostId, apiBase, useMock]);
+    }, [lostPostId, apiBase]);
 
     if (loading) return <p>불러오는 중...</p>;
     if (!post) return <p>{error || "데이터 없음"}</p>;
-
+    // 로그인 한 사람이랑 글쓴이랑 같은지 확인
+    const handleEditClick = () => {
+        if (String(myId) !== String(post.memberId)) {
+            alert("게시글 작성자만 수정할 수 있습니다.");
+            return;
+        }
+        navigate(`/lost/${post.lostPostId}/edit`);
+    };
     return (
         <div>
-            <DetailedHeader />
+            <DetailedHeader postMemberId={post.memberId} />
             <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
@@ -146,7 +145,8 @@ export default function DetailedPage() {
             </div>
             {/* 하단 버튼 */}
             <div className=" pt-[12px] pb-[42px] px-[24px]">
-                <Button label="채팅하기"></Button>
+                <Button label="채팅하기" onClick={() => navigate(`/chat/${post.memberId}`)}
+                ></Button>
             </div>
         </div>
     );

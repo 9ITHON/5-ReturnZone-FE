@@ -4,7 +4,7 @@ export const DetailTest = {
     "/images/headset1.jpg",
     "/images/headset2.jpg",
     "/images/headset3.jpg",
-    ,],
+    ],
   registrationType: "LOST",
   title: "소니 WH-1000XM4 헤드셋 찾아주세요!!!!!!!!!!!",
   memberImageUrl: "https://your-bucket.s3.ap-northeast-2.amazonaws.com/lostPosts/lostpost1.jpg",

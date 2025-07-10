@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { authAPI } from '../services/api';
 import logo from '../assets/logo.svg';
 import errorIcon from '../assets/에러아이콘.svg';
+import { apiService } from '../services/apiService';
 
 export default function Search_pw() {
   const [username, setUsername] = useState('');
@@ -39,7 +39,7 @@ export default function Search_pw() {
     }
 
     try {
-      const response = await authAPI.findPassword(username, email);
+      const response = await apiService.findPassword(username, email);
       console.log('비밀번호 찾기 성공:', response);
       setIsSubmitted(true);
     } catch (error) {

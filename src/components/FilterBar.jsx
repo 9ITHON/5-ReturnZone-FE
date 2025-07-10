@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import categorySettingsIcon from '../assets/categorySettings.svg';
 
 const FILTERS = [
+  { key: 'all', label: '전체' },
   { key: 'location', label: '위치' },
   { key: 'latest', label: '최신순' },
-  { key: 'instant', label: '즉시 정산 가능' },
   { key: 'category', label: '카테고리' },
 ];
 
 const FilterBar = ({ onFilter, onLocationButton, selectedFilters = [], onCategoryButton, selectedCategory }) => {
-  const [selected, setSelected] = useState(selectedFilters);
+  // '전체'가 기본으로 선택되지 않도록 빈 배열로 초기화
+  const [selected, setSelected] = useState([]);
 
   useEffect(() => {
     setSelected(selectedFilters);

@@ -40,13 +40,3 @@ function AppRoute(){
   )
 }
 // 메인 페이지
-function App() {
-
-  return (
-    <BrowserRouter>
-      <AppRoute></AppRoute>
-    </BrowserRouter>
-  )
-}
-
-export default App
