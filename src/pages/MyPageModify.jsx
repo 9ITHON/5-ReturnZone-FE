@@ -11,7 +11,7 @@ import BottomArrow from '../assets/하단꺽쇠.svg'
 import MypageInput from "../components/MyPageInput";
 import RegisterLabel from "../components/register-label";
 import Button from "../components/button";
-import { GetMyPage, GetMyPageDummy } from "../utils/GetMyPage";
+import { GetMyPage } from "../utils/GetMyPage";
 import MyPageBank from "../components/MyPageBank";
 import useMyPageFormStore from "../stores/useMyPageFormStore";
 

@@ -22,7 +22,7 @@ function AppRoute(){
       <Route path='/' element={<Home/>}></Route>
       <Route path='/LogIn' element={<Login/>}></Route>
       <Route path='/SignUp' element={<SignUp/>}></Route>
-      <Route path='/Chat' element={<Chat/>}></Route>
+      <Route path="chat/:id" element={<Chat />} />
       <Route path='/ChatList' element={<ChatList/>}></Route>
       <Route path='/RegisterLocation' element={<RegisterLocation/>}/>
       <Route path='/Register' element={<RegisterPage/>}></Route>
@@ -40,3 +40,13 @@ function AppRoute(){
   )
 }
 // 메인 페이지
+function App() {
+
+  return (
+    <BrowserRouter>
+      <AppRoute></AppRoute>
+    </BrowserRouter>
+  )
+}
+
+export default App

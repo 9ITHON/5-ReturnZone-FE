@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GetMyPage, GetMyPageDummy } from "../utils/GetMyPage";
+import { GetMyPage } from "../utils/GetMyPage";
 import { formatNumber } from "../utils/formatNumber";
 
 export default function MyPageUserCard() {
