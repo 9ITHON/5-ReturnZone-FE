@@ -91,22 +91,15 @@ const Home = () => {
   const handleAllFilterSelect = (value) => {
     setAllFilterValue(value);
     setAllFilterOpen(false);
-    // value에 따라 필터 적용
+    setSelectedCategory(null);
+    // setSelectedLocation(""); // 위치 초기화 제거
+    setSelectedFilters([]);
     if (value === "all") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
       fetchItems();
     } else if (value === "lost") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
-      filterItems("분실", "", undefined);
+      filterItems("분실", selectedLocation, undefined);
     } else if (value === "found") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
-      filterItems("주인", "", undefined);
+      filterItems("주인", selectedLocation, undefined);
     }
   };
 
@@ -117,7 +110,31 @@ const Home = () => {
 
   // 지도에서 위치 선택 시
   const handleMapSelect = (pos) => {
-    filterItems(selectedCategory, selectedLocation, selectedFilters[0], pos);
+    // 좌표 → 주소 변환 (동 이름 추출)
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      geocoder.coord2Address(pos.lng, pos.lat, (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK && result[0]) {
+          // 동/읍/면 이름 추출
+          let dong = '';
+          if (result[0].address) {
+            dong = result[0].address.region_3depth_name;
+          } else if (result[0].road_address) {
+            dong = result[0].road_address.region_3depth_name;
+          }
+          setSelectedLocation(dong);
+          // 가까운순 정렬
+          filterItems(selectedCategory, dong, 'distance', pos);
+        } else {
+          setSelectedLocation('');
+          filterItems(selectedCategory, '', 'distance', pos);
+        }
+      });
+    } else {
+      // fallback: 좌표만 저장
+      setSelectedLocation('');
+      filterItems(selectedCategory, '', 'distance', pos);
+    }
   };
 
   // 최신순 필터 선택 핸들러
@@ -195,10 +212,14 @@ const Home = () => {
               if (f.key === 'latest') {
                 label = latestFilterValue === 'distance' ? '현재 위치와 가까운 순' : '최신순';
               }
+              if (f.key === 'location' && selectedLocation) {
+                label = selectedLocation;
+              }
               const isCategorySelected = f.key === 'category' && selectedCategory;
               const isAllSelected = f.key === 'all' && allFilterValue !== 'all';
               const isLatestSelected = f.key === 'latest' && (latestFilterValue === 'distance' || latestFilterValue === 'latest');
-              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected;
+              const isLocationSelected = f.key === 'location' && !!selectedLocation;
+              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected || isLocationSelected;
               return (
                 <button
                   key={f.key}
