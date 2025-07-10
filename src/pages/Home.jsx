@@ -174,6 +174,16 @@ const Home = () => {
       {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
         <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
           <div className="flex items-center w-full h-12 px-4 gap-1.5">
+            {/* 필터 라벨 버튼 */}
+            <button
+              type="button"
+              disabled
+              className="flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium bg-[#06f] border-[#06f] text-white cursor-default"
+              tabIndex={-1}
+              style={{ pointerEvents: 'none' }}
+            >
+              <span>필터</span>
+            </button>
             {/* 필터 버튼들 */}
             {FILTERS.map((f) => {
               let label = f.label;

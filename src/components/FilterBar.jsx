@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import categorySettingsIcon from '../assets/categorySettings.svg';
 
 const FILTERS = [
   { key: 'all', label: '전체' },
@@ -36,6 +35,16 @@ const FilterBar = ({ onFilter, onLocationButton, selectedFilters = [], onCategor
   return (
     <div className="w-full h-12 px-6 bg-white absolute top-[110px] left-0 right-0 z-10">
       <div className="inline-flex flex-row items-center gap-x-2 whitespace-nowrap overflow-x-auto scrollbar-hide relative">
+        {/* 필터 라벨 버튼 */}
+        <button
+          type="button"
+          disabled
+          className="box-border flex flex-row items-center px-3 py-2 gap-1 min-w-[69px] h-[34px] bg-[#06f] border border-[#06f] rounded-lg text-[13px] font-medium text-white truncate opacity-100 cursor-default"
+          tabIndex={-1}
+          style={{ pointerEvents: 'none' }}
+        >
+          <span className="truncate w-full">필터</span>
+        </button>
         {/* 필터 버튼들 */}
         {FILTERS.map(f => {
           const isCategorySelected = f.key === 'category' && selectedCategory;
