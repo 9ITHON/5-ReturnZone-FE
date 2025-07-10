@@ -256,7 +256,7 @@ const Home = () => {
                 if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
                 else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
                 return (
-                  <div onClick={() => navigate(`/chat/${item.id}`)} className="cursor-pointer" key={item.id}>
+                  <div onClick={() => navigate(`/lost/${item.lostPostId}`)} className="cursor-pointer" key={item.lostPostId}>
                     <ItemCard
                       {...item}
                       status={status}

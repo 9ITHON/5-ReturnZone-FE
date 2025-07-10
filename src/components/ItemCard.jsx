@@ -7,6 +7,15 @@ const ItemCard = ({
   reward = '10,000원',
   status = '', // '분실했어요' | '주인찾아요' | ''
   imageUrl = '',
+  // lostPostId = 1,
+  // title = "소니 헤드셋",
+  // timeAgo = "3시간 전",
+  // location = "월계 1동",
+  // reward = 10000,
+  // mainImageUrl = "https://your-bucket.s3.ap-northeast-2.amazonaws.com/lostPosts/lostpost1.jpg",
+  // instantSettlement = true,
+  // registrationType = "LOST",
+  // status = "주인 찾는 중"
 }) => (
   <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-4 w-full max-w-[342px] bg-white rounded-xl shadow-sm p-4 overflow-hidden">
     {/* 이미지/아이콘 영역 */}
