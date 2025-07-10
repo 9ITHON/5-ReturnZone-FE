@@ -71,8 +71,8 @@ const ChatroomList = () => {
           ) : rooms.length === 0 ? (
             <div className="text-center text-gray-400">채팅방이 없습니다.</div>
           ) : (
-            rooms.map((room, idx) => (
-              <ChatroomItem key={room.roomId || room.id || idx} room={room} onClick={handleClick} />
+            rooms.map((room) => (
+              <ChatroomItem key={room.roomId} room={room} onClick={handleClick} />
             ))
           )}
         </div>

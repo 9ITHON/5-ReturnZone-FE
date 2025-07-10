@@ -3,9 +3,10 @@ import { useParams } from "react-router-dom";
 import ChatRoomPage from "../components/ChatRoomPage";
 
 const Chat = () => {
-  const { id } = useParams();
-  if (id) {
-    return <ChatRoomPage />;
+  const { id, roomId } = useParams();
+  const resolvedRoomId = id || roomId;
+  if (resolvedRoomId) {
+    return <ChatRoomPage roomId={resolvedRoomId} />;
   }
   return null;
 };

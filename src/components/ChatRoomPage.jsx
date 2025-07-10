@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { apiService } from "../services/apiService";
 import ReportHeader from "./ReportHeader";
 import ReportModal from "./ReportModal";
+import ChatRoomWebSocket from './ChatRoomWebSocket';
 
 const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   <div
@@ -40,40 +41,22 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   </div>
 );
 
-const ChatRoomPage = () => {
-  const { roomId } = useParams();
+const ChatRoomPage = ({ roomId: propRoomId }) => {
+  const params = useParams();
+  const roomId = propRoomId || params.id;
+  const userId = localStorage.getItem('user_id') || '1'; // 실제 로그인 유저 정보로 교체
   const navigate = useNavigate();
   const [showOption, setShowOption] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [reportModalType, setReportModalType] = useState(null); // null | 'report' | 'block'
-  // input, setInput 제거
+  console.log('roomId in ChatRoomPage:', roomId);
+
+  if (!roomId) {
+    return <div style={{padding: 32, color: 'red'}}>잘못된 접근입니다. (roomId 없음)</div>;
+  }
 
   // 예시: 실제로는 props나 API에서 분실자/습득자 여부를 받아야 함
   const isOwner = true; // 분실자(내가 물건을 잃어버린 사람)
   const isFinder = false; // 습득자(내가 물건을 주운 사람)
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true);
-      try {
-        const res = await apiService.getChatMessages(roomId);
-        setMessages(res.content || []);
-      } catch {
-        setMessages([]);
-      }
-      setLoading(false);
-    };
-    if (roomId) fetchMessages();
-  }, [roomId]);
-
-  // 메시지 전송 핸들러 (후속 구현)
-  // const handleSend = async () => {
-  //   if (!input.trim()) return;
-  //   await apiService.sendChatMessage(roomId, { content: input });
-  //   setInput("");
-  //   // 메시지 새로고침 등 추가 구현 필요
-  // };
 
   return (
     <div className="relative w-[390px] mx-auto">
@@ -189,54 +172,13 @@ const ChatRoomPage = () => {
             )}
             {/* 채팅 메시지 영역 */}
             <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-4 px-6 pt-4 pb-2 h-[420px] overflow-y-auto">
-              {loading ? (
-                <div className="text-center text-gray-400">메시지 불러오는 중...</div>
-              ) : messages.length === 0 ? (
-                <div className="text-center text-gray-400">메시지가 없습니다.</div>
-              ) : (
-                messages.map((msg) => (
-                  <div key={msg.id || msg.messageId} className={`w-full flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[70%] px-4 py-2.5 rounded-[22px] ${msg.isMine ? 'bg-[#06f] text-white' : 'bg-[#f2f2f2] text-[#111]'}`}>
-                      <p className="break-words whitespace-pre-line">{msg.content}</p>
-                      <div className="flex justify-end items-center gap-1 mt-1">
-                        <span className="text-xs text-[#808080]">{msg.time || msg.createdAt}</span>
-                        {msg.isMine && msg.read && <span className="text-xs font-medium text-[#808080]">읽음</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+              <ChatRoomWebSocket
+                roomId={roomId}
+                userId={userId}
+                subscribeTopic={`/topic/chat/${roomId}`}
+                sendDestination="/app/chat.send"
+              />
             </div>
-          </div>
-        </div>
-      </div>
-      {/* 입력창 */}
-      <div className="flex flex-col justify-start items-center w-[390px] gap-[38px] pt-3 pb-12 bg-white">
-        <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
-          <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-            {/* 카메라 아이콘 - 내부 투명 */}
-            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none">
-              <path d="M15 13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13C9 11.3431 10.3431 10 12 10C13.6569 10 15 11.3431 15 13Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              <path d="M7.8523 5.34341L7.86169 5.31319C8.10539 4.52919 8.79233 4 9.56632 4L14.4337 4C15.2076 4 15.8946 4.52919 16.1383 5.31319L16.1477 5.34341C16.2695 5.7354 16.613 6 17 6L18 6C19.6569 6 21 7.34315 21 9V17C21 18.6569 19.6569 20 18 20H6C4.34315 20 3 18.6569 3 17L3 9C3 7.34315 4.34315 6 6 6L6.99999 6C7.38699 6 7.73045 5.7354 7.8523 5.34341Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            </svg>
-          </div>
-          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[290px] h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
-            <div className="flex justify-center items-end self-stretch flex-grow relative overflow-hidden gap-2.5">
-              <p className="flex-grow w-[266px] text-base font-medium text-left text-[#b8b8b8]">메시지 보내기</p>
-            </div>
-          </div>
-          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-            {/* 전송 아이콘 - 내부 투명 */}
-            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none">
-              <g clipPath="url(#clip0_652_10693)">
-                <path d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </g>
-              <defs>
-                <clipPath id="clip0_652_10693">
-                  <rect width={24} height={24} fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
           </div>
         </div>
       </div>
