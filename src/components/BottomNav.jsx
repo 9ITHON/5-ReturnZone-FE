@@ -33,7 +33,7 @@ const BottomNav = ({ unreadCount = 0 }) => {
           <img src={plusRectangleIcon} alt="분실물 등록" className="w-6 h-6" />
           <p
             className={`text-xs font-medium ${
-              location.pathname === "/register"
+              location.pathname === "/Register"
                 ? "text-[#2D68FF]"
                 : "text-[#111]"
             }`}
