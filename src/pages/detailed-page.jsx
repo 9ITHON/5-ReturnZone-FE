@@ -25,7 +25,7 @@ export default function DetailedPage(props) {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
+                const response = await axios.get(`${apiBase}api/v1/lostPosts/${lostPostId}`, {
                     headers: {
                         Accept: "application/json",
                     },
