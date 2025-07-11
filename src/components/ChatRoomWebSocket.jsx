@@ -22,6 +22,8 @@ const ChatRoomWebSocket = ({
   showFoundOwnerMsg,
   showDeliveryMsg,
   showDeliveryCompleted,
+  isLostOwner,
+  isFinder,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -148,8 +150,8 @@ const ChatRoomWebSocket = ({
             </div>
           );
         })}
-        {/* 주인을 찾았어요 메시지 */}
-        {showFoundOwnerMsg && (
+        {/* 주인을 찾았어요 메시지 - 습득자용 */}
+        {showFoundOwnerMsg && isFinder && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
@@ -162,8 +164,8 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
-        {/* 물건 전달 시작 메시지 */}
-        {showDeliveryMsg && (
+        {/* 물건 전달 시작 메시지 - 습득자용 */}
+        {showDeliveryMsg && isFinder && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
@@ -180,8 +182,8 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
-        {/* 전달 완료 메시지 */}
-        {showDeliveryCompleted && (
+        {/* 전달 완료 메시지 - 습득자용 */}
+        {showDeliveryCompleted && isFinder && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
@@ -190,6 +192,33 @@ const ChatRoomWebSocket = ({
               <br />
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
                 약속된 500포인트가 지급되었습니다. 감사합니다!
+              </span>
+            </p>
+          </div>
+        )}
+        {/* 분실자용 메시지들 */}
+        {showFoundOwnerMsg && isLostOwner && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                🎉 물건을 찾아주신 분이 계세요!
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                물건을 받으시면 상단 버튼을 눌러주세요.
+              </span>
+            </p>
+          </div>
+        )}
+        {showDeliveryCompleted && isLostOwner && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                🎉 물건을 잘 받으셨군요!
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                찾아주신 분에게 현상금이 지급되었습니다.
               </span>
             </p>
           </div>

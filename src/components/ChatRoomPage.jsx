@@ -142,10 +142,15 @@ const ChatRoomPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFoundOwnerMsg, setShowFoundOwnerMsg] = useState(false);
   const [showDeliveryCompleted, setShowDeliveryCompleted] = useState(false);
+  const [forceUserRole, setForceUserRole] = useState(null); // 개발용: 'lost' | 'finder' | null
 
   // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
   const lostPostId = searchParams.get('lostPostId') || params.lostPostId || params.itemId;
+
+  // 현재 사용자가 분실자인지 습득자인지 판단 (개발용 강제 설정 포함)
+  const isLostOwner = forceUserRole === 'lost' ? true : forceUserRole === 'finder' ? false : (item?.memberId === userId || item?.userId === userId);
+  const isFinder = !isLostOwner;
 
   useEffect(() => {
     async function fetchData() {
@@ -238,12 +243,27 @@ const ChatRoomPage = () => {
           registrationType: "LOST",
           status: "주인 찾는 중"
         }} />
-        <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showDeliveryCompleted ? 'bg-[#f2f2f2]' : showFoundOwnerMsg ? 'bg-[#f2f2f2] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showDeliveryCompleted ? undefined : (showFoundOwnerMsg ? () => setShowDeliveryCompleted(true) : () => setShowConfirmModal(true))}>
-          <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showDeliveryCompleted ? 'text-[#06f] font-semibold' : showFoundOwnerMsg ? 'text-[#111]' : 'text-white'}`}>
-            {showDeliveryCompleted ? `${item?.reward || 500}포인트 지급 완료` : (showFoundOwnerMsg ? '전달을 기다리고 있어요' : '물건 주인을 찾았어요')}
-          </p>
-        </div>
-        {showConfirmModal && <ConfirmOwnerModal userName={userName} onClose={() => { setShowConfirmModal(false); setShowFoundOwnerMsg(true); }} />}
+        
+        {/* 습득자용 버튼 (물건을 찾은 사람) */}
+        {isFinder && (
+          <>
+            <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showDeliveryCompleted ? 'bg-[#f2f2f2]' : showFoundOwnerMsg ? 'bg-[#f2f2f2] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showDeliveryCompleted ? undefined : (showFoundOwnerMsg ? () => setShowDeliveryCompleted(true) : () => setShowConfirmModal(true))}>
+              <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showDeliveryCompleted ? 'text-[#06f] font-semibold' : showFoundOwnerMsg ? 'text-[#111]' : 'text-white'}`}>
+                {showDeliveryCompleted ? `${item?.reward || 500}포인트 지급 완료` : (showFoundOwnerMsg ? '전달을 기다리고 있어요' : '물건 주인을 찾았어요')}
+              </p>
+            </div>
+            {showConfirmModal && <ConfirmOwnerModal userName={userName} onClose={() => { setShowConfirmModal(false); setShowFoundOwnerMsg(true); }} />}
+          </>
+        )}
+
+        {/* 분실자용 버튼 (물건을 잃어버린 사람) */}
+        {isLostOwner && (
+          <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showDeliveryCompleted ? 'bg-[#f2f2f2]' : showFoundOwnerMsg ? 'bg-[#06f] cursor-pointer' : 'bg-[#f2f2f2]'}`} onClick={showDeliveryCompleted ? undefined : (showFoundOwnerMsg ? () => setShowDeliveryCompleted(true) : undefined)}>
+            <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showDeliveryCompleted ? 'text-[#06f] font-semibold' : showFoundOwnerMsg ? 'text-white' : 'text-[#111]'}`}>
+              {showDeliveryCompleted ? '수령 확인 완료' : (showFoundOwnerMsg ? '물건을 받았어요' : '물건을 찾아주세요')}
+            </p>
+          </div>
+        )}
       </div>
       {/* 채팅 메시지 영역 등 나머지 UI */}
       <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
@@ -257,6 +277,8 @@ const ChatRoomPage = () => {
               showFoundOwnerMsg={showFoundOwnerMsg}
               showDeliveryMsg={false}
               showDeliveryCompleted={showDeliveryCompleted}
+              isLostOwner={isLostOwner}
+              isFinder={isFinder}
             />
           </div>
         </div>
