@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService';
-import { loginWithKakao } from '../utils/kakao';
 import kakaoIcon from '../assets/카카오.svg';
+
+const KAKAO_CLIENT_ID = "4b5c5b6d6f920a0fe945665f2da2648a";
+const KAKAO_REDIRECT_URI = "http://15.164.234.32:8080/auth/login/kakao";
+
+function handleKakaoLogin() {
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
+  window.location.href = kakaoAuthUrl;
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -100,43 +107,6 @@ export default function Login() {
 
   const handleSignup = () => {
     navigate('/SignUp');
-  };
-
-  const handleKakaoLogin = async () => {
-    try {
-      setIsLoading(true);
-      
-      // 카카오 SDK를 통한 로그인
-      const kakaoResult = await loginWithKakao();
-      console.log('카카오 로그인 결과:', kakaoResult);
-
-      // 서버에 카카오 토큰 전송하여 우리 앱 토큰 받기
-      const serverResponse = await apiService.kakaoLogin(
-        kakaoResult.accessToken,
-        kakaoResult.userInfo
-      );
-
-      // 토큰 저장 및 로그인 처리
-      if (serverResponse.token || serverResponse.accessToken) {
-        localStorage.setItem('authToken', serverResponse.token || serverResponse.accessToken);
-        localStorage.setItem('loginType', 'kakao');
-        navigate('/dashboard');
-      }
-
-    } catch (error) {
-      console.error('카카오 로그인 오류:', error);
-      
-      if (error.message?.includes('카카오 SDK')) {
-        alert('카카오 로그인 서비스에 일시적인 문제가 있습니다. 나중에 다시 시도해주세요.');
-      } else if (error.message?.includes('사용자가 취소')) {
-        // 사용자가 로그인을 취소한 경우, 별도 알림 없이 처리
-        console.log('사용자가 카카오 로그인을 취소했습니다.');
-      } else {
-        alert('카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // 컴포넌트 마운트 시 자동 로그인 체크

@@ -8,12 +8,13 @@ import DetailImg from "../components/detail-img";
 import DetailMap from "../components/detail-map";
 import DetailSimilar from "../components/detail-similar";
 import { DetailDate } from "../utils/detail-date";
+import { formatPrice } from "../utils/formatPrice";
 
 import ProductIcon from '../assets/상품.svg'
 import TimeIcon from '../assets/상세시간.svg'
 import LocationIcon from '../assets/상세위치.svg'
 
-export default function DetailedPage(props) {
+export default function DetailedPage() {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
     const { lostPostId } = useParams(); //
     const [post, setPost] = useState(null);
@@ -80,7 +81,7 @@ export default function DetailedPage(props) {
                         </div>
                         {/* 제목, 현상금, 카테고리 */}
                         <h1 className="text-[22px] text-[#111111] font-semibold">{post.title}</h1>
-                        <p className="text-[22px] text-[#111111] font-semibold">현상금 {post.reward.toLocaleString()}원</p>
+                        <p className="text-[22px] text-[#111111] font-semibold">현상금 {formatPrice(post.reward)}</p>
                     </div>
 
                     {/* 본문 내용 */}

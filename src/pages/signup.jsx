@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import Button from "../components/button"
 import Header from "../components/sign-header"
 import SHInputField from "../components/SHInputField"
 // import UserHeader from "../components/user-header";
 import GoLogin from "../assets/로그인가기.svg"
+import { apiService } from "../services/apiService";
 
 export default function SignUp() {
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
     const [username, setName] = useState(""); // 이름
     const [email, setEmail] = useState(""); // 이메일
     const [password, setPassword] = useState(""); // 비번
@@ -52,58 +51,24 @@ export default function SignUp() {
         } else {
             setPasswordError("");
         }
-        // 약관 비동의
-        // if (!agree) {
-        //     alert("약관에 동의해야 합니다.");
-        //     return;
-        // }
         try {
-            // 회원가입 정보 테스트
-            console.log('회원가입 데이터 확인:');
-            console.log('이름:', username);
-            console.log('이메일:', email);
-            console.log('비밀번호:', password);
-            console.log('비밀번호 확인:', passwordConfirm);
-            console.log('약관 동의:', agree);
-            const response = await axios.post(`${apiBase}/api/v1/members/signup`, { // api 호출은 api 명세에 따라 수정 필요(env 형식으로 관리 필요)
-                username,
-                email,
-                password,
-            });
-            if (response.status === 201) { // 로그인 성공 시 
-                console.log("회원가입 성공");
                 alert("회원가입에 성공했습니다.");
-                navigate("/LogIn"); // 로그인 페이지로 이동
+                navigate("/Login");
             } else {
-                console.error("회원가입 오류 발생");
                 alert("회원가입 중 오류가 발생하였습니다.");
             }
-        } catch (error) {
-            console.error("회원가입 실패", error);
+        } catch {
             alert("회원가입에 실패했습니다.");
         }
     };
     //이메일 중복 검사
     const handleCheckEmail = async () => {
-        // 이메일 형식 확인
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setEmailError("이메일 형식을 지켜 작성해주세요");
             return;
         }
         try {
-            const response = await axios.get(`${apiBase}/api/v1/members/email/${email}`);
-
-            // 사용 가능 (200 OK)
-            setEmailError("");
-            setEmailSuccess("사용가능한 이메일입니다!");
-            setIsEmailChecked(true);
-        } catch (error) {
-            if (error.response?.status === 400) {
-                setEmailError("이미 존재하는 이메일입니다");
-            } else {
-                setEmailError("서버 오류가 발생했습니다");
-            }
             setEmailSuccess("");
             setIsEmailChecked(false);
         }
