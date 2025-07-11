@@ -19,6 +19,7 @@ const ChatRoomWebSocket = ({
   userId,
   subscribeTopic,
   sendDestination,
+  showFoundOwnerMsg,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -145,6 +146,20 @@ const ChatRoomWebSocket = ({
             </div>
           );
         })}
+        {/* 주인을 찾았어요 메시지 */}
+        {showFoundOwnerMsg && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                😀 주인을 찾았어요! 이제 물건을 전달해 주세요.
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                분실자가 수령을 확인하면 포인트가 자동 지급됩니다.
+              </span>
+            </p>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       {/* 메시지 입력 바 */}

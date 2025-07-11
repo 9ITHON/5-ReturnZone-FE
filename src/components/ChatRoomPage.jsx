@@ -7,6 +7,90 @@ import ChatRoomWebSocket from './ChatRoomWebSocket';
 import ItemCard from "./ItemCard";
 import ChatRoomItemCard from './ChatRoomItemCard';
 
+const ConfirmOwnerModal = ({ onClose, userName }) => (
+  <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30">
+    <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
+      <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+        <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
+          <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
+        </div>
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
+            <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-base font-semibold text-center text-[#111]">
+              분실품 주인 확인
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[390px]">
+          <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
+            <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
+              <img
+                src="rectangle-3468137.jpeg"
+                className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
+                alt="user"
+              />
+            </div>
+            <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
+              {userName || '유저'}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-2 px-6 pt-2 pb-[72px]">
+            <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 relative gap-0.5">
+              <p className="flex-grow-0 flex-shrink-0 text-xl font-semibold text-left text-[#111]">
+                분실품 주인이 확실한가요?
+              </p>
+            </div>
+            <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                  stroke="#808080"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <circle
+                  cx="0.666667"
+                  cy="0.666667"
+                  r="0.5"
+                  transform="matrix(-1 0 0 1 8.66699 10)"
+                  fill="#808080"
+                  stroke="#808080"
+                  strokeWidth="0.333333"
+                />
+              </svg>
+              <p className="flex-grow-0 flex-shrink-0 text-sm text-center text-[#808080]">
+                분실품 주인이 확인되면 물건을 전달해야 합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
+        <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+          <div className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] cursor-pointer" onClick={onClose}>
+            <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+              <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                네. 주인이 맞습니다
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   <div
     className="absolute right-0 top-14 z-50"
@@ -55,6 +139,8 @@ const ChatRoomPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showFoundOwnerMsg, setShowFoundOwnerMsg] = useState(false);
 
   // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
@@ -151,6 +237,12 @@ const ChatRoomPage = () => {
           registrationType: "LOST",
           status: "주인 찾는 중"
         }} />
+        <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showFoundOwnerMsg ? 'bg-[#f2f2f2]' : 'bg-[#06f] cursor-pointer'}`} onClick={showFoundOwnerMsg ? undefined : () => setShowConfirmModal(true)}>
+          <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showFoundOwnerMsg ? 'text-[#111]' : 'text-white'}`}>
+            {showFoundOwnerMsg ? '전달을 기다리고 있어요' : '물건 주인을 찾았어요'}
+          </p>
+        </div>
+        {showConfirmModal && <ConfirmOwnerModal userName={userName} onClose={() => { setShowConfirmModal(false); setShowFoundOwnerMsg(true); }} />}
       </div>
       {/* 채팅 메시지 영역 등 나머지 UI */}
       <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
@@ -161,6 +253,7 @@ const ChatRoomPage = () => {
               userId={String(userId)}
               subscribeTopic={`/topic/chat/${String(roomId || lostPostId || params.id || params.lostPostId)}`}
               sendDestination="/app/chat.send"
+              showFoundOwnerMsg={showFoundOwnerMsg}
             />
           </div>
         </div>
