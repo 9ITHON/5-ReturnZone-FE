@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import Button from "../components/button";
@@ -21,8 +21,12 @@ export default function DetailedPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [similarPosts, setSimilarPosts] = useState([]); // 유사한 페이지
+    // const myId = localStorage.getItem("userId"); // 현재 로그인 중인 아이디
+    // const isAuthor = String(myId) === String(post.memberId); // 아이디가 같나요?
 
-    // 분실물 정보 상세 조회
+    const navigate = useNavigate();
+
+    //분실물 정보 상세 조회
     useEffect(() => {
         const fetchPost = async () => {
             try {
@@ -46,10 +50,17 @@ export default function DetailedPage() {
 
     if (loading) return <p>불러오는 중...</p>;
     if (!post) return <p>{error || "데이터 없음"}</p>;
-
+    // 로그인 한 사람이랑 글쓴이랑 같은지 확인
+    const handleEditClick = () => {
+        if (String(myId) !== String(post.memberId)) {
+            alert("게시글 작성자만 수정할 수 있습니다.");
+            return;
+        }
+        navigate(`/lost/${post.lostPostId}/edit`);
+    };
     return (
         <div>
-            <DetailedHeader />
+            <DetailedHeader postMemberId={post.memberId} />
             <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
@@ -135,7 +146,8 @@ export default function DetailedPage() {
             </div>
             {/* 하단 버튼 */}
             <div className=" pt-[12px] pb-[42px] px-[24px]">
-                <Button label="채팅하기"></Button>
+                <Button label="채팅하기" onClick={() => navigate(`/chat/${post.memberId}`)}
+                ></Button>
             </div>
         </div>
     );

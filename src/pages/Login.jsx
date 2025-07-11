@@ -106,7 +106,7 @@ export default function Login() {
   };
 
   const handleSignup = () => {
-    navigate('/signup');
+    navigate('/SignUp');
   };
 
   // 컴포넌트 마운트 시 자동 로그인 체크
