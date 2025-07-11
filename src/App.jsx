@@ -14,12 +14,21 @@ import MyPageExchange from './pages/MyPageExchange';
 import MyPageModify from './pages/MyPageModify';
 import MyPageProduct from './pages/MyPageProduct';
 import MyPageLocation from './pages/MyPageLocation';
-import Header from './components/sign-header';
+import UserMessageLogin from './components/UserMessageLogin';
 
 // 라우터 설정 함수
 function AppRoute() {
   const isLoggedIn = Boolean(localStorage.getItem('userId')); // 로그인 정보 확인
-
+  // 로그인 검사
+  const loginRequired = (element) =>
+    isLoggedIn ? element : (
+      <UserMessageLogin
+        title="로그인이 필요합니다"
+        message="해당 페이지는 로그인 이후 <br /> 이용하실 수 있습니다."
+        path="/Login"
+        cancelPath={-1}
+      />
+    );
   return (
     <Routes>
       {/* 공용 라우트 */}
@@ -27,28 +36,19 @@ function AppRoute() {
       <Route path='/LogIn' element={<Login />} />
       <Route path='/SignUp' element={<SignUp />} />
       <Route path='/Register' element={<RegisterPage />} />
-      <Route path='/SearchPage' element={<SearchPage />} />
       <Route path='/lost/:lostPostId' element={<DetailedPage />} />
 
       {/* 로그인된 사용자만 접근 가능한 라우트 */}
-      {isLoggedIn && (
-        <>
-          <Route path='/Chat' element={<Chat />} />
-          <Route path='/ChatList' element={<ChatList />} />
-          <Route path='/RegisterLocation' element={<RegisterLocation />} />
-          <Route path="/lost/:lostPostId/edit" element={<ModifyPage />} />
-          <Route path='/MyPageExchange' element={<MyPageExchange />} />
-          <Route path='/MyPageModify' element={<MyPageModify />} />
-          <Route path='/MyPageProduct' element={<MyPageProduct />} />
-          <Route path='/MyPageLocation' element={<MyPageLocation />} />
-          <Route path='/MyPage' element={<MyPage />} />
-        </>
-      )}
-
-      {/* 로그인되지 않은 사용자가 보호 라우트에 접근했을 때 */}
-      {!isLoggedIn && (
-        <Route path='/*' element={<Navigate to="/LogIn" replace />} />
-      )}
+      <Route path='/SearchPage' element={loginRequired(<SearchPage />)} />
+      <Route path='/Chat' element={loginRequired(<Chat />)} />
+      <Route path='/ChatList' element={loginRequired(<ChatList />)} />
+      <Route path='/RegisterLocation' element={loginRequired(<RegisterLocation />)} />
+      <Route path="/lost/:lostPostId/edit" element={loginRequired(<ModifyPage />)} />
+      <Route path='/MyPageExchange' element={loginRequired(<MyPageExchange />)} />
+      <Route path='/MyPageModify' element={loginRequired(<MyPageModify />)} />
+      <Route path='/MyPageProduct' element={loginRequired(<MyPageProduct />)} />
+      <Route path='/MyPageLocation' element={loginRequired(<MyPageLocation />)} />
+      <Route path='/MyPage' element={loginRequired(<MyPage />)} />
     </Routes>
   );
 }

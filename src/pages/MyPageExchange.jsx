@@ -5,7 +5,7 @@ import MyPageAccount from "../components/MyPageAccount";
 import MyPageUserHeader from "../components/MyPageUserHeader";
 import Button from "../components/button";
 import MyPagePoint from "../components/MyPagePoint";
-import { GetMyPage, GetMyPageDummy } from "../utils/GetMyPage";
+import { GetMyPage } from "../utils/GetMyPage";
 
 
 export default function MyPageExchange() {

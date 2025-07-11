@@ -7,7 +7,7 @@ import DetailedHeader from "../components/detailed-header";
 import DetailImg from "../components/detail-img";
 import DetailMap from "../components/detail-map";
 import DetailSimilar from "../components/detail-similar";
-import { DetailTest } from "../test/detailTest"; //더미 데이터
+// import { DetailTest } from "../test/detailTest"; //더미 데이터
 import { DetailDate } from "../utils/detail-date";
 
 import ProductIcon from '../assets/상품.svg'
