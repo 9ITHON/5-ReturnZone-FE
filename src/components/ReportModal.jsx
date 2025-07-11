@@ -1,8 +1,23 @@
 import React from "react";
+import apiService from "../services/apiService";
 
-const ReportModal = ({ onCancel, onConfirm, type = "report" }) => {
+const ReportModal = ({ onCancel, onConfirm, type = "report", roomId, userId }) => {
   const isBlock = type === "block";
   const isExit = type === "exit";
+
+  const handleConfirm = async () => {
+    if (isExit) {
+      try {
+        await apiService.deleteChatRoom(roomId, userId);
+        if (onConfirm) onConfirm();
+      } catch {
+        alert("채팅방 나가기에 실패했습니다.");
+      }
+    } else {
+      if (onConfirm) onConfirm();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.3)" }}>
       <div
@@ -58,7 +73,7 @@ const ReportModal = ({ onCancel, onConfirm, type = "report" }) => {
             </p>
           </div>
           <div className="flex-grow-0 flex-shrink-0 w-[0.33px] h-11 relative bg-[#808080]" />
-          <div className="flex-grow h-11 relative border-t-[0.33px] border-r-0 border-b-0 border-l-0 border-[#808080] cursor-pointer" onClick={onConfirm}>
+          <div className="flex-grow h-11 relative border-t-[0.33px] border-r-0 border-b-0 border-l-0 border-[#808080] cursor-pointer" onClick={handleConfirm}>
             <p className={`absolute top-[11px] text-base font-semibold text-center text-[#06f] ${isExit ? 'left-[45px]' : 'left-[39px]'}`}>
               {isExit ? "나가기" : isBlock ? "차단하기" : "신고하기"}
             </p>
