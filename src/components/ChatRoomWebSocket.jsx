@@ -21,6 +21,7 @@ const ChatRoomWebSocket = ({
   sendDestination,
   showFoundOwnerMsg,
   showDeliveryMsg,
+  showDeliveryCompleted,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -175,6 +176,20 @@ const ChatRoomWebSocket = ({
               <br />
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
                 버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
+              </span>
+            </p>
+          </div>
+        )}
+        {/* 전달 완료 메시지 */}
+        {showDeliveryCompleted && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                🎉 전달 완료! 주인이 물건을 잘 받았어요.
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+                약속된 500포인트가 지급되었습니다. 감사합니다!
               </span>
             </p>
           </div>

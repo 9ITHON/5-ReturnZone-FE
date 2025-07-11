@@ -141,7 +141,7 @@ const ChatRoomPage = () => {
   const [userName, setUserName] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFoundOwnerMsg, setShowFoundOwnerMsg] = useState(false);
-  const [showDeliveryMsg, setShowDeliveryMsg] = useState(false);
+  const [showDeliveryCompleted, setShowDeliveryCompleted] = useState(false);
 
   // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
@@ -238,9 +238,9 @@ const ChatRoomPage = () => {
           registrationType: "LOST",
           status: "주인 찾는 중"
         }} />
-        <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showFoundOwnerMsg ? 'bg-[#f2f2f2] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showFoundOwnerMsg ? () => setShowDeliveryMsg(true) : () => setShowConfirmModal(true)}>
-          <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showFoundOwnerMsg ? 'text-[#111]' : 'text-white'}`}>
-            {showFoundOwnerMsg ? '전달을 기다리고 있어요' : '물건 주인을 찾았어요'}
+        <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showDeliveryCompleted ? 'bg-[#f2f2f2]' : showFoundOwnerMsg ? 'bg-[#f2f2f2] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showDeliveryCompleted ? undefined : (showFoundOwnerMsg ? () => setShowDeliveryCompleted(true) : () => setShowConfirmModal(true))}>
+          <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showDeliveryCompleted ? 'text-[#06f] font-semibold' : showFoundOwnerMsg ? 'text-[#111]' : 'text-white'}`}>
+            {showDeliveryCompleted ? `${item?.reward || 500}포인트 지급 완료` : (showFoundOwnerMsg ? '전달을 기다리고 있어요' : '물건 주인을 찾았어요')}
           </p>
         </div>
         {showConfirmModal && <ConfirmOwnerModal userName={userName} onClose={() => { setShowConfirmModal(false); setShowFoundOwnerMsg(true); }} />}
@@ -255,7 +255,8 @@ const ChatRoomPage = () => {
               subscribeTopic={`/topic/chat/${String(roomId || lostPostId || params.id || params.lostPostId)}`}
               sendDestination="/app/chat.send"
               showFoundOwnerMsg={showFoundOwnerMsg}
-              showDeliveryMsg={showDeliveryMsg}
+              showDeliveryMsg={false}
+              showDeliveryCompleted={showDeliveryCompleted}
             />
           </div>
         </div>
