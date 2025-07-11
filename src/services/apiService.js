@@ -55,7 +55,7 @@ export const apiService = {
   // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/auth/login', { email, password });
+      const response = await apiClient.post('/members/login', { email, password });
       // localStorage 저장 코드 제거
       return response.data; // { email, username, imageUrl }
     });
@@ -87,7 +87,7 @@ export const apiService = {
   },
   async kakaoLogin(kakaoAccessToken, userInfo) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/auth/kakao/login', { kakaoAccessToken, userInfo });
+      const response = await apiClient.post('/auth/login/kakao', { kakaoAccessToken, userInfo });
       if (response.data.accessToken) {
         localStorage.setItem('auth_token', response.data.accessToken);
       }
@@ -122,7 +122,7 @@ export const apiService = {
   },
   async getLostPost(id) {
     return retryRequest(async () => {
-      const response = await apiClient.get(`/lostPosts/${id}`);
+      const response = await apiClient.get(`/lostPosts/${lostPostId}`);
       return response.data;
     });
   },
@@ -134,20 +134,20 @@ export const apiService = {
   },
   async updateLostPost(id, data) {
     return retryRequest(async () => {
-      const response = await apiClient.put(`/lostPosts/${id}`, data);
+      const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);
       return response.data;
     });
   },
   async deleteLostPost(id) {
     return retryRequest(async () => {
-      const response = await apiClient.delete(`/lostPosts/${id}`);
+      const response = await apiClient.delete(`/lostPosts/${lostPostId}`);
       return response.data;
     });
   },
   // 검색
   async searchLostPosts(params = {}) {
     return retryRequest(async () => {
-      const response = await apiClient.get('/lostPosts/search', { params });
+      const response = await apiClient.get('/search/posts', { params });
       return response.data;
     });
   },
