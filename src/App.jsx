@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Router 추가
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
 import RegisterLocation from './pages/register-location';
@@ -14,6 +15,7 @@ import MyPageExchange from './pages/MyPageExchange';
 import MyPageModify from './pages/MyPageModify';
 import MyPageProduct from './pages/MyPageProduct';
 import MyPageLocation from './pages/MyPageLocation';
+import { AuthProvider } from "./utils/AuthContext.jsx";
 import UserMessageLogin from './components/UserMessageLogin';
 
 // 라우터 설정 함수
@@ -56,9 +58,11 @@ function AppRoute() {
 function App() {
 
   return (
-    <BrowserRouter>
-      <AppRoute></AppRoute>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoute></AppRoute>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
