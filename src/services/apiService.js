@@ -50,7 +50,7 @@ export const apiService = {
   // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/auth/login', { email, password });
+      const response = await apiClient.post('/members/login', { email, password });
       if (response.data.accessToken) {
         localStorage.setItem('auth_token', response.data.accessToken);
       }
