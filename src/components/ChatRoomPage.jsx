@@ -5,6 +5,7 @@ import ReportHeader from "./ReportHeader";
 import ReportModal from "./ReportModal";
 import ChatRoomWebSocket from './ChatRoomWebSocket';
 import ItemCard from "./ItemCard";
+import ChatRoomItemCard from './ChatRoomItemCard';
 
 const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   <div
@@ -64,21 +65,21 @@ const ChatRoomPage = () => {
       setLoading(true);
       setError(null);
       try {
-        // 1. 아이템 정보 불러오기
+      
         const itemData = lostPostId ? await apiService.getLostPost(lostPostId) : null;
         setItem(itemData);
-        // 2. 등록자 이름(닉네임) 가져오기
+      
         if (itemData?.nickname) {
           setUserName(itemData.nickname);
         } else if (itemData?.memberId) {
           // 만약 닉네임이 없고 memberId만 있으면, 유저 정보 추가 fetch 필요 (apiService.getUser 등)
           // setUserName(await apiService.getUser(itemData.memberId).then(u => u.nickname || u.name));
         }
-        // 3. 채팅방 정보 불러오기 or 생성
+     
         let chatRoomId = lostPostId;
         const targetUserId = itemData?.memberId || itemData?.userId;
         if (!params.id && lostPostId && targetUserId && userId !== targetUserId) {
-          // 채팅방이 없으면 생성 (본인 채팅방 방지)
+     
           await apiService.createChatRoom({ lostPostId, userId, targetUserId });
           navigate(`/chat/${lostPostId}`);
           return;
@@ -140,24 +141,21 @@ const ChatRoomPage = () => {
           }}
         />
       )}
-      {/* 상단 상품 정보 및 시스템 메시지 */}
+      {/* 아이템 카드 - 채팅방 상단에 항상 노출 */}
+      <div className="w-full px-6 pt-4">
+        <ChatRoomItemCard data={item || {
+          title: "소니 WH-1000XM4 헤드셋",
+          location: "역삼1동",
+          timeAgo: "10일 전",
+          mainImageUrl: "",
+          registrationType: "LOST",
+          status: "주인 찾는 중"
+        }} />
+      </div>
+      {/* 채팅 메시지 영역 등 나머지 UI */}
       <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
         <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 pt-4">
           <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
-            {/* 상품 정보 */}
-            {item && (
-              <ItemCard
-                data={{
-                  title: item.title,
-                  reward: item.reward,
-                  imageUrl: item.mainImageUrl,
-                  timeAgo: item.timeAgo,
-                  registrationType: item.registrationType,
-                  status: item.status,
-                }}
-              />
-            )}
-            {/* 채팅 메시지 영역 */}
             <ChatRoomWebSocket
               roomId={String(roomId || lostPostId || params.id || params.lostPostId)}
               userId={String(userId)}
