@@ -123,14 +123,16 @@ const ChatRoomWebSocket = ({
             >
               <div className="flex flex-col items-end">
                 <div
-                  className={`max-w-[75%] px-4 py-2 rounded-2xl text-[15px] whitespace-pre-line break-words ${
+                  className={
                     isMine
-                      ? 'bg-[#0066FF] text-white rounded-br-md'
-                      : 'bg-[#F2F2F2] text-[#111] rounded-bl-md'
-                  }`}
-                  style={{ wordBreak: 'break-all' }}
+                      ? 'flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f] w-full max-w-[310px]'
+                      : 'flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 w-full max-w-[268px] px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]'
+                  }
+                  style={isMine ? {} : {}}
                 >
-                  {msg.content}
+                  <p className={isMine ? 'self-stretch flex-grow-0 flex-shrink-0 w-full text-base text-left text-white break-words' : 'flex-grow w-full text-base text-left text-[#111] break-words'}>
+                    {msg.content}
+                  </p>
                 </div>
                 {/* 마지막 메시지 그룹에만 시간/읽음 표시 */}
                 {isLastOfGroup && (
