@@ -52,6 +52,8 @@ export default function SignUp() {
             setPasswordError("");
         }
         try {
+            const response = await apiService.register({ username, email, password });
+            if (response && (response.status === 201 || response.success)) { // TODO: 실제 회원가입 성공 조건으로 변경
                 alert("회원가입에 성공했습니다.");
                 navigate("/Login");
             } else {
@@ -69,6 +71,18 @@ export default function SignUp() {
             return;
         }
         try {
+            const response = await apiService.checkEmailDuplicate(email);
+            if (response === true || response === "true") {
+                setEmailError("");
+                setEmailSuccess("사용가능한 이메일입니다!");
+                setIsEmailChecked(true);
+            } else {
+                setEmailError("이미 존재하는 이메일입니다");
+                setEmailSuccess("");
+                setIsEmailChecked(false);
+            }
+        } catch {
+            setEmailError("이미 존재하는 이메일입니다");
             setEmailSuccess("");
             setIsEmailChecked(false);
         }

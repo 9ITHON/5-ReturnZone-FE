@@ -8,6 +8,40 @@ const ItemCard = ({
   reward = 10000,
   status = '', // '분실했어요' | '주인찾아요' | ''
   imageUrl = '',
+  data, // search-page에서 전달되는 data prop
+}) => {
+  // data prop이 있으면 data의 값들을 사용
+  const finalTitle = data?.title || title;
+  const finalLocation = data?.location || data?.lostLocationDong || location;
+  const finalTime = data?.timeAgo || time;
+  const finalReward = data?.reward || reward;
+  const finalStatus = data?.registrationType === 'LOST' ? '분실했어요' : 
+                     data?.registrationType === 'FOUND' ? '주인찾아요' : status;
+  const finalImageUrl = data?.imageUrls?.[0] || imageUrl;
+
+  return (
+    <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3 mb-4">
+      <div className="flex-grow-0 flex-shrink-0 w-[122px] h-[122px] relative">
+        {finalImageUrl ? (
+          <img src={finalImageUrl} alt="분실물" className="object-cover w-[122px] h-[122px] absolute left-[-1px] top-[-1px] rounded-xl" />
+        ) : (
+          <div className="w-[122px] h-[122px] rounded-xl bg-[#F2F2F2]" />
+        )}
+      </div>
+      <div className="flex flex-col justify-start items-start flex-grow relative gap-1">
+        <p className="self-stretch flex-grow-0 flex-shrink-0 w-52 text-lg font-medium text-left text-[#111]">
+          {finalTitle}
+        </p>
+        <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
+          {/* 상태 뱃지 */}
+          {finalStatus === '주인찾아요' && (
+            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#e6fbee]">
+              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-1 py-[3px] rounded">
+                <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 relative gap-1">
+                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#00d455]">
+                    주인 찾아요
+                  </p>
+                </div>
               </div>
             </div>
           )}
