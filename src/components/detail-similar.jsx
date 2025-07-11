@@ -1,5 +1,6 @@
 // 유사 상품
 import React from 'react';
+import { formatPrice } from '../utils/formatPrice';
 
 export default function DetailSimilar({ post }) {
     return (
@@ -24,7 +25,7 @@ export default function DetailSimilar({ post }) {
                 {post.location} · {post.timeAgo}
             </p>
             <p className="text-[18px] text-[#111111] font-bold">
-                <span className='font-medium'>현상금</span> {post.reward.toLocaleString()}원
+                <span className='font-medium'>현상금</span> {formatPrice(post.reward)}
             </p>
         </div>
     );

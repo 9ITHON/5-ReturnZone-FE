@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
@@ -22,8 +23,8 @@ function AppRoute(){
       <Route path='/' element={<Home/>}></Route>
       <Route path='/LogIn' element={<Login/>}></Route>
       <Route path='/SignUp' element={<SignUp/>}></Route>
+      <Route path="ChatList" element={<ChatList />} />
       <Route path="chat/:id" element={<Chat />} />
-      <Route path='/ChatList' element={<ChatList/>}></Route>
       <Route path='/RegisterLocation' element={<RegisterLocation/>}/>
       <Route path='/Register' element={<RegisterPage/>}></Route>
       <Route path="/lost/:lostPostId" element={<DetailedPage />} />

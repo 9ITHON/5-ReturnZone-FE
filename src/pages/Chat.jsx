@@ -1,17 +1,15 @@
 import React from "react";
-import { useParams, useOutletContext } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import ChatRoomPage from "../components/ChatRoomPage";
 
 const Chat = () => {
-  const { id } = useParams();
-  const { onMessageRead, unreadCount } = useOutletContext();
-
-  if (id) {
-    return (
-      <>
-        <ChatRoomPage chatRoomId={id} onMessageRead={() => onMessageRead(id)} />
-      </>
-    );
+  const { id, roomId } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const lostPostId = searchParams.get('lostPostId');
+  const resolvedRoomId = id || roomId || lostPostId;
+  if (resolvedRoomId) {
+    return <ChatRoomPage roomId={resolvedRoomId} />;
   }
   return null;
 };

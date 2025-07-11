@@ -91,22 +91,15 @@ const Home = () => {
   const handleAllFilterSelect = (value) => {
     setAllFilterValue(value);
     setAllFilterOpen(false);
-    // value에 따라 필터 적용
+    setSelectedCategory(null);
+    // setSelectedLocation(""); // 위치 초기화 제거
+    setSelectedFilters([]);
     if (value === "all") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
       fetchItems();
     } else if (value === "lost") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
-      filterItems("분실", "", undefined);
+      filterItems("분실", selectedLocation, undefined);
     } else if (value === "found") {
-      setSelectedCategory(null);
-      setSelectedLocation("");
-      setSelectedFilters([]);
-      filterItems("주인", "", undefined);
+      filterItems("주인", selectedLocation, undefined);
     }
   };
 
@@ -117,7 +110,31 @@ const Home = () => {
 
   // 지도에서 위치 선택 시
   const handleMapSelect = (pos) => {
-    filterItems(selectedCategory, selectedLocation, selectedFilters[0], pos);
+    // 좌표 → 주소 변환 (동 이름 추출)
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      geocoder.coord2Address(pos.lng, pos.lat, (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK && result[0]) {
+          // 동/읍/면 이름 추출
+          let dong = '';
+          if (result[0].address) {
+            dong = result[0].address.region_3depth_name;
+          } else if (result[0].road_address) {
+            dong = result[0].road_address.region_3depth_name;
+          }
+          setSelectedLocation(dong);
+          // 가까운순 정렬
+          filterItems(selectedCategory, dong, 'distance', pos);
+        } else {
+          setSelectedLocation('');
+          filterItems(selectedCategory, '', 'distance', pos);
+        }
+      });
+    } else {
+      // fallback: 좌표만 저장
+      setSelectedLocation('');
+      filterItems(selectedCategory, '', 'distance', pos);
+    }
   };
 
   // 최신순 필터 선택 핸들러
@@ -172,8 +189,18 @@ const Home = () => {
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
-        <div className="sticky top-0 z-50 bg-white border-b border-[#e6e6e6]">
-          <div className="flex items-center w-full h-12 px-4 gap-1.5 overflow-x-auto hide-scrollbar">
+        <div className="sticky top-0 z-50 bg-white">
+          <div className="flex items-center w-full h-12 px-4 gap-1.5">
+            {/* 필터 라벨 버튼 */}
+            <button
+              type="button"
+              disabled
+              className="flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium bg-[#06f] border-[#06f] text-white cursor-default"
+              tabIndex={-1}
+              style={{ pointerEvents: 'none' }}
+            >
+              <span>필터</span>
+            </button>
             {/* 필터 버튼들 */}
             {FILTERS.map((f) => {
               let label = f.label;
@@ -185,18 +212,22 @@ const Home = () => {
               if (f.key === 'latest') {
                 label = latestFilterValue === 'distance' ? '현재 위치와 가까운 순' : '최신순';
               }
+              if (f.key === 'location' && selectedLocation) {
+                label = selectedLocation;
+              }
               const isCategorySelected = f.key === 'category' && selectedCategory;
               const isAllSelected = f.key === 'all' && allFilterValue !== 'all';
               const isLatestSelected = f.key === 'latest' && (latestFilterValue === 'distance' || latestFilterValue === 'latest');
-              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected;
+              const isLocationSelected = f.key === 'location' && !!selectedLocation;
+              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected || isLocationSelected;
               return (
                 <button
                   key={f.key}
                   onClick={() => handleFilterClick(f.key)}
-                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#06f]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
+                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#111]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
                 >
                   <span>{f.key === 'category' && selectedCategory ? selectedCategory : label}</span>
-                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" />
+                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" style={{ filter: 'none' }} />
                 </button>
               );
             })}
@@ -233,8 +264,8 @@ const Home = () => {
         onClose={() => setLatestFilterOpen(false)}
       />
 
-      <div className="flex flex-col items-center px-0 pt-[48px] pb-[88px] flex-1 w-full overflow-y-scroll">
-        <div className="flex flex-col gap-4 w-[342px]">
+      <div className="flex flex-col items-center px-0 pt-[16px] pb-[88px] flex-1 w-full overflow-y-scroll">
+        <div className="flex flex-col gap-2 w-full px-6">
           {/* Show location permission status */}
           {/* Show distance info if sorting by distance */}
 
@@ -256,7 +287,7 @@ const Home = () => {
                 if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
                 else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
                 return (
-                  <div onClick={() => navigate(`/lost/${item.lostPostId}`)} className="cursor-pointer" key={item.lostPostId}>
+                  <div onClick={() => navigate(`/chat?lostPostId=${item.lostPostId || item.id}`)} className="cursor-pointer" key={item.id}>
                     <ItemCard
                       {...item}
                       status={status}
