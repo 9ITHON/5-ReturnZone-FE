@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import kakaoIcon from '../assets/카카오.svg';
+import { useAuth } from "../utils/AuthContext.jsx";
 
 const KAKAO_CLIENT_ID = "4b5c5b6d6f920a0fe945665f2da2648a";
 const KAKAO_REDIRECT_URI = "http://15.164.234.32:8080/auth/login/kakao";
@@ -13,6 +14,7 @@ function handleKakaoLogin() {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -46,26 +48,10 @@ export default function Login() {
     }
 
     try {
-      const response = await apiService.login(email, password);
-      
-      console.log('로그인 성공:', response);
-      
-      // 토큰 저장
-      if (response.token || response.accessToken) {
-        localStorage.setItem('authToken', response.token || response.accessToken);
-      }
-
-      // 자동 로그인 체크
-      if (remember) {
-        localStorage.setItem('rememberMe', 'true');
-        localStorage.setItem('savedEmail', email);
-      } else {
-        localStorage.removeItem('rememberMe');
-        localStorage.removeItem('savedEmail');
-      }
-
-      // 대시보드나 메인 페이지로 이동
-      navigate('/');
+      // 로그인 API 호출
+      const response = await apiService.login({ email, password });
+      setUser(response); // context에만 저장
+      navigate("/"); // 메인 페이지로 이동
 
     } catch (error) {
       console.error('로그인 실패:', error);
@@ -111,13 +97,7 @@ export default function Login() {
 
   // 컴포넌트 마운트 시 자동 로그인 체크
   React.useEffect(() => {
-    const rememberMe = localStorage.getItem('rememberMe');
-    const savedEmail = localStorage.getItem('savedEmail');
-    
-    if (rememberMe === 'true' && savedEmail) {
-      setEmail(savedEmail);
-      setRemember(true);
-    }
+    // 자동 로그인 관련 로직 제거
   }, []);
 
   return (

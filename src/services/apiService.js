@@ -56,10 +56,8 @@ export const apiService = {
   async login({ email, password }) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/login', { email, password });
-      if (response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.accessToken);
-      }
-      return response.data;
+      // localStorage 저장 코드 제거
+      return response.data; // { email, username, imageUrl }
     });
   },
   async register(userData) {
