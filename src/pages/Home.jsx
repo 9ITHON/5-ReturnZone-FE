@@ -42,7 +42,6 @@ const Home = () => {
   const [latestFilterOpen, setLatestFilterOpen] = React.useState(false);
   const [latestFilterValue, setLatestFilterValue] = React.useState("latest");
 
-  // Use the location data hook
   const {
     items,
     loading,
