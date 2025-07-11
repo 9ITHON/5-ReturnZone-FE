@@ -39,10 +39,12 @@ export default function Login() {
     }
 
     try {
-      const response = await apiService.login(email, password);
+      const response = await apiService.login({ email, password }); // 수정
+      console.log('입력된 이메일:', email);
+      console.log('입력된 비밀번호:', password); // 테스트
       
       console.log('로그인 성공:', response);
-      
+
       // 토큰 저장
       if (response.token || response.accessToken) {
         localStorage.setItem('authToken', response.token || response.accessToken);
