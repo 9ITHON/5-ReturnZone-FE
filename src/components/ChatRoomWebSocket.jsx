@@ -24,6 +24,7 @@ const ChatRoomWebSocket = ({
   showDeliveryCompleted,
   isLostOwner,
   isFinder,
+  showPaymentCompleted,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -223,6 +224,13 @@ const ChatRoomWebSocket = ({
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
                 찾아주신 분에게 현상금이 지급되었습니다.
               </span>
+            </p>
+          </div>
+        )}
+        {showPaymentCompleted && isLostOwner && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
+              ✅ 습득자에게 현상금이 지급되었어요. 감사합니다!
             </p>
           </div>
         )}

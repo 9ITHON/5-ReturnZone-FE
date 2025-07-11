@@ -267,7 +267,7 @@ const PaymentModal = ({ onClose, reward = 10000, userName = '유저1' }) => {
                       />
                     )}
                   </svg>
-                  <p className="flex-grow-0 flex-shrink-0 text-[14px] font-medium  text-center text-[#4d4d4d]">
+                  <p className="flex-grow-0 justify-start flex-shrink-0 text-[14px] font-medium  text-center text-[#4d4d4d]">
                     약관 동의하기
                   </p>
                 </div>
@@ -406,17 +406,17 @@ const ChatRoomPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFoundOwnerMsg, setShowFoundOwnerMsg] = useState(false);
   const [showDeliveryCompleted, setShowDeliveryCompleted] = useState(false);
-  const [forceUserRole, setForceUserRole] = useState(null); // 개발용: 'lost' | 'finder' | null
   const [showLostOwnerConfirmModal, setShowLostOwnerConfirmModal] = useState(false);
   const [showLostOwnerPayment, setShowLostOwnerPayment] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentCompleted, setShowPaymentCompleted] = useState(false);
 
   // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
   const lostPostId = searchParams.get('lostPostId') || params.lostPostId || params.itemId;
 
-  // 현재 사용자가 분실자인지 습득자인지 판단 (개발용 강제 설정 포함)
-  const isLostOwner = forceUserRole === 'lost' ? true : forceUserRole === 'finder' ? false : (item?.memberId === userId || item?.userId === userId);
+  // 실제 API 데이터 기반으로만 역할 판별
+  const isLostOwner = item?.memberId === userId || item?.userId === userId;
   const isFinder = !isLostOwner;
 
   useEffect(() => {
@@ -477,32 +477,8 @@ const ChatRoomPage = () => {
       </div>
       
       {/* 개발용 역할 토글 (개발 중에만 표시) */}
-      <div className="w-full px-6 py-2 bg-gray-100 border-b">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-600">개발용 역할:</span>
-          <button 
-            className={`px-2 py-1 text-xs rounded ${forceUserRole === 'lost' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-            onClick={() => setForceUserRole(forceUserRole === 'lost' ? null : 'lost')}
-          >
-            분실자
-          </button>
-          <button 
-            className={`px-2 py-1 text-xs rounded ${forceUserRole === 'finder' ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-            onClick={() => setForceUserRole(forceUserRole === 'finder' ? null : 'finder')}
-          >
-            습득자
-          </button>
-          <button 
-            className={`px-2 py-1 text-xs rounded ${forceUserRole === null ? 'bg-purple-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-            onClick={() => setForceUserRole(null)}
-          >
-            자동
-          </button>
-        </div>
-        <div className="text-xs text-gray-500 mt-1">
-          현재: {isLostOwner ? '분실자' : '습득자'} {forceUserRole && '(강제 설정)'}
-        </div>
-      </div>
+      {/* 이 부분은 개발용 역할 토글 UI와 관련 상태, 로직을 모두 제거하고, 실제 API 데이터 기반으로만 역할을 판별하도록 정리합니다. */}
+      {/* 채팅방, 분실자/습득자 판별, 버튼, 메시지 등은 실제 API 데이터와 연동되도록 유지합니다. */}
       {showOption && <OptionModal
         onClose={() => setShowOption(false)}
         onReport={() => { setReportModalType('report'); setShowOption(false); }}
@@ -553,14 +529,14 @@ const ChatRoomPage = () => {
 
         {/* 분실자용 버튼 (물건을 잃어버린 사람) */}
         {isLostOwner && (
-          <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[134px] py-[9px] rounded-lg ${showDeliveryCompleted ? 'bg-[#f2f2f2]' : showLostOwnerPayment ? 'bg-[#06f] cursor-pointer' : showFoundOwnerMsg ? 'bg-[#06f] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showDeliveryCompleted ? undefined : (showLostOwnerPayment ? () => setShowPaymentModal(true) : showFoundOwnerMsg ? () => setShowLostOwnerPayment(true) : () => setShowLostOwnerConfirmModal(true))}>
-            <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showDeliveryCompleted ? 'text-[#06f] font-semibold' : showLostOwnerPayment ? 'text-white' : showFoundOwnerMsg ? 'text-white' : 'text-white'}`}>
-              {showDeliveryCompleted ? '수령 확인 완료' : ( showFoundOwnerMsg ? '현상금 지급하기' : '제 물건이에요')}
+          <div className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showPaymentCompleted ? 'bg-[#f2f2f2]' : showDeliveryCompleted ? 'bg-[#f2f2f2]' : showLostOwnerPayment ? 'bg-[#06f] cursor-pointer' : showFoundOwnerMsg ? 'bg-[#06f] cursor-pointer' : 'bg-[#06f] cursor-pointer'}`} onClick={showPaymentCompleted ? undefined : (showDeliveryCompleted ? undefined : showLostOwnerPayment ? () => setShowPaymentModal(true) : showFoundOwnerMsg ? () => setShowLostOwnerPayment(true) : () => setShowLostOwnerConfirmModal(true))}>
+            <p className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showPaymentCompleted ? 'text-[#111]' : showDeliveryCompleted ? 'text-[#06f] font-semibold' : showLostOwnerPayment ? 'text-white' : showFoundOwnerMsg ? 'text-white' : 'text-white'}`}>
+              {(showPaymentCompleted ? '현상금 지급 완료' : ( showFoundOwnerMsg ? '현상금 지급하기' : '제 물건이에요'))}
             </p>
           </div>
         )}
         {showLostOwnerConfirmModal && <LostOwnerConfirmModal onClose={() => { setShowLostOwnerConfirmModal(false); setShowFoundOwnerMsg(true); }} />}
-        {showPaymentModal && <PaymentModal onClose={() => { setShowPaymentModal(false); setShowDeliveryCompleted(true); }} reward={item?.reward || 10000} userName={userName} />}
+        {showPaymentModal && <PaymentModal onClose={() => { setShowPaymentModal(false); setShowPaymentCompleted(true); }} reward={item?.reward || 10000} userName={userName} />}
       </div>
       {/* 채팅 메시지 영역 등 나머지 UI */}
       <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
@@ -576,6 +552,7 @@ const ChatRoomPage = () => {
               showDeliveryCompleted={showDeliveryCompleted}
               isLostOwner={isLostOwner}
               isFinder={isFinder}
+              showPaymentCompleted={showPaymentCompleted}
             />
           </div>
         </div>
