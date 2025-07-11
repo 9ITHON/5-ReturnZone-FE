@@ -27,13 +27,13 @@ function AppRoute() {
       <Route path='/LogIn' element={<Login />} />
       <Route path='/SignUp' element={<SignUp />} />
       <Route path='/Register' element={<RegisterPage />} />
-      <Route path='/SearchPage' element={<SearchPage />} />
       <Route path='/lost/:lostPostId' element={<DetailedPage />} />
 
       {/* 로그인된 사용자만 접근 가능한 라우트 */}
       {isLoggedIn && (
         <>
           <Route path='/Chat' element={<Chat />} />
+          <Route path='/SearchPage' element={<SearchPage />} />
           <Route path='/ChatList' element={<ChatList />} />
           <Route path='/RegisterLocation' element={<RegisterLocation />} />
           <Route path="/lost/:lostPostId/edit" element={<ModifyPage />} />
