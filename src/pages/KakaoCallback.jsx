@@ -33,7 +33,7 @@ export default function KakaoCallback() {
           localStorage.setItem('authToken', response.token || response.accessToken);
           localStorage.setItem('loginType', 'kakao');
           alert('카카오 로그인 성공!');
-          navigate('/dashboard');
+          navigate('/');
         } else {
           throw new Error('토큰을 받지 못했습니다.');
         }
