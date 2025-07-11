@@ -64,7 +64,7 @@ const BottomNav = () => {
         </Link>
         {/* 채팅 */}
         <Link
-          to="/chat"
+          to="/ChatList"
           className="flex flex-col justify-start items-center self-stretch flex-grow relative gap-0.5 py-1.5 rounded-[56px]"
         >
           <div className="flex-grow-0 flex-shrink-0 w-6 h-6 relative">

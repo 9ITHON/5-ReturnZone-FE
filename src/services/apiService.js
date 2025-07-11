@@ -193,7 +193,7 @@ export const apiService = {
   },
   async createChatRoom(roomData) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/chat/rooms', roomData);
+      const response = await apiClient.post('/chats/rooms', roomData);
       return response.data;
     });
   },

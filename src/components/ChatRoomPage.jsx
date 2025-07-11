@@ -438,8 +438,11 @@ const ChatRoomPage = () => {
         let chatRoomId = lostPostId;
         const targetUserId = itemData?.memberId || itemData?.userId;
         if (!params.id && lostPostId && targetUserId && userId !== targetUserId) {
-     
-          await apiService.createChatRoom({ lostPostId, userId, targetUserId });
+          await apiService.createChatRoom({
+            lostPostId: Number(lostPostId),
+            memberId: Number(userId),
+            otherMemberId: Number(targetUserId)
+          });
           navigate(`/chat/${lostPostId}`);
           return;
         }
