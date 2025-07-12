@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client/dist/sockjs.js';
+import React, { useState, useEffect, useRef } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client/dist/sockjs.js";
 
 /**
  * ChatRoomWebSocket
@@ -12,7 +12,7 @@ import SockJS from 'sockjs-client/dist/sockjs.js';
  * - sendDestination: string (예: `/app/chat.send`)
  * - renderMessage: (msg, idx) => ReactNode (optional, 메시지 렌더링 커스텀)
  */
-const WS_URL = 'https://15.164.234.32.nip.io/ws-stomp';
+const WS_URL = "https://15.164.234.32.nip.io/ws-stomp";
 
 const ChatRoomWebSocket = ({
   roomId,
@@ -27,12 +27,19 @@ const ChatRoomWebSocket = ({
   showPaymentCompleted,
 }) => {
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const clientRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    console.log('[WebSocket Mount] roomId:', roomId, 'userId:', userId, 'subscribeTopic:', subscribeTopic);
+    console.log(
+      "[WebSocket Mount] roomId:",
+      roomId,
+      "userId:",
+      userId,
+      "subscribeTopic:",
+      subscribeTopic
+    );
     if (!roomId || !userId) return;
     connect();
     return () => disconnect();
@@ -48,22 +55,21 @@ const ChatRoomWebSocket = ({
   const subscriptionRef = useRef(null);
 
   const connect = () => {
-    console.log('Connecting to WebSocket with userId:', userId);
     clientRef.current = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: {
-        'X-USER-ID': userId,
+        "X-USER-ID": userId,
       },
       debug: (str) => {
-        console.log('STOMP Debug:', str);
+        console.log("STOMP Debug:", str);
       },
       reconnectDelay: 5000,
       onConnect: () => {
-        console.log('WebSocket connected successfully');
+        console.log("WebSocket connected successfully");
         subscribe();
       },
       onStompError: (frame) => {
-        console.error('STOMP Error:', frame);
+        console.error("STOMP Error:", frame);
       },
     });
     clientRef.current.activate();
@@ -85,65 +91,97 @@ const ChatRoomWebSocket = ({
       subscriptionRef.current.unsubscribe();
       subscriptionRef.current = null;
     }
-    console.log('Subscribing to topic:', subscribeTopic);
-    subscriptionRef.current = clientRef.current.subscribe(subscribeTopic, (message) => {
-      console.log('Received message:', message.body);
-      const receivedMessage = JSON.parse(message.body);
-      console.log('Parsed message:', receivedMessage);
-      setMessages((prev) => {
-        console.log('Previous messages:', prev);
-        // 메시지 id가 있으면 중복 추가 방지
-        if (prev.some(m => m.id && receivedMessage.id && m.id === receivedMessage.id)) {
-          console.log('Duplicate message with id, skipping');
-          return prev;
-        }
-        // id가 없으면 content+createdAt로 임시 중복 방지
-        if (prev.some(m => m.content === receivedMessage.content && m.createdAt === receivedMessage.createdAt)) {
-          console.log('Duplicate message with content+time, skipping');
-          return prev;
-        }
-        console.log('Adding new message to state');
-        return [...prev, receivedMessage];
-      });
-    });
+    console.log("Subscribing to topic:", subscribeTopic);
+    subscriptionRef.current = clientRef.current.subscribe(
+      subscribeTopic,
+      (message) => {
+        console.log("Received message:", message.body);
+        const receivedMessage = JSON.parse(message.body);
+        console.log("Parsed message:", receivedMessage);
+        setMessages((prev) => {
+          console.log("Previous messages:", prev);
+          // 메시지 id가 있으면 중복 추가 방지
+          if (
+            prev.some(
+              (m) => m.id && receivedMessage.id && m.id === receivedMessage.id
+            )
+          ) {
+            console.log("Duplicate message with id, skipping");
+            return prev;
+          }
+          // id가 없으면 content+createdAt로 임시 중복 방지
+          if (
+            prev.some(
+              (m) =>
+                m.content === receivedMessage.content &&
+                m.createdAt === receivedMessage.createdAt
+            )
+          ) {
+            console.log("Duplicate message with content+time, skipping");
+            return prev;
+          }
+          console.log("Adding new message to state");
+          return [...prev, receivedMessage];
+        });
+      }
+    );
   };
 
   const sendMessage = () => {
     if (input.trim() && clientRef.current && clientRef.current.connected) {
       const chatMessage = {
-        roomId,
+        roomId: 19,
         senderId: userId,
         content: input,
-        type: 'TEXT',
+        type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장
       };
-      console.log('Sending message:', chatMessage);
+      console.log("Sending message:", chatMessage);
       clientRef.current.publish({
         destination: sendDestination,
         body: JSON.stringify(chatMessage),
       });
-      setInput('');
+      setInput("");
     } else {
-      console.log('Cannot send message:', {
+      console.log("Cannot send message:", {
         hasInput: !!input.trim(),
         hasClient: !!clientRef.current,
-        isConnected: clientRef.current?.connected
+        isConnected: clientRef.current?.connected,
       });
     }
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-white" style={{height: '100%', minHeight: 400}}>
-      <div className="flex-1 overflow-y-auto px-3 py-2" style={{maxHeight: 400, minHeight: 300, background: '#fff'}}>
-        {console.log('[WebSocket Render] roomId:', roomId, 'userId:', userId, 'subscribeTopic:', subscribeTopic, 'messages:', messages)}
+    <div
+      className="flex flex-col h-full w-full bg-white"
+      style={{ height: "100%", minHeight: 400 }}
+    >
+      <div
+        className="flex-1 overflow-y-auto px-3 py-2"
+        style={{ maxHeight: 400, minHeight: 300, background: "#fff" }}
+      >
+        {console.log(
+          "[WebSocket Render] roomId:",
+          roomId,
+          "userId:",
+          userId,
+          "subscribeTopic:",
+          subscribeTopic,
+          "messages:",
+          messages
+        )}
         {messages.map((msg, idx) => {
           const isMine = String(msg.senderId) === String(userId);
           // 시간 포맷
           function getTimeStr(dateString) {
-            if (!dateString) return '';
+            if (!dateString) return "";
             const date = new Date(dateString);
             // 한국 시간대 강제 적용
-            return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' });
+            return date.toLocaleTimeString("ko-KR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Asia/Seoul",
+            });
           }
           // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
           const isLastOfGroup =
@@ -152,26 +190,38 @@ const ChatRoomWebSocket = ({
           return (
             <div
               key={msg.id || idx}
-              className={`flex w-full mb-2 ${isMine ? 'justify-end' : 'justify-start'}`}
+              className={`flex w-full mb-2 ${
+                isMine ? "justify-end" : "justify-start"
+              }`}
             >
               <div className="flex flex-col items-end">
                 <div
                   className={
                     isMine
-                      ? 'flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f] w-full max-w-[310px]'
-                      : 'flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 w-full max-w-[268px] px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]'
+                      ? "flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f] w-full max-w-[310px]"
+                      : "flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 w-full max-w-[268px] px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]"
                   }
                   style={isMine ? {} : {}}
                 >
-                  <p className={isMine ? 'self-stretch flex-grow-0 flex-shrink-0 w-full text-base text-left text-white break-words' : 'flex-grow w-full text-base text-left text-[#111] break-words'}>
+                  <p
+                    className={
+                      isMine
+                        ? "self-stretch flex-grow-0 flex-shrink-0 w-full text-base text-left text-white break-words"
+                        : "flex-grow w-full text-base text-left text-[#111] break-words"
+                    }
+                  >
                     {msg.content}
                   </p>
                 </div>
                 {/* 마지막 메시지 그룹에만 시간/읽음 표시 */}
                 {isLastOfGroup && (
                   <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1 mt-1 mr-1">
-                    <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">{getTimeStr(msg.createdAt)}</p>
-                    <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">읽음</p>
+                    <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">
+                      {getTimeStr(msg.createdAt)}
+                    </p>
+                    <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">
+                      읽음
+                    </p>
                   </div>
                 )}
               </div>
@@ -264,7 +314,16 @@ const ChatRoomWebSocket = ({
         <div ref={messagesEndRef} />
       </div>
       {/* 메시지 입력 바 */}
-      <div className="flex flex-col justify-start items-center w-[390px] bg-white" style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: '42px', zIndex: 20 }}>
+      <div
+        className="flex flex-col justify-start items-center w-[390px] bg-white"
+        style={{
+          position: "fixed",
+          left: "50%",
+          transform: "translateX(-50%)",
+          bottom: "42px",
+          zIndex: 20,
+        }}
+      >
         <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
           <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <svg
@@ -301,7 +360,7 @@ const ChatRoomWebSocket = ({
               placeholder="메시지 보내기"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             />
           </div>
           <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
@@ -339,4 +398,4 @@ const ChatRoomWebSocket = ({
   );
 };
 
-export default ChatRoomWebSocket; 
+export default ChatRoomWebSocket;
