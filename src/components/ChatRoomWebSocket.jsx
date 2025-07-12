@@ -41,7 +41,6 @@ const ChatRoomWebSocket = ({
   }, [roomId, userId]);
 
   useEffect(() => {
-    setMessages([]);
   }, [roomId]);
 
   useEffect(() => {
