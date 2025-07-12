@@ -214,7 +214,7 @@ export default function MyPageLocation() {
             />
 
             {/* 버튼 */}
-            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
+            <div className=" px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="선택 완료" onClick={handleConfirm} />
             </div>
         </div>

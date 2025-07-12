@@ -21,7 +21,10 @@ export const useRegisterStore = create((set) => ({
     setDetailLocation: (v) => set({ detailLocation: v }),
 
     questions: ["", ""],
-    setQuestions: (v) => set({ questions: v }),
+    setQuestions: (v) =>
+        set((state) => ({
+            questions: typeof v === "function" ? v(state.questions) : v,
+        })),
 
     selectedDate: null,
     setSelectedDate: (v) => set({ selectedDate: v }),
@@ -41,8 +44,10 @@ export const useRegisterStore = create((set) => ({
     setLocation: (address, lat, lng) => {
         set({
             selectedLocation: address,
-            latitude: lat,
-            longitude: lng,
+            latitude: null,
+            longitude: null,
+            setLatitude: (v) => set({ latitude: v }),
+            setLongitude: (v) => set({ longitude: v }),
         });
     },
 

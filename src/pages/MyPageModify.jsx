@@ -121,7 +121,7 @@ export default function MyPageModify() {
     return (
         <div>
             <MyPageUserHeader label="개인정보 수정" />
-            <div className="overflow-y-auto h-[660px] hide-scrollbar">
+            <div className="overflow-y-auto pb-[150px] h-[660px] hide-scrollbar">
                 <div className="flex items-center flex-col gap-[32px] py-[16px] px-[24px]">
                     {/* 숨겨진 input */}
                     <input
@@ -188,7 +188,7 @@ export default function MyPageModify() {
                     </div>
                 </div>
             </div>
-            <div className=" px-[24px] pt-[12px] pb-[38px] fixed bottom-0 ">
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="수정하기" onClick={handleSubmit} />
             </div>
             {isBankModalOpen && (

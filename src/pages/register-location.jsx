@@ -49,7 +49,7 @@ export default function RegisterLocation() {
                 map.setCenter(latlng);
                 marker.setPosition(latlng);
                 setLatlng({ lat, lng });
-                console.log("현재 위치 →",address , lat, lng);
+                console.log("현재 위치 →", address, lat, lng);
                 if (geocoderRef.current) {
                     geocoderRef.current.coord2Address(
                         lng,
@@ -221,7 +221,7 @@ export default function RegisterLocation() {
             />
 
             {/* 버튼 */}
-            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? 'bottom-[10px]' : ''}`}>
+            <div className={` px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10 ${isKeyboardOpen ? "!bottom-[10px]" : ""}`}>
                 <Button label="선택 완료" onClick={handleConfirm} />
             </div>
         </div>

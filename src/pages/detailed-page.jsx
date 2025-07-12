@@ -11,12 +11,12 @@ import DetailSimilar from "../components/detail-similar";
 import { DetailDate } from "../utils/detail-date";
 import { formatPrice } from "../utils/formatPrice";
 
-import ProductIcon from '../assets/상품.svg'
-import TimeIcon from '../assets/상세시간.svg'
-import LocationIcon from '../assets/상세위치.svg'
+import ProductIcon from "../assets/상품.svg";
+import TimeIcon from "../assets/상세시간.svg";
+import LocationIcon from "../assets/상세위치.svg";
 
 export default function DetailedPage() {
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+    const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8080";
     const { lostPostId } = useParams(); //
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -31,11 +31,14 @@ export default function DetailedPage() {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await axios.get(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
-                    headers: {
-                        Accept: "application/json",
-                    },
-                });
+                const response = await axios.get(
+                    `${apiBase}/api/v1/lostPosts/${lostPostId}`,
+                    {
+                        headers: {
+                            Accept: "application/json",
+                        },
+                    }
+                );
                 setPost(response.data);
                 setSimilarPosts(response.data.similarLostPosts || []); // 유사 페이지
             } catch (err) {
@@ -54,7 +57,7 @@ export default function DetailedPage() {
     return (
         <div>
             <DetailedHeader postMemberId={post.memberId} />
-            <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
+            <div className=" flex flex-col gap-[40px] pb-[150px] px-[24px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
                     <div>
@@ -64,29 +67,59 @@ export default function DetailedPage() {
                     <div className="flex flex-col gap-[8px]">
                         <div>
                             <span
-                                className={`rounded-[6px] py-[3px] px-[4px] text-[14px] ${post.registrationType === 'LOST'
-                                    ? 'bg-[#F9EAE0] text-[#FF5900]'
-                                    : 'bg-[#d3ffe5] text-[#00D455]'
+                                className={`rounded-[6px] py-[3px] px-[4px] text-[14px] ${post.registrationType === "LOST"
+                                    ? "bg-[#F9EAE0] text-[#FF5900]"
+                                    : "bg-[#d3ffe5] text-[#00D455]"
                                     }`}
                             >
-                                {post.registrationType === 'LOST' ? '분실했어요' : '주인 찾아요'}
+                                {post.registrationType === "LOST"
+                                    ? "분실했어요"
+                                    : "주인 찾아요"}
                             </span>
                         </div>
                         {/* 제목, 현상금, 카테고리 */}
-                        <h1 className="text-[22px] text-[#111111] font-semibold">{post.title}</h1>
-                        <p className="text-[22px] text-[#111111] font-semibold">현상금 {formatPrice(post.reward)}</p>
+                        <h1 className="text-[22px] text-[#111111] font-semibold">
+                            {post.title}
+                        </h1>
+                        <p className="text-[22px] text-[#111111] font-semibold">
+                            현상금 {formatPrice(post.reward)}
+                        </p>
                     </div>
 
                     {/* 본문 내용 */}
                     <p>{post.description}</p>
                 </div>
 
+                {post.registrationType === "LOST" && (
+                    <div
+                        className="p-2 rounded-m border border-[#FF0000] rounded-md"
+                        style={{ backgroundColor: "rgba(255, 0, 0, 0.1)" }}
+                    >
+                        <p className=" text-[#D32F2F] text-[14px] font-bold px-0.5 py-1">
+                            습득자는 현상금 요구가 가능하지만 강제할 수 없고, 물건 금액의
+                            20%를 넘기면 법적 문제가 될 수 있습니다.또한 습득자가 반환을
+                            거부하거나 악의로 보관하면 법적 책임을 질 수 있습니다.
+                        </p>
+                    </div>
+                )}
+
                 {/* 분실 정보 */}
                 <div className="flex flex-col gap-[8px]">
                     <p className="text-[#111111] font-bold text-[18px]">분실물 정보</p>
-                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]"><img src={ProductIcon} alt="물품" />{post.category} | {post.itemName}</p>
-                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]"> <img src={TimeIcon} alt="시간" />{DetailDate(post.lostDateTimeStart, post.lostDateTimeEnd)}</p>
-                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]"> <img src={LocationIcon} alt="위치" />{post.detailedLocation}</p>
+                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]">
+                        <img src={ProductIcon} alt="물품" />
+                        {post.category} | {post.itemName}
+                    </p>
+                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]">
+                        {" "}
+                        <img src={TimeIcon} alt="시간" />
+                        {DetailDate(post.lostDateTimeStart, post.lostDateTimeEnd)}
+                    </p>
+                    <p className="flex items-center gap-[6px] text-[#111111] text-[16px]">
+                        {" "}
+                        <img src={LocationIcon} alt="위치" />
+                        {post.detailedLocation}
+                    </p>
                 </div>
 
                 {/* 지도 (고정)*/}
@@ -106,19 +139,25 @@ export default function DetailedPage() {
                             />
                             <div>
                                 <p className="text-[16px] text-[#111111]">{post.nickname}</p>
-                                <p className="text-[14px] text-[#808080]">{post.lostLocationDong} · {post.timeAgo}</p>
+                                <p className="text-[14px] text-[#808080]">
+                                    {post.lostLocationDong} · {post.timeAgo}
+                                </p>
                             </div>
                         </div>
 
                         {/* 습득/반환 */}
                         <div className="flex gap-[30px]">
                             {[
-                                { label: '습득', count: 3 },
-                                { label: '반환', count: 2 },
+                                { label: "습득", count: 3 },
+                                { label: "반환", count: 2 },
                             ].map(({ label, count }) => (
                                 <div key={label} className="text-center px-[16px]">
-                                    <p className="text-[14px] text-[#111111] font-medium">{label}</p>
-                                    <p className="text-[14px] text-[#111111] font-medium">{count}회</p>
+                                    <p className="text-[14px] text-[#111111] font-medium">
+                                        {label}
+                                    </p>
+                                    <p className="text-[14px] text-[#111111] font-medium">
+                                        {count}회
+                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -138,7 +177,7 @@ export default function DetailedPage() {
                 )}
             </div>
             {/* 하단 버튼 */}
-            <div className=" pt-[12px] pb-[42px] px-[24px]">
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="채팅하기" onClick={() => navigate(`/chat/${post.memberId}`)}
                 ></Button>
             </div>
