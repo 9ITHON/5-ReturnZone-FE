@@ -3,28 +3,17 @@ import ChatMessage from "./ChatMessage";
 import { GetMyPage } from "../utils/GetMyPage";
 import { formatNumber } from "../utils/formatNumber";
 
-/**
- * ChatRoomWebSocket
- *
- * Props:
- * - roomId: string | number (필수)
- * - memberId: string | number (필수)
- * - subscribeTopic: string (예: `/topic/chat/${roomId}`)
- * - sendDestination: string (예: `/app/chat.send`)
- * - renderMessage: (msg, idx) => ReactNode (optional, 메시지 렌더링 커스텀)
- */
 const ChatRoomWebSocket = ({
   memberId,
-  showFoundOwnerMsg = false,
-  showDeliveryCompleted = false,
+  item, // item 데이터를 prop으로 받음
   isLostOwner = false,
   isFinder = false,
   showPaymentCompleted = false,
   showRewardModal = false,
   setShowRewardModal = () => {},
   setShowDeliveryCompleted = () => {},
+  setShowPaymentCompleted = () => {}, // prop 추가
 }) => {
-  // 내쪽(오른쪽) 더미 메시지 3개
   const initialMyMessages = [
     {
       id: 1001,
@@ -45,7 +34,6 @@ const ChatRoomWebSocket = ({
       createdAt: "2024-06-10T10:00:03.000Z",
     },
   ];
-  // 왼쪽(상대방) 더미 메시지
   const dummyMessages = [
     {
       id: 1,
@@ -66,16 +54,14 @@ const ChatRoomWebSocket = ({
       createdAt: "2024-06-10T10:00:15.000Z",
     },
   ];
-  // 실제 메시지 state: 오른쪽 더미만 먼저 보임
   const [messages, setMessages] = useState(initialMyMessages);
   const [input, setInput] = useState("");
-  const [dummyIndex, setDummyIndex] = useState(0); // 다음에 보여줄 더미 메시지 인덱스
-  const [rewardAmount, setRewardAmount] = useState(""); // 현상금 금액
-  const [isAgreed, setIsAgreed] = useState(false); // 약관 동의 상태
-  const [userInfo, setUserInfo] = useState(null); // 사용자 정보
+  const [dummyIndex, setDummyIndex] = useState(0); 
+  const [rewardAmount, setRewardAmount] = useState(""); 
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -88,7 +74,6 @@ const ChatRoomWebSocket = ({
     fetchUserInfo();
   }, []);
 
-  // 2초 후 왼쪽 더미 메시지 1개씩 1초 간격으로 추가
   useEffect(() => {
     if (dummyIndex === 0) {
       const timer = setTimeout(() => {
@@ -101,7 +86,7 @@ const ChatRoomWebSocket = ({
           ...prev,
           {
             ...dummyMessages[dummyIndex - 1],
-            id: Date.now() + dummyIndex, // 고유 id 보장
+            id: Date.now() + dummyIndex,
             createdAt: new Date().toISOString(),
           },
         ]);
@@ -110,7 +95,7 @@ const ChatRoomWebSocket = ({
       return () => clearTimeout(timer);
     }
   }, [dummyIndex]);
-
+  
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -131,36 +116,33 @@ const ChatRoomWebSocket = ({
 
   const handleRewardPayment = () => {
     if (!isAgreed || !rewardAmount.trim()) return;
-    // 현상금 지급 로직 처리
-    console.log("현상금 지급:", rewardAmount);
+    // TODO: 실제 현상금 지급 API 호출 로직
+    console.log("현상금 지급 API 호출:", rewardAmount);
     setShowRewardModal(false);
-    setShowDeliveryCompleted(true); // 전달 완료 상태로 변경
+    setShowDeliveryCompleted(true); // 습득자 버튼 상태 변경용
+    setShowPaymentCompleted(true);  // 분실자에게 지급 완료 알림 표시용
     setRewardAmount("");
     setIsAgreed(false);
   };
-
-  // 숫자 입력 처리 및 포맷팅
+  
   const handleRewardAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    const value = e.target.value.replace(/[^0-9]/g, '');
     setRewardAmount(value);
   };
-
-  // 숫자를 천 단위로 포맷팅
+  
   const formatNumberLocal = (num) => {
     if (!num) return '';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  // 버튼 활성화 조건: 약관 동의 + 금액 입력
   const isButtonEnabled = isAgreed && rewardAmount.trim() !== "";
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
       <div
-        className="flex-1 overflow-y-auto px-2 py-2 min-h-0 max-h-full"
-        style={{ background: '#fff', maxHeight: 'calc(100vh - 120px)', height: '100%' }}
+        className="flex-1 overflow-y-auto px-2 py-2 min-h-0"
+        style={{ background: '#fff' }}
       >
-        {/* 상단 안내문(❗)도 스크롤 영역 안에 포함 */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
             <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
@@ -176,7 +158,6 @@ const ChatRoomWebSocket = ({
             </span>
           </p>
         </div>
-        {/* 채팅 메시지 + 안내문 스크롤 영역 */}
         <div className="flex flex-col w-full min-h-0">
           {messages.map((msg, idx) => {
             const isMine = String(msg.memberId) === String(memberId);
@@ -190,11 +171,27 @@ const ChatRoomWebSocket = ({
                 isMine={isMine}
                 senderName={isMine ? "나" : "상대방"}
                 showSenderName={!isMine && isLastOfGroup}
-                showTime={false}
               />
             );
           })}
-          {/* 안내문: 마지막 메시지 바로 밑에 */}
+          
+          {/* 마지막 메시지 시간과 읽음 상태 표시 */}
+          {messages.length > 0 && (
+            <div className={`flex items-center gap-1 mt-1 w-fit ${String(messages[messages.length - 1].memberId) === String(memberId) ? 'ml-auto' : 'mr-auto'}`}>
+              {String(messages[messages.length - 1].memberId) === String(memberId) && (
+                <p className="text-xs font-medium text-[#808080]">읽음</p>
+              )}
+              <p className="text-xs text-[#808080]">
+                {new Date(messages[messages.length - 1].createdAt).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Asia/Seoul',
+                })}
+              </p>
+            </div>
+          )}
+
+          {/* 분실자에게 현상금 지급 완료 알림 */}
           {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
             <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-2 mb-2">
               <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
@@ -232,21 +229,7 @@ const ChatRoomWebSocket = ({
             </span>
           </div>
         )}
-      
-        {/* 전달 완료 메시지 - 습득자용 */}
-        {showDeliveryCompleted && isFinder && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                🎉 전달 완료! 주인이 물건을 잘 받았어요.
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                약속된 500포인트가 지급되었습니다. 감사합니다!
-              </span>
-            </p>
-          </div>
-        )}
+    
         {showFoundOwnerMsg && isLostOwner && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
@@ -264,19 +247,6 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
-        {showDeliveryCompleted && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                🎉 물건을 잘 받으셨군요!
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                찾아주신 분에게 현상금이 지급되었습니다.
-              </span>
-            </p>
-          </div>
-        )}
         {showPaymentCompleted && isLostOwner && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
@@ -284,7 +254,12 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
+          
+          <div style={{height:24}} />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
+  );
       
       {/* 현상금 지급 모달 */}
       {showRewardModal && (
@@ -299,7 +274,7 @@ const ChatRoomWebSocket = ({
           }}
         >
           <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
-            <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+             <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
               <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
                 <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
               </div>
@@ -317,6 +292,7 @@ const ChatRoomWebSocket = ({
                       <img
                         src={userInfo?.imageUrl || "rectangle-3468137.jpeg"}
                         className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
+                        alt="user profile"
                       />
                     </div>
                     <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
@@ -342,7 +318,7 @@ const ChatRoomWebSocket = ({
                           현상금
                         </p>
                         <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-left text-[#06f]">
-                          10,000원 중
+                           {item?.reward ? `${formatNumber(item.reward)}원 중` : ''}
                         </p>
                       </div>
                     </div>
@@ -356,31 +332,9 @@ const ChatRoomWebSocket = ({
                     />
                   </div>
                   <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
-                    <svg
-                      width={16}
-                      height={16}
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
-                        stroke="#808080"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                      />
-                      <circle
-                        cx="0.666667"
-                        cy="0.666667"
-                        r="0.5"
-                        transform="matrix(-1 0 0 1 8.66699 10)"
-                        fill="#808080"
-                        stroke="#808080"
-                        strokeWidth="0.333333"
-                      />
+                    <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-4 h-4 relative" preserveAspectRatio="none" >
+                      <path d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z" stroke="#808080" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <circle cx="0.666667" cy="0.666667" r="0.5" transform="matrix(-1 0 0 1 8.66699 10)" fill="#808080" stroke="#808080" strokeWidth="0.333333" />
                     </svg>
                     <p className="flex-grow w-[322px] text-sm text-left text-[#808080]">
                       현상금은 0원 입력도 가능하며, 물건 금액의 5~20% 지급을 권장하고, 지급 시 자동으로 '해결
@@ -390,62 +344,24 @@ const ChatRoomWebSocket = ({
                 </div>
               </div>
               <div className="flex justify-between items-start self-stretch flex-grow-0 flex-shrink-0 h-11">
-                <div className="flex justify-between items-center flex-grow relative overflow-hidden px-6">
-                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
-                    <button
-                      onClick={() => setIsAgreed(!isAgreed)}
-                      className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative"
-                    >
-                      <svg
-                        width={44}
-                        height={44}
-                        viewBox="0 0 44 44"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="flex-grow-0 flex-shrink-0 w-11 h-11 relative"
-                        preserveAspectRatio="none"
-                      >
-                        <rect x="11.5" y="11.5" width={21} height={21} rx="3.5" stroke={isAgreed ? "#06f" : "#808080"} fill={isAgreed ? "#06f" : "transparent"} />
-                        {isAgreed && (
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M20.1723 24.8999L26.9661 18L28 19.05L20.1723 27L16 22.7625L17.0339 21.7125L20.1723 24.8999Z"
-                            fill="white"
-                          />
-                        )}
-                      </svg>
-                      <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#4d4d4d]">
-                        약관 동의하기
-                      </p>
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowRewardModal(false);
-                      setRewardAmount("");
-                      setIsAgreed(false);
-                    }}
-                  >
-                    <svg
-                      width={24}
-                      height={24}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M9 6L15 12L9 18"
-                        stroke="#808080"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                 <div className="flex justify-between items-center flex-grow relative overflow-hidden px-6">
+                   <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
+                     <button
+                       onClick={() => setIsAgreed(!isAgreed)}
+                       className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative"
+                     >
+                       <svg width={44} height={44} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-11 h-11 relative" preserveAspectRatio="none">
+                         <rect x="11.5" y="11.5" width={21} height={21} rx="3.5" stroke={isAgreed ? "#06f" : "#808080"} fill={isAgreed ? "#06f" : "transparent"} />
+                         {isAgreed && (
+                           <path fillRule="evenodd" clipRule="evenodd" d="M20.1723 24.8999L26.9661 18L28 19.05L20.1723 27L16 22.7625L17.0339 21.7125L20.1723 24.8999Z" fill="white" />
+                         )}
+                       </svg>
+                       <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#4d4d4d]">
+                         약관 동의하기
+                       </p>
+                     </button>
+                   </div>
+                 </div>
               </div>
             </div>
             <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
@@ -468,7 +384,7 @@ const ChatRoomWebSocket = ({
       )}
       
       {/* 메시지 입력 바 */}
-      <div
+       <div
         className="flex flex-col justify-start items-center bg-white"
         style={{
           position: "fixed",
@@ -510,7 +426,7 @@ const ChatRoomWebSocket = ({
                     <path d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                   </g>
                   <defs>
-                    <clipPath id="clip0_652_9848">
+                    <clipPath id="clip0_652_9848)">
                       <rect width={24} height={24} fill="white" />
                     </clipPath>
                   </defs>
