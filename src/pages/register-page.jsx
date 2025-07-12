@@ -260,15 +260,15 @@ export default function RegisterPage() {
         formData.append("images", img);
       });
 
-      const response = await axios.post(
+      const res = await axios.post(
         `${apiBase}/api/v1/lostPosts`,
         formData,
         {
-          // 🔥 주의: Content-Type은 axios가 자동 설정해야 함!
-          // headers: {
-          //   "Content-Type": "multipart/form-data",
-          // },
-          validateStatus: () => true,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          validateStatus: () => true
         }
       );
 
