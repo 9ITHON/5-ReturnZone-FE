@@ -13,17 +13,17 @@ const apiClient = axios.create({
   },
   withCredentials: true,
 });
-
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem('accessToken');
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+// 자동으로 JWT 토큰 추가
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken'); // ✅ 반드시 accessToken
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`; // ✅ 누락되면 401
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // apiClient.interceptors.response.use(
 //   (response) => response,
@@ -49,7 +49,7 @@ const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
 
 export function getUserId() {
   // 로그인하지 않았으면 null 반환
-  return localStorage.getItem('user_id') ?? null;
+  return localStorage.getItem('userId') ?? null;
 }
 
 export const apiService = {
@@ -105,7 +105,7 @@ export const apiService = {
     } catch {
       // ignore error, always remove token
     }
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('accessToken');
   },
   // 아이디 찾기
   async findId({ name, email }) {
@@ -126,7 +126,8 @@ export const apiService = {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/login/kakao', { kakaoAccessToken, userInfo });
       if (response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.accessToken);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        console.log("로그인 응답:", response);
       }
       return response.data;
     });
@@ -160,13 +161,13 @@ export const apiService = {
       return response.data;
     });
   },
-  // 분실물 조회
-  async getLostPost(id) {
-    return retryRequest(async () => {
-      const response = await apiClient.get(`/lostPosts/${lostPostId}`);
-      return response.data;
-    });
-  },
+  // // 분실물 조회
+  // async getLostPost(id) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.get(`/lostPosts/${lostPostId}`);
+  //     return response.data;
+  //   });
+  // },
   // 분실물 생성
   async createLostPost(data) {
     return retryRequest(async () => {
@@ -175,18 +176,18 @@ export const apiService = {
     });
   },
   // 분실물 수정
-  async updateLostPost(id, data) {
-    return retryRequest(async () => {
-      const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);
-      return response.data;
-    });
-  },
-  async deleteLostPost(id) {
-    return retryRequest(async () => {
-      const response = await apiClient.delete(`/lostPosts/${lostPostId}`);
-      return response.data;
-    });
-  },
+  // async updateLostPost(id, data) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);
+  //     return response.data;
+  //   });
+  // },
+  // async deleteLostPost(id) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.delete(`/lostPosts/${lostPostId}`);
+  //     return response.data;
+  //   });
+  // },
   // 검색
   async searchLostPosts(params = {}) {
     return retryRequest(async () => {
@@ -207,11 +208,15 @@ export const apiService = {
       return response.data;
     });
   },
+  // 룸 들어가기 (채팅 목록 조회)
   async getChatRoom(roomId) {
     return retryRequest(async () => {
-      const response = await apiClient.get(`/chat/rooms/${roomId}`);
+      const response = await apiClient.get(`/chats/rooms/${roomId}/messages`, {
+        params: { page },
+      });
       return response.data;
     });
+
   },
   // 채팅 메시지 조회 (Swagger 기준)
   async getChatMessages(roomId, page = 0) {
