@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'; // Router 추가
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
 import RegisterLocation from './pages/register-location';
@@ -43,7 +43,7 @@ function AppRoute() {
 
       {/* 로그인된 사용자만 접근 가능한 라우트 */}
       <Route path='/SearchPage' element={loginRequired(<SearchPage />)} />
-      <Route path='/Chat' element={loginRequired(<Chat />)} />
+      <Route path='/Chat/:roomId' element={loginRequired(<Chat />)} />
       <Route path='/ChatList' element={loginRequired(<ChatList />)} />
       <Route path='/RegisterLocation' element={loginRequired(<RegisterLocation />)} />
       <Route path="/lost/:lostPostId/edit" element={loginRequired(<ModifyPage />)} />
