@@ -157,10 +157,10 @@ const ChatRoomWebSocket = ({
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-white"
+      className="flex flex-col h-[630px] w-full bg-white"
       style={{
         minHeight: 0,
-        height: "100%",
+        height: "60%",
         maxWidth: 480,
         width: "100vw",
         margin: "0 auto",
