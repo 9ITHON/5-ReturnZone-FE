@@ -2,12 +2,13 @@ import axios from "axios";
 
 const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 //실제 API 호출
-export const GetMyPage = async (userId) => {
-    if (!userId) throw new Error("userId is required");
+export const GetMyPage = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) throw new Error("Access token is missing");
 
     const response = await axios.get(`${apiBase}/api/v1/mypage`, {
         headers: {
-            "X-USER-ID": userId,
+            Authorization: `Bearer ${accessToken}`,
         },
     });
 
