@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Router 추가
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
 import RegisterLocation from './pages/register-location';
@@ -16,6 +16,7 @@ import MyPageProduct from './pages/MyPageProduct';
 import MyPageLocation from './pages/MyPageLocation';
 import { AuthProvider } from "./utils/AuthContext.jsx";
 import UserMessageLogin from './components/UserMessageLogin';
+import KakaoCallback from './pages/KakaoCallback';
 
 // 라우터 설정 함수
 function AppRoute() {
@@ -38,6 +39,7 @@ function AppRoute() {
       <Route path='/SignUp' element={<SignUp />} />
       <Route path='/Register' element={<RegisterPage />} />
       <Route path='/lost/:lostPostId' element={<DetailedPage />} />
+      <Route path='/kakao-callback' element={<KakaoCallback />} />
 
       {/* 로그인된 사용자만 접근 가능한 라우트 */}
       <Route path='/SearchPage' element={loginRequired(<SearchPage />)} />
