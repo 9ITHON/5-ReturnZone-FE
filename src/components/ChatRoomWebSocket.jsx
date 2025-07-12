@@ -33,6 +33,7 @@ const ChatRoomWebSocket = ({
   const clientRef = useRef(null);
   const subscriptionRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     if (!roomId || !memberId) return;
@@ -64,6 +65,7 @@ const ChatRoomWebSocket = ({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: {
         "X-USER-ID": memberId,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       debug: (str) => {
         console.log("STOMP Debug:", str);
@@ -121,7 +123,7 @@ const ChatRoomWebSocket = ({
     if (input.trim() && clientRef.current?.connected) {
       const chatMessage = {
         roomId: roomId,
-        token : token , 
+        memberId: memberId,
         content: input,
         type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장
