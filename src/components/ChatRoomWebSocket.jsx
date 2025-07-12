@@ -156,13 +156,17 @@ const ChatRoomWebSocket = ({
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
+      {/* 스크롤 가능한 메시지 영역 */}
       <div
-        className="flex-1 overflow-y-auto px-2 py-2 min-h-0 max-h-full"
-        style={{ background: '#fff', maxHeight: 'calc(100vh - 120px)', height: '100%' }}
+        className="flex-1 overflow-y-auto px-6 py-2"
+        style={{ 
+          background: '#fff', 
+          maxHeight: 'calc(100vh - 200px)', 
+          minHeight: 0 
+        }}
       >
-         <div className="flex-grow overflow-y-auto px-6 py-2 space-y-4">
-        {/* 상단 안내문(❗)도 스크롤 영역 안에 포함 */}
-        <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+        {/* 상단 안내문(❗) */}
+        <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-4">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
             <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
               ❗현상금 요구는 가능하지만 강제할 수 없고,{' '}
@@ -177,8 +181,9 @@ const ChatRoomWebSocket = ({
             </span>
           </p>
         </div>
-        {/* 채팅 메시지 + 안내문 스크롤 영역 */}
-        <div className="flex flex-col w-full min-h-0">
+
+        {/* 채팅 메시지들 */}
+        <div className="flex flex-col w-full space-y-2">
           {messages.map((msg, idx) => {
             const isMine = String(msg.memberId) === String(memberId);
             const isLastOfGroup =
@@ -195,55 +200,39 @@ const ChatRoomWebSocket = ({
               />
             );
           })}
-          {/* 안내문: 마지막 메시지 바로 밑에 */}
-          {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
-            <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-2 mb-2">
-              <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  📦 물건 전달이 시작되었습니다.
-                </span>
-                <br />
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  물건을 받으셨다면, 상단의 버튼을 눌러주세요.
-                </span>
-                <br />
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
-                </span>
-              </p>
-            </div>
-          )}
-          {/* 안내문이 입력창에 가려지지 않도록 24px 여유 공간 */}
-          <div style={{height:24}} />
-          <div ref={messagesEndRef} />
         </div>
-        {/* 마지막 메시지 시간만 하단에 표시 */}
-        {messages.length > 0 && (
-          <div className="flex justify-end items-center w-full mt-2 pr-4">
-            <span className="text-xs text-[#808080]">
-              {(() => {
-                const lastMsg = messages[messages.length - 1];
-                const date = new Date(lastMsg.createdAt);
-                return date.toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: 'Asia/Seoul',
-                });
-              })()}
-            </span>
+
+        {/* 안내문: 마지막 메시지 바로 밑에 */}
+        {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4 mb-2">
+            <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+              <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                📦 물건 전달이 시작되었습니다.
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                물건을 받으셨다면, 상단의 버튼을 눌러주세요.
+              </span>
+              <br />
+              <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
+              </span>
+            </p>
           </div>
         )}
-        </div>
+
         {/* 전달 완료 메시지 - 습득자용 */}
         {showDeliveryCompleted && isFinder && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4 mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               ✅ 습득자에게 현상금이 지급되었어요. 감사합니다!  
             </p>
           </div>
         )}
+
+        {/* 분실자용 안내문들 */}
         {showFoundOwnerMsg && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4 mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
                 📦 물건 전달이 시작되었습니다.
@@ -259,8 +248,9 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
+
         {showDeliveryCompleted && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4 mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
                 🎉 물건을 잘 받으셨군요!
@@ -272,13 +262,34 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
+
         {showPaymentCompleted && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
+          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4 mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               ✅ 습득자에게 현상금이 지급되었어요. 감사합니다!
             </p>
           </div>
         )}
+
+        {/* 마지막 메시지 시간만 하단에 표시 */}
+        {messages.length > 0 && (
+          <div className="flex justify-end items-center w-full mt-4 pr-4">
+            <span className="text-xs text-[#808080]">
+              {(() => {
+                const lastMsg = messages[messages.length - 1];
+                const date = new Date(lastMsg.createdAt);
+                return date.toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Asia/Seoul',
+                });
+              })()}
+            </span>
+          </div>
+        )}
+
+        {/* 스크롤 끝 지점 */}
+        <div ref={messagesEndRef} style={{ height: '24px' }} />
       </div>
       
       {/* 현상금 지급 모달 */}
