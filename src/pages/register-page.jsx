@@ -536,7 +536,7 @@ export default function RegisterPage() {
         </div>
       </div>
       <div
-        className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-2 ${
+        className={`px-[24px] py-[12px] fixed bottom-[0px] md:bottom-[110px] z-2 ${
           isKeyboardOpen ? "!bottom-[10px]" : ""
         }`}
       >

@@ -160,13 +160,13 @@ export const apiService = {
       return response.data;
     });
   },
-  // 분실물 조회
-  async getLostPost(id) {
-    return retryRequest(async () => {
-      const response = await apiClient.get(`/lostPosts/${lostPostId}`);
-      return response.data;
-    });
-  },
+  // // 분실물 조회
+  // async getLostPost(id) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.get(`/lostPosts/${lostPostId}`);
+  //     return response.data;
+  //   });
+  // },
   // 분실물 생성
   async createLostPost(data) {
     return retryRequest(async () => {
@@ -175,18 +175,18 @@ export const apiService = {
     });
   },
   // 분실물 수정
-  async updateLostPost(id, data) {
-    return retryRequest(async () => {
-      const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);
-      return response.data;
-    });
-  },
-  async deleteLostPost(id) {
-    return retryRequest(async () => {
-      const response = await apiClient.delete(`/lostPosts/${lostPostId}`);
-      return response.data;
-    });
-  },
+  // async updateLostPost(id, data) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);
+  //     return response.data;
+  //   });
+  // },
+  // async deleteLostPost(id) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.delete(`/lostPosts/${lostPostId}`);
+  //     return response.data;
+  //   });
+  // },
   // 검색
   async searchLostPosts(params = {}) {
     return retryRequest(async () => {
