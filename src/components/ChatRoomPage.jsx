@@ -8,7 +8,7 @@ import ItemCard from "./ItemCard";
 import ChatRoomItemCard from "./ChatRoomItemCard";
 
 const ConfirmOwnerModal = ({ onClose, userName }) => (
-  <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30">
+  <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30 w-[390px] h-[630px]">
     <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
       <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
         <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
