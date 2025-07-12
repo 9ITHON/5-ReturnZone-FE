@@ -39,6 +39,11 @@ const ChatRoomWebSocket = ({
     // eslint-disable-next-line
   }, [roomId, userId]);
 
+  // roomId가 바뀔 때 메시지 초기화
+  useEffect(() => {
+    setMessages([]);
+  }, [roomId]);
+
   // Store subscription ref
   const subscriptionRef = useRef(null);
 

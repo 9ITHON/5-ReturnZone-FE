@@ -477,7 +477,7 @@ const ChatRoomPage = () => {
   const [showOption, setShowOption] = useState(false);
   const [reportModalType, setReportModalType] = useState(null);
   const [item, setItem] = useState(null);
-  const [roomId, setRoomId] = useState(params.id);
+  const [roomId, setRoomId] = useState(params.roomId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState("");
@@ -519,7 +519,7 @@ const ChatRoomPage = () => {
         let chatRoomId = lostPostId;
         const targetUserId = itemData?.memberId || itemData?.userId;
         if (
-          !params.id &&
+          !params.roomId &&
           lostPostId &&
           targetUserId &&
           userId !== targetUserId
@@ -541,7 +541,7 @@ const ChatRoomPage = () => {
     }
     fetchData();
     // eslint-disable-next-line
-  }, [lostPostId, params.id]);
+  }, [lostPostId, params.roomId]);
 
   if (loading)
     return (
@@ -780,11 +780,11 @@ const ChatRoomPage = () => {
           <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
             <ChatRoomWebSocket
               roomId={String(
-                roomId || lostPostId || params.id || params.lostPostId
+                roomId || lostPostId || params.roomId || params.lostPostId
               )}
               userId={String(userId)}
               subscribeTopic={`/topic/chat/${String(
-                roomId || lostPostId || params.id || params.lostPostId
+                roomId || lostPostId || params.roomId || params.lostPostId
               )}`}
               sendDestination="/app/chat.send"
               showFoundOwnerMsg={showFoundOwnerMsg}
