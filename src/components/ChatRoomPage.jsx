@@ -559,7 +559,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
     );
 
   return (
-    <>
+    <div className="flex flex-col h-screen w-full max-w-[390px] mx-auto bg-white" >
       {/* 상단 헤더 */}
       <div className="flex justify-between items-center w-[390px] overflow-hidden px-6 py-1.5 bg-white">
         <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
@@ -812,7 +812,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -342,7 +342,7 @@ const ChatRoomWebSocket = ({
                           현상금
                         </p>
                         <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-left text-[#06f]">
-                          10,000원 중
+                          60,000원 중
                         </p>
                       </div>
                     </div>
@@ -453,7 +453,7 @@ const ChatRoomWebSocket = ({
                 <button
                   onClick={handleRewardPayment}
                   disabled={!isButtonEnabled}
-                  className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#e6e6e6] disabled:text-[#808080]"
+                  className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#06f] disabled:text-[#808080]"
                 >
                   <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
                     <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
