@@ -162,47 +162,48 @@ export default function RegisterPage() {
   };
   // 한글 오전/오후 시간 → HH:mm 포맷으로 변환
   function convertTo24HourFormat(timeStr) {
-    // 예: '오전 3:00' → '03:00', '오후 1:30' → '13:30'
     const [ampm, time] = timeStr.split(' ');
     let [hour, minute] = time.split(':').map((t) => parseInt(t, 10));
-
-    if (ampm === '오전') {
-      if (hour === 12) hour = 0;
-    } else if (ampm === '오후') {
-      if (hour !== 12) hour += 12;
-    }
-
+    if (ampm === '오전' && hour === 12) hour = 0;
+    if (ampm === '오후' && hour !== 12) hour += 12;
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   }
-  // 분실물 등록
+
   const handleRegister = async () => {
     try {
-      // 로그인 유효성 검사 진행
       if (!userId) {
         alert("로그인이 필요한 기능입니다.");
         return;
       }
-      const startTime = convertTo24HourFormat(selectedTimes[0]);
-      const endTime = convertTo24HourFormat(selectedTimes[1]);
-      const lostDateTimeStart = new Date(`${date}T${startTime}`);
-      const lostDateTimeEnd = new Date(`${date}T${endTime}`);
-
-      if (!(selectedDate instanceof Date) || isNaN(selectedDate)) {
+      if (!(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
         alert("날짜를 올바르게 선택해주세요.");
+        return;
+      }
+      if (
+        !Array.isArray(selectedTimes) ||
+        selectedTimes.length < 2 ||
+        typeof selectedTimes[0] !== "string" ||
+        typeof selectedTimes[1] !== "string"
+      ) {
+        alert("시간을 올바르게 선택해주세요.");
         return;
       }
 
       const date = selectedDate.toISOString().split("T")[0];
+      const startTime = convertTo24HourFormat(selectedTimes[0]);
+      const endTime = convertTo24HourFormat(selectedTimes[1]);
 
-      console.log("selectedDate:", selectedDate);
-      console.log("selectedTimes:", selectedTimes);
-      console.log("startTime:", selectedTimes?.[0]);
-      console.log("endTime:", selectedTimes?.[1]);
-      if (isNaN(lostDateTimeStart) || isNaN(lostDateTimeEnd)) {
-        alert("시간을 올바르게 입력해주세요.");
+      const lostDateTimeStart = new Date(`${date}T${startTime}`);
+      const lostDateTimeEnd = new Date(`${date}T${endTime}`);
+
+      if (
+        isNaN(lostDateTimeStart.getTime()) ||
+        isNaN(lostDateTimeEnd.getTime())
+      ) {
+        alert("시간 형식이 올바르지 않습니다.");
         return;
       }
-      // 바디 정의
+
       const requestDto = {
         registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
         title,
@@ -224,30 +225,28 @@ export default function RegisterPage() {
         lostDateTimeEnd: lostDateTimeEnd.toISOString(),
       };
 
-      // 이미지 처리 및 요청 바디 결합
       const formData = new FormData();
       formData.append(
         "requestDto",
         new Blob([JSON.stringify(requestDto)], { type: "application/json" })
       );
+
       images.forEach((img) => {
         formData.append("images", img);
       });
 
-      // POST 요청
       const response = await axios.post(
         `${apiBase}/api/v1/lostPosts`,
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data", // optional (axios가 자동 지정함)
-            // "X-USER-ID": userId, // 명세에 따라 로그인한 사용자 ID 전달
-          },
+          // 🔥 주의: Content-Type은 axios가 자동 설정해야 함!
+          // headers: {
+          //   "Content-Type": "multipart/form-data",
+          // },
           validateStatus: () => true,
         }
       );
 
-      // 응답 처리
       if (response.status === 201) {
         alert("등록이 완료되었습니다.");
         reset();
@@ -256,15 +255,15 @@ export default function RegisterPage() {
         const msg = response.data?.message || "입력값을 다시 확인해 주세요.";
         alert(`요청 오류: ${msg}`);
       } else {
-        alert(
-          `서버 오류 (${response.status})가 발생했습니다. 잠시 후 다시 시도해 주세요.`
-        );
+        alert(`서버 오류 (${response.status})가 발생했습니다.`);
       }
     } catch (error) {
       console.error("등록 요청 실패:", error);
       alert("요청 중 예외가 발생했습니다.");
     }
   };
+
+
   // 외부클릭으로 모달 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
