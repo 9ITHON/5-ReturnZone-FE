@@ -57,7 +57,7 @@ export default function DetailedPage() {
     return (
         <div>
             <DetailedHeader postMemberId={post.memberId} />
-            <div className=" flex flex-col gap-[40px] pb-[150px] px-[24px] overflow-y-auto hide-scrollbar">
+            <div className=" flex flex-col gap-[40px] pb-[150px] px-[24px] h-[680px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
                     <div>
