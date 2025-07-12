@@ -223,7 +223,9 @@ export default function RegisterPage() {
         feature5: questions[4] || "",
         lostDateTimeStart: lostDateTimeStart.toISOString(),
         lostDateTimeEnd: lostDateTimeEnd.toISOString(),
+
       };
+      console.log("requestDto:", requestDto);
 
       const formData = new FormData();
       formData.append(
