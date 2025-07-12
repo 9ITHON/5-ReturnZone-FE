@@ -273,13 +273,6 @@ const ChatRoomWebSocket = ({
       {/* 메시지 입력 바 */}
       <div
         className="flex flex-col justify-start items-center w-[390px] gap-[38px] pt-3 pb-12 bg-white"
-        style={{
-          position: "fixed",
-          left: "50%",
-          transform: "translateX(-50%)",
-          bottom: 0,
-          zIndex: 20,
-        }}
       >
         <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
           <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
