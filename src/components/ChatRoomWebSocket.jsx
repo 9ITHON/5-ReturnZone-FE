@@ -1,8 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client/dist/sockjs.js";
+import React from "react";
 import ChatMessage from "./ChatMessage";
-import { apiService } from "../services/apiService";
 
 /**
  * ChatRoomWebSocket
@@ -14,156 +11,51 @@ import { apiService } from "../services/apiService";
  * - sendDestination: string (예: `/app/chat.send`)
  * - renderMessage: (msg, idx) => ReactNode (optional, 메시지 렌더링 커스텀)
  */
-const WS_URL = "https://15.164.234.32.nip.io/ws-stomp";
-
-const ChatRoomWebSocket = ({
-  roomId,
-  memberId, // userId -> memberId
-  subscribeTopic,
-  sendDestination,
-  showFoundOwnerMsg,
-  showDeliveryMsg,
-  showDeliveryCompleted,
-  isLostOwner,
-  isFinder,
-  showPaymentCompleted,
-}) => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const clientRef = useRef(null);
-  const subscriptionRef = useRef(null);
-  const messagesEndRef = useRef(null);
-  const accessToken = localStorage.getItem("accessToken");
-
-  useEffect(() => {
-    if (!roomId || !memberId) return;
-    connect();
-    return () => disconnect();
-  }, [roomId, memberId]);
-
-  useEffect(() => {}, [roomId]);
-
-  useEffect(() => {
-    if (!roomId || !memberId) return;
-    const loadChatHistory = async () => {
-      try {
-        console.log("Loading chat history for roomId:", roomId);
-        const response = await apiService.getChatMessages(roomId, 0);
-        console.log("Chat history loaded:", response);
-        if (response && response.content) {
-          setMessages(response.content);
-        }
-      } catch (error) {
-        console.error("Failed to load chat history:", error);
-      }
-    };
-    loadChatHistory();
-  }, [roomId, memberId]);
-
-  const connect = () => {
-    clientRef.current = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
-      connectHeaders: {
-        "X-USER-ID": memberId,
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
-      debug: (str) => {
-        console.log("STOMP Debug:", str);
-      },
-      reconnectDelay: 5000,
-      onConnect: () => {
-        console.log("WebSocket connected successfully");
-        subscribe();
-      },
-      onStompError: (frame) => {
-        console.error("STOMP Error:", frame);
-      },
-    });
-    clientRef.current.activate();
-  };
-
-  const disconnect = () => {
-    if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe();
-      subscriptionRef.current = null;
-    }
-    if (clientRef.current) {
-      clientRef.current.deactivate();
-    }
-  };
-
-  const subscribe = () => {
-    if (!clientRef.current || !subscribeTopic) return;
-    subscriptionRef.current = clientRef.current.subscribe(
-      subscribeTopic,
-      async (message) => {
-        console.log('WebSocket 수신 메시지:', message); // 수신 디버깅 로그 추가
-        const receivedMessage = JSON.parse(message.body);
-        setMessages((prev) => {
-          const isDuplicate = prev.some(
-            (m) =>
-              (m.id && receivedMessage.id && m.id === receivedMessage.id) ||
-              (m.content === receivedMessage.content &&
-                m.createdAt === receivedMessage.createdAt)
-          );
-          return isDuplicate ? prev : [...prev, receivedMessage];
-        });
-        if (String(receivedMessage.memberId) !== String(memberId)) {
-          try {
-            await apiService.markMessageAsRead(roomId, memberId);
-            console.log("Message marked as read");
-          } catch (error) {
-            console.error("Failed to mark message as read:", error);
-          }
-        }
-      }
-    );
-  };
-
-  const sendMessage = () => {
-    if (input.trim() && clientRef.current?.connected) {
-      const chatMessage = {
-        roomId: roomId,
-        memberId: memberId,
-        content: input,
-        type: "TEXT",
-        createdAt: new Date().toISOString(), // UTC로 저장
-      };
-      clientRef.current.publish({
-        destination: sendDestination,
-        body: JSON.stringify(chatMessage),
-      });
-      setInput("");
-    } else {
-      console.log("Cannot send message:", {
-        hasInput: !!input.trim(),
-        hasClient: !!clientRef.current,
-        isConnected: clientRef.current?.connected,
-      });
-    }
-  };
+const ChatRoomWebSocket = ({ memberId }) => {
+  // 더미 채팅 데이터: 내 메시지(memberId), 상대 메시지('other') 번갈아가며
+  const messages = [
+    {
+      id: 1,
+      memberId: memberId,
+      content: "안녕하세요!",
+      createdAt: "2024-06-10T10:00:00.000Z",
+    },
+    {
+      id: 2,
+      memberId: "other",
+      content: "네, 안녕하세요! 무엇을 도와드릴까요?",
+      createdAt: "2024-06-10T10:00:05.000Z",
+    },
+    {
+      id: 3,
+      memberId: memberId,
+      content: "분실물을 찾고 싶어요.",
+      createdAt: "2024-06-10T10:00:10.000Z",
+    },
+    {
+      id: 4,
+      memberId: "other",
+      content: "어떤 물건을 잃어버리셨나요?",
+      createdAt: "2024-06-10T10:00:15.000Z",
+    },
+    {
+      id: 5,
+      memberId: memberId,
+      content: "헤드셋이요.",
+      createdAt: "2024-06-10T10:00:20.000Z",
+    },
+    {
+      id: 6,
+      memberId: "other",
+      content: "확인해보겠습니다!",
+      createdAt: "2024-06-10T10:00:25.000Z",
+    },
+  ];
 
   return (
-    <div
-      className="flex flex-col h-full w-full bg-white"
-      style={{ minHeight: 0, height: '100%' }}
-    >
-      <div
-        className="flex-1 overflow-y-auto px-2 py-2"
-        style={{ minHeight: 0, background: '#fff' }}
-      >
-        {console.log(
-          "[WebSocket Render] roomId:",
-          roomId,
-          "memberId:",
-          memberId,
-          "subscribeTopic:",
-          subscribeTopic,
-          "messages:",
-          messages
-        )}
+    <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%' }}>
+      <div className="flex-1 overflow-y-auto px-2 py-2" style={{ minHeight: 0, background: '#fff' }}>
         {messages.map((msg, idx) => {
-          // memberId로 내 메시지/상대 메시지 구분
           const isMine = String(msg.memberId) === String(memberId);
           // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
           const isLastOfGroup =
@@ -175,12 +67,12 @@ const ChatRoomWebSocket = ({
               key={msg.id || idx}
               message={msg}
               isMine={isMine}
-              senderName={msg.senderName || "사용자"}
+              senderName={isMine ? "나" : "상대방"}
               showSenderName={!isMine && isLastOfGroup}
             />
           );
         })}
-        {/* 주인을 찾았어요 메시지 - 습득자용 */}
+        주인을 찾았어요 메시지 - 습득자용
         {showFoundOwnerMsg && isFinder && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
             <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">

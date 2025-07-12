@@ -702,7 +702,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
                 userName={userName}
                 onClose={() => {
                   setShowConfirmModal(false);
-                  setShowFoundOwnerMsg(true);
+                  setShowFoundOwnerMsg(true); // 버튼 클릭 시 안내 메시지 뜨도록 보장
                 }}
               />
             )}
