@@ -126,7 +126,8 @@ export const apiService = {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/login/kakao', { kakaoAccessToken, userInfo });
       if (response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.accessToken);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        console.log("로그인 응답:", response);
       }
       return response.data;
     });
