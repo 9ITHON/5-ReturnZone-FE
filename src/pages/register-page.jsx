@@ -174,16 +174,16 @@ export default function RegisterPage() {
       }
 
       const date = selectedDate.toISOString().split("T")[0];
-      const startTime = selectedTimes?.[0] || "00:00";
-      const endTime = selectedTimes?.[1] || "00:00";
+      const startTime = selectedTimes?.[0];
+      const endTime = selectedTimes?.[1];
 
       const lostDateTimeStart = new Date(`${date}T${startTime}`);
       const lostDateTimeEnd = new Date(`${date}T${endTime}`);
 
-      // if (isNaN(lostDateTimeStart) || isNaN(lostDateTimeEnd)) {
-      //   alert("시간을 올바르게 입력해주세요.");
-      //   return;
-      // }
+      if (isNaN(lostDateTimeStart) || isNaN(lostDateTimeEnd)) {
+        alert("시간을 올바르게 입력해주세요.");
+        return;
+      }
       // 바디 정의
       const requestDto = {
         registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",

@@ -29,7 +29,7 @@ export const useRegisterStore = create((set) => ({
     selectedDate: null,
     setSelectedDate: (v) => set({ selectedDate: v }),
 
-    selectedTimes: [],
+    selectedTimes: ["", ""],
     setSelectedTimes: (v) => set({ selectedTimes: v }),
 
     description: '',
