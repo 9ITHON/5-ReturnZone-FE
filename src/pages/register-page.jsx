@@ -130,8 +130,8 @@ export default function RegisterPage() {
     if (!address || latlng.lat === null || latlng.lng === null) return;
 
     setSelectedLocation(address);         // 위치 주소 저장
-    setLatitude(latlng.lat);              // 위도 저장
-    setLongitude(latlng.lng);            // 경도 저장
+    setlatitude(latlng.lat);      // 수정된 코드
+    setlongitude(latlng.lng);         // 경도 저장
 
     navigate(path, { replace: true });    // RegisterPage로 이동
   };
