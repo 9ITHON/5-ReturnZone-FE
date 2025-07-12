@@ -291,6 +291,7 @@ const ChatRoomWebSocket = ({
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                fill="none"
               />
               <path
                 d="M7.8523 5.34341L7.86169 5.31319C8.10539 4.52919 8.79233 4 9.56632 4L14.4337 4C15.2076 4 15.8946 4.52919 16.1383 5.31319L16.1477 5.34341C16.2695 5.7354 16.613 6 17 6L18 6C19.6569 6 21 7.34315 21 9V17C21 18.6569 19.6569 20 18 20H6C4.34315 20 3 18.6569 3 17L3 9C3 7.34315 4.34315 6 6 6L6.99999 6C7.38699 6 7.73045 5.7354 7.8523 5.34341Z"
@@ -298,41 +299,47 @@ const ChatRoomWebSocket = ({
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                fill="none"
               />
             </svg>
           </div>
           <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[290px] h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
-            <div className="flex justify-center items-end self-stretch flex-grow relative overflow-hidden gap-2.5">
-              <p className="flex-grow w-[266px] text-base font-medium text-left text-[#b8b8b8]">
-                메시지 보내기
-              </p>
-            </div>
+            <input
+              type="text"
+              className="flex-grow w-[266px] text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
+              placeholder="메시지 보내기"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            />
           </div>
           <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-            <svg
-              width={24}
-              height={24}
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-              preserveAspectRatio="none"
-            >
-              <g clipPath="url(#clip0_652_10693)">
-                <path
-                  d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836"
-                  stroke="#111111"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_652_10693">
-                  <rect width={24} height={24} fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
+            <button onClick={sendMessage}>
+              <svg
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+                preserveAspectRatio="none"
+              >
+                <g clipPath="url(#clip0_652_10693)">
+                  <path
+                    d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836"
+                    stroke="#111111"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_652_10693">
+                    <rect width={24} height={24} fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
