@@ -121,7 +121,7 @@ const ChatRoomWebSocket = ({
     if (input.trim() && clientRef.current?.connected) {
       const chatMessage = {
         roomId: roomId,
-        memberId: memberId, // senderId -> memberId
+        token : token , 
         content: input,
         type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장

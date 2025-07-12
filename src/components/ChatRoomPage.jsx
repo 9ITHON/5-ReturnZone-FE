@@ -473,7 +473,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
   const params = useParams();
   const location = useLocation();
   // userId -> memberId로 변수명 및 로직 변경
-  const memberId = localStorage.getItem("user_id") || "1";
+  const memberId = localStorage.getItem("userId") || "1";
   const navigate = useNavigate();
   const [showOption, setShowOption] = useState(false);
   const [reportModalType, setReportModalType] = useState(null);
