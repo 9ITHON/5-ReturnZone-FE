@@ -19,6 +19,9 @@ const ChatRoomWebSocket = ({
   isLostOwner = false,
   isFinder = false,
   showPaymentCompleted = false,
+  showRewardModal = false,
+  setShowRewardModal = () => {},
+  setShowDeliveryCompleted = () => {},
 }) => {
   // 내쪽(오른쪽) 더미 메시지 3개
   const initialMyMessages = [
@@ -66,6 +69,8 @@ const ChatRoomWebSocket = ({
   const [messages, setMessages] = useState(initialMyMessages);
   const [input, setInput] = useState("");
   const [dummyIndex, setDummyIndex] = useState(0); // 다음에 보여줄 더미 메시지 인덱스
+  const [rewardAmount, setRewardAmount] = useState(""); // 현상금 금액
+  const [isAgreed, setIsAgreed] = useState(false); // 약관 동의 상태
   const messagesEndRef = useRef(null);
 
   // 2초 후 왼쪽 더미 메시지 1개씩 1초 간격으로 추가
@@ -109,13 +114,35 @@ const ChatRoomWebSocket = ({
     setInput("");
   };
 
+  const handleRewardPayment = () => {
+    if (!isAgreed || !rewardAmount.trim()) return;
+    // 현상금 지급 로직 처리
+    console.log("현상금 지급:", rewardAmount);
+    setShowRewardModal(false);
+    setShowDeliveryCompleted(true); // 전달 완료 상태로 변경
+    setRewardAmount("");
+    setIsAgreed(false);
+  };
+
+  // 숫자 입력 처리 및 포맷팅
+  const handleRewardAmountChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    setRewardAmount(value);
+  };
+
+  // 숫자를 천 단위로 포맷팅
+  const formatNumber = (num) => {
+    if (!num) return '';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
       <div
-        className="flex-1 overflow-y-auto px-2 py-2"
-        style={{ minHeight: 0, background: '#fff', maxHeight: 'calc(100vh - 120px)', height: '100%' }}
+        className="flex-1 overflow-y-auto px-2 py-2 min-h-0 max-h-full"
+        style={{ background: '#fff', maxHeight: 'calc(100vh - 120px)', height: '100%' }}
       >
-        {/* 상단 경고 메시지 */}
+        {/* 상단 안내문(❗)도 스크롤 영역 안에 포함 */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
             <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
@@ -131,23 +158,46 @@ const ChatRoomWebSocket = ({
             </span>
           </p>
         </div>
-        {messages.map((msg, idx) => {
-          const isMine = String(msg.memberId) === String(memberId);
-          const isLastOfGroup =
-            idx === messages.length - 1 ||
-            String(messages[idx + 1]?.memberId) !== String(msg.memberId);
-          return (
-            <ChatMessage
-              key={msg.id || idx}
-              message={msg}
-              isMine={isMine}
-              senderName={isMine ? "나" : "상대방"}
-              showSenderName={!isMine && isLastOfGroup}
-              // 시간은 아래에서 한 번만 표시
-              showTime={false}
-            />
-          );
-        })}
+        {/* 채팅 메시지 + 안내문 스크롤 영역 */}
+        <div className="flex flex-col w-full min-h-0">
+          {messages.map((msg, idx) => {
+            const isMine = String(msg.memberId) === String(memberId);
+            const isLastOfGroup =
+              idx === messages.length - 1 ||
+              String(messages[idx + 1]?.memberId) !== String(msg.memberId);
+            return (
+              <ChatMessage
+                key={msg.id || idx}
+                message={msg}
+                isMine={isMine}
+                senderName={isMine ? "나" : "상대방"}
+                showSenderName={!isMine && isLastOfGroup}
+                showTime={false}
+              />
+            );
+          })}
+          {/* 안내문: 마지막 메시지 바로 밑에 */}
+          {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+            <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-2 mb-2">
+              <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                  📦 물건 전달이 시작되었습니다.
+                </span>
+                <br />
+                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                  물건을 받으셨다면, 상단의 버튼을 눌러주세요.
+                </span>
+                <br />
+                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                  버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
+                </span>
+              </p>
+            </div>
+          )}
+          {/* 안내문이 입력창에 가려지지 않도록 24px 여유 공간 */}
+          <div style={{height:24}} />
+          <div ref={messagesEndRef} />
+        </div>
         {/* 마지막 메시지 시간만 하단에 표시 */}
         {messages.length > 0 && (
           <div className="flex justify-end items-center w-full mt-2 pr-4">
@@ -233,8 +283,188 @@ const ChatRoomWebSocket = ({
             </p>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
+      
+      {/* 현상금 지급 모달 */}
+      {showRewardModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRewardModal(false);
+              setRewardAmount("");
+              setIsAgreed(false);
+            }
+          }}
+        >
+          <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
+            <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+              <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
+                <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
+              </div>
+              <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+                <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
+                  <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-lg font-bold text-center text-[#111]">
+                    현상금 지급하기
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-between items-start flex-grow-0 flex-shrink-0 w-[390px] h-[58px]">
+                <div className="flex justify-between items-center flex-grow overflow-hidden px-6 py-[11px]">
+                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2">
+                    <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
+                      <img
+                        src="rectangle-3468137.jpeg"
+                        className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
+                      />
+                    </div>
+                    <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
+                      유저1
+                    </p>
+                  </div>
+                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
+                    <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#808080]">
+                      보유 포인트
+                    </p>
+                    <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+                      15,000원
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+                <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-3 px-6 pt-2 pb-[72px]">
+                  <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2">
+                    <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-2">
+                      <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1">
+                        <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+                          현상금
+                        </p>
+                        <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-left text-[#06f]">
+                          10,000원 중
+                        </p>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      className="flex-grow-0 flex-shrink-0 text-4xl font-bold text-left text-[#111] bg-transparent border-none outline-none"
+                      placeholder="얼마나 지급할까요?"
+                      value={formatNumber(rewardAmount)}
+                      onChange={handleRewardAmountChange}
+                      maxLength={10}
+                    />
+                  </div>
+                  <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
+                    <svg
+                      width={16}
+                      height={16}
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                        stroke="#808080"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle
+                        cx="0.666667"
+                        cy="0.666667"
+                        r="0.5"
+                        transform="matrix(-1 0 0 1 8.66699 10)"
+                        fill="#808080"
+                        stroke="#808080"
+                        strokeWidth="0.333333"
+                      />
+                    </svg>
+                    <p className="flex-grow w-[322px] text-sm text-left text-[#808080]">
+                      현상금은 0원 입력도 가능하며, 물건 금액의 5~20% 지급을 권장하고, 지급 시 자동으로 '해결
+                      완료' 상태로 전환됩니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-start self-stretch flex-grow-0 flex-shrink-0 h-11">
+                <div className="flex justify-between items-center flex-grow relative overflow-hidden px-6">
+                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
+                    <button
+                      onClick={() => setIsAgreed(!isAgreed)}
+                      className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative"
+                    >
+                      <svg
+                        width={44}
+                        height={44}
+                        viewBox="0 0 44 44"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="flex-grow-0 flex-shrink-0 w-11 h-11 relative"
+                        preserveAspectRatio="none"
+                      >
+                        <rect x="11.5" y="11.5" width={21} height={21} rx="3.5" stroke={isAgreed ? "#06f" : "#808080"} fill={isAgreed ? "#06f" : "transparent"} />
+                        {isAgreed && (
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M20.1723 24.8999L26.9661 18L28 19.05L20.1723 27L16 22.7625L17.0339 21.7125L20.1723 24.8999Z"
+                            fill="white"
+                          />
+                        )}
+                      </svg>
+                      <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#4d4d4d]">
+                        약관 동의하기
+                      </p>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowRewardModal(false);
+                      setRewardAmount("");
+                      setIsAgreed(false);
+                    }}
+                  >
+                    <svg
+                      width={24}
+                      height={24}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M9 6L15 12L9 18"
+                        stroke="#808080"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
+              <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+                <button
+                  onClick={handleRewardPayment}
+                  disabled={!isAgreed || !rewardAmount.trim()}
+                  className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#e6e6e6] disabled:text-[#808080]"
+                >
+                  <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+                    <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                      지급하기
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* 메시지 입력 바 */}
       <div
         className="flex flex-col justify-start items-center bg-white"

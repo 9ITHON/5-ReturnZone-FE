@@ -24,7 +24,7 @@ const ConfirmOwnerModal = ({ onClose, userName }) => (
         <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[390px]">
           <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
             <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
-              <img
+              <img 
                 src="rectangle-3468137.jpeg"
                 className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
                 alt="user"
@@ -490,6 +490,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
   const [showLostOwnerPayment, setShowLostOwnerPayment] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPaymentCompleted, setShowPaymentCompleted] = useState(false);
+  const [showRewardModal, setShowRewardModal] = useState(false); // 현상금 지급 모달 상태 추가
 
   // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
@@ -665,7 +666,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
         {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
           <div
             className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[134px] py-[9px] rounded-lg bg-[#06f] cursor-pointer"
-            onClick={() => setShowDeliveryCompleted(true)}
+            onClick={() => setShowRewardModal(true)}
           >
             <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-white">
               물건을 잘 받았어요
@@ -776,6 +777,9 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
               isLostOwner={isLostOwner}
               isFinder={isFinder}
               showPaymentCompleted={showPaymentCompleted}
+              showRewardModal={showRewardModal}
+              setShowRewardModal={setShowRewardModal}
+              setShowDeliveryCompleted={setShowDeliveryCompleted}
             />
             {/* 안내 알림 메시지 */}
             {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
