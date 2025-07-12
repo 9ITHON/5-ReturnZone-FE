@@ -9,7 +9,7 @@ import plusRectangleIcon from "../assets/plus.svg";
 const BottomNav = () => {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
-
+  //토큰으로 바꿈
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -22,10 +22,10 @@ const BottomNav = () => {
     };
 
     fetchUnreadCount();
-    
+
     // 주기적으로 업데이트 (30초마다)
     const interval = setInterval(fetchUnreadCount, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -39,9 +39,8 @@ const BottomNav = () => {
         >
           <img src={homeIcon} alt="홈" className="w-6 h-6" />
           <p
-            className={`text-xs font-medium ${
-              location.pathname === "/" ? "text-[#2D68FF]" : "text-[#111]"
-            }`}
+            className={`text-xs font-medium ${location.pathname === "/" ? "text-[#2D68FF]" : "text-[#111]"
+              }`}
           >
             홈
           </p>
@@ -53,11 +52,10 @@ const BottomNav = () => {
         >
           <img src={plusRectangleIcon} alt="분실물 등록" className="w-6 h-6" />
           <p
-            className={`text-xs font-medium ${
-              location.pathname === "/Register"
+            className={`text-xs font-medium ${location.pathname === "/Register"
                 ? "text-[#2D68FF]"
                 : "text-[#111]"
-            }`}
+              }`}
           >
             분실물 등록
           </p>
@@ -82,11 +80,10 @@ const BottomNav = () => {
             )}
           </div>
           <p
-            className={`text-xs font-medium ${
-              location.pathname.startsWith("/chat")
+            className={`text-xs font-medium ${location.pathname.startsWith("/chat")
                 ? "text-[#2D68FF]"
                 : "text-[#111]"
-            }`}
+              }`}
           >
             채팅
           </p>
@@ -98,9 +95,8 @@ const BottomNav = () => {
         >
           <img src={userIcon} alt="마이페이지" className="w-6 h-6" />
           <p
-            className={`text-xs font-medium ${
-              location.pathname === "/MyPage" ? "text-[#2D68FF]" : "text-[#111]"
-            }`}
+            className={`text-xs font-medium ${location.pathname === "/MyPage" ? "text-[#2D68FF]" : "text-[#111]"
+              }`}
           >
             마이페이지
           </p>
