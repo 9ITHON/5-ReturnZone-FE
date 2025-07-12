@@ -83,7 +83,7 @@ export const apiService = {
   // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/auth/login', { email, password });
+      const response = await apiClient.post('/members/login', { email, password });
       // localStorage 저장 코드 제거
       return response.data; // { email, username, imageUrl }
     });
@@ -99,7 +99,7 @@ export const apiService = {
   async logout() {
     try {
       await retryRequest(async () => {
-        const response = await apiClient.post('/auth/logout');
+        const response = await apiClient.post('/members/logout');
         return response.data;
       });
     } catch {
