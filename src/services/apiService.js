@@ -24,6 +24,64 @@ apiClient.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+//카카오 현재 위치 가져오는 함수
+export function getCurrentPositionFromKakao(callback) {
+  const KAKAO_API_KEY = "9d52e34fbb979fdd643ebcef1b43488a"; //
+
+  // 1. Kakao Maps SDK가 로드되어 있지 않으면 로드
+  if (!window.kakao || !window.kakao.maps) {
+    const script = document.createElement("script");
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`;
+    script.async = true;
+    script.onload = () => {
+      getCurrentPositionLogic(callback);
+    };
+    script.onerror = () => {
+      console.error("Kakao Maps SDK 로딩 실패");
+      callback(null);
+    };
+    document.head.appendChild(script);
+  } else {
+    getCurrentPositionLogic(callback);
+  }
+}
+
+// 실제 로직 분리
+function getCurrentPositionLogic(callback) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2Address(longitude, latitude, (result, status) => {
+          if (status === window.kakao.maps.services.Status.OK) {
+            const address = result[0].address?.address_name || "";
+            callback({
+              lat: latitude,
+              lng: longitude,
+              address: address,
+            });
+          } else {
+            callback({
+              lat: latitude,
+              lng: longitude,
+              address: "",
+            });
+          }
+        });
+      },
+      (error) => {
+        console.error("Geolocation Error:", error);
+        callback(null);
+      }
+    );
+  } else {
+    console.warn("Geolocation을 지원하지 않습니다.");
+    callback(null);
+  }
+}
+
 
 let isRefreshing = false;
 let refreshSubscribers = [];

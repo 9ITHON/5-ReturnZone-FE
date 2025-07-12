@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import MainHeader from "../components/main-header";
 import FilterBar from "../components/FilterBar.jsx";
 import ItemCard from "../components/ItemCard.jsx";
@@ -10,6 +10,9 @@ import { useNavigate } from "react-router-dom";
 import categoryIcon from "../assets/category.svg";
 import AllFilterModal from "../components/AllFilterModal.jsx";
 import LatestFilterModal from "../components/LatestFilterModal.jsx";
+import FilterIcon from "../assets/필터.svg";
+import { getCurrentPositionFromKakao } from "../services/apiService.js";
+
 
 const CATEGORY_LIST = [
   "전자기기",
@@ -66,6 +69,18 @@ const Home = () => {
     selectedLocation,
     filterItems,
   ]);
+  // 현재 위치 가져오기
+  useEffect(() => {
+    getCurrentPositionFromKakao((pos) => {
+      if (pos) {
+        setLatitude(pos.lat);
+        setLongitude(pos.lng);
+        setSelectedLocation(pos.address);
+      } else {
+        alert("현재 위치를 가져오는 데 실패했습니다.");
+      }
+    });
+  }, []);
 
   // 필터 버튼 클릭 핸들러 (중복 적용)
   const handleFilterClick = (key) => {
@@ -189,7 +204,7 @@ const Home = () => {
 
   return (
     <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
-      <MainHeader />
+      <MainHeader label={selectedLocation || "위치미상"} />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen &&
         !locationOpen &&
@@ -198,15 +213,7 @@ const Home = () => {
           <div className="sticky top-0 z-50 bg-white">
             <div className="flex items-center w-full h-12 px-4 gap-1.5">
               {/* 필터 라벨 버튼 */}
-              <button
-                type="button"
-                disabled
-                className="flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium bg-[#06f] border-[#06f] text-white cursor-default"
-                tabIndex={-1}
-                style={{ pointerEvents: "none" }}
-              >
-                <span>필터</span>
-              </button>
+              <img src={FilterIcon} alt="필터" className="h-[34px] w-[34px] rounded-[8px] p-[8px] bg-[#F2F2F2]" />
               {/* 필터 버튼들 */}
               {FILTERS.map((f) => {
                 let label = f.label;

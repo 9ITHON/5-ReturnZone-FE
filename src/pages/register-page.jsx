@@ -489,7 +489,7 @@ export default function RegisterPage() {
                   onClick={() => handleDeleteQuestion(questions.length - 1)}
                   className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
                 >
-                  <img src={XButton} alt="x" className="w-[18px] h-[18px] w-full" />
+                  <img src={XButton} alt="x" className="w-[18px] h-[18px] " />
                   질문삭제
                 </button>
               )}
