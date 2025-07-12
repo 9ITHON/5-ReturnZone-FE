@@ -8,12 +8,7 @@ export default function MyPageUserCard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userId = getUserId();
-                // 실제 호출
-                const data = await GetMyPage(userId);
-
-                // 테스트용 더미 데이터 호출
-                // const data = await GetMyPageDummy();
+                const data = await GetMyPage(); // userId 인자 제거
                 setUserInfo(data);
             } catch (e) {
                 console.error("유저 정보 로딩 실패:", e);
