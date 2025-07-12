@@ -40,11 +40,15 @@ export default function MyPageExchange() {
 
             setIsLoading(true);
 
-            const response = await axios.post(`${apiBase}/api/v1/mypage/exchange`, null, {
-                // headers: {
-                //     "X-USER-ID": userId,
-                // },
-            });
+            const response = await axios.post(
+                `${apiBase}/api/v1/mypage/exchange`,
+                null,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
 
             // 응답 받은 새 포인트 반영
             setUserInfo((prev) => ({
