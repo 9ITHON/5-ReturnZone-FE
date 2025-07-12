@@ -158,8 +158,12 @@ const ChatRoomWebSocket = ({
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
       {/* 스크롤 가능한 메시지 영역 */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto px-6 py-2"
-        style={{ paddingBottom: 120 }}
+        className="flex-1 overflow-y-auto px-6 py-2"
+        style={{ 
+          background: '#fff', 
+          maxHeight: 'calc(100vh - 200px)', 
+          minHeight: 0 
+        }}
       >
         {/* 상단 안내문(❗) */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-4">
@@ -285,7 +289,7 @@ const ChatRoomWebSocket = ({
         )}
 
         {/* 스크롤 끝 지점 */}
-        <div ref={messagesEndRef} style={{ height: '48px' }} />
+        <div ref={messagesEndRef} style={{ height: '24px' }} />
       </div>
       
       {/* 현상금 지급 모달 */}
