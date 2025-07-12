@@ -147,11 +147,11 @@ const ChatRoomWebSocket = ({
   return (
     <div
       className="flex flex-col h-full w-full bg-white"
-      style={{ height: "100%", minHeight: 400 }}
+      style={{ minHeight: 0, height: '100%' }}
     >
       <div
-        className="flex-1 overflow-y-auto px-3 py-2"
-        style={{ maxHeight: 400, minHeight: 300, background: "#fff" }}
+        className="flex-1 overflow-y-auto px-2 py-2"
+        style={{ minHeight: 0, background: '#fff' }}
       >
         {console.log(
           "[WebSocket Render] roomId:",
@@ -267,16 +267,17 @@ const ChatRoomWebSocket = ({
       </div>
       {/* 메시지 입력 바 */}
       <div
-        className="flex flex-col justify-start items-center w-[390px] bg-white"
+        className="flex flex-col justify-start items-center w-full bg-white"
         style={{
           position: "fixed",
-          left: "50%",
-          transform: "translateX(-50%)",
-          bottom: "42px",
+          left: 0,
+          right: 0,
+          bottom: 0,
           zIndex: 20,
+          maxWidth: '100vw',
         }}
       >
-        <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+        <div className="flex justify-center items-center w-full max-w-2xl mx-auto gap-2.5 px-2 py-2 bg-white">
           <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <svg
               width={24}
@@ -305,10 +306,10 @@ const ChatRoomWebSocket = ({
               />
             </svg>
           </div>
-          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[290px] h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
+          <div className="flex justify-start items-center flex-grow h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
             <input
               type="text"
-              className="flex-grow w-[266px] text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
+              className="flex-grow text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
               placeholder="메시지 보내기"
               value={input}
               onChange={(e) => setInput(e.target.value)}
