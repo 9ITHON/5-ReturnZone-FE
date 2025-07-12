@@ -20,17 +20,33 @@ const ChatRoomWebSocket = ({
   isFinder = false,
   showPaymentCompleted = false,
 }) => {
-
-
-
-  // 더미 채팅 데이터: 처음엔 빈 배열, 사용자가 메시지를 보내면 시작
+  // 왼쪽(상대방) 더미 메시지
+  const dummyMessages = [
+    {
+      id: 1,
+      memberId: "other",
+      content: "네, 안녕하세요! 무엇을 도와드릴까요?",
+      createdAt: "2024-06-10T10:00:05.000Z",
+    },
+    {
+      id: 2,
+      memberId: "other",
+      content: "분실물의 특징을 알려주시면 도와드릴 수 있습니다.",
+      createdAt: "2024-06-10T10:00:10.000Z",
+    },
+    {
+      id: 3,
+      memberId: "other",
+      content: "찾으시는 물건이 어떤 건가요?",
+      createdAt: "2024-06-10T10:00:15.000Z",
+    },
+  ];
+  // 오른쪽(내 메시지): 사용자가 입력해서 보냄
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [isMineTurn, setIsMineTurn] = useState(true); // 내 차례/상대 차례 번갈아가며
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // 새 메시지 추가 시 스크롤 맨 아래로
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -40,24 +56,25 @@ const ChatRoomWebSocket = ({
     if (!input.trim()) return;
     const newMsg = {
       id: Date.now(),
-      memberId: isMineTurn ? memberId : "other",
+      memberId: memberId,
       content: input,
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, newMsg]);
     setInput("");
-    setIsMineTurn((prev) => !prev); // 다음엔 상대방/내 차례로 번갈아가게
   };
+
+  // 렌더링: 더미(상대방) + 내 메시지 시간순 정렬
+  const allMessages = [...dummyMessages, ...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%' }}>
       <div className="flex-1 overflow-y-auto px-2 py-2" style={{ minHeight: 0, background: '#fff' }}>
-        {messages.map((msg, idx) => {
+        {allMessages.map((msg, idx) => {
           const isMine = String(msg.memberId) === String(memberId);
-          // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
           const isLastOfGroup =
-            idx === messages.length - 1 ||
-            String(messages[idx + 1]?.memberId) !== String(msg.memberId);
+            idx === allMessages.length - 1 ||
+            String(allMessages[idx + 1]?.memberId) !== String(msg.memberId);
           return (
             <ChatMessage
               key={msg.id || idx}
