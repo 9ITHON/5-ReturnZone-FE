@@ -142,19 +142,20 @@ export default function RegisterPage() {
       location.state?.lat !== null &&
       location.state?.lng !== null
     ) {
+      // 정상 위치 전달 시
       setSelectedLocation(location.state.address);
       setlatitude(location.state.lat);
       setlongitude(location.state.lng);
       console.log("위치 설정됨:", location.state);
     } else {
-      // 위치 정보가 없는 경우 판교역으로 강제 설정
-      const fallbackAddress = "경기도 성남시 분당구 판교역로 235 (삼평동)";
-      const fallbackLat = 37.3948;
-      const fallbackLng = 127.1111;
+      // 위치 정보 없으면 판교역으로 더미값 세팅
+      const dummyAddress = "경기도 성남시 분당구 판교역로 235 (삼평동)";
+      const dummyLat = 37.3948;
+      const dummyLng = 127.1111;
 
-      setSelectedLocation(fallbackAddress);
-      setlatitude(fallbackLat);
-      setlongitude(fallbackLng);
+      setSelectedLocation(dummyAddress);
+      setlatitude(dummyLat);
+      setlongitude(dummyLng);
       console.warn("위치 정보 누락 - 판교역으로 기본 설정됨");
     }
   }, [location.state]);
