@@ -214,24 +214,7 @@ const ChatRoomWebSocket = ({
             </span>
           </div>
         )}
-        {/* 물건 전달 시작 메시지 - 습득자용 */}
-        {showDeliveryMsg && isFinder && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                📦 물건 전달이 시작되었습니다.
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                물건을 받으셨다면, 상단의 버튼을 눌러주세요.
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
-              </span>
-            </p>
-          </div>
-        )}
+      
         {/* 전달 완료 메시지 - 습득자용 */}
         {showDeliveryCompleted && isFinder && (
           <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
@@ -288,7 +271,7 @@ const ChatRoomWebSocket = ({
       {/* 현상금 지급 모달 */}
       {showRewardModal && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center"
+          className="fixed inset-0 bg-[#111]/50 bg-opacity-50 z-50 flex items-end justify-center"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowRewardModal(false);
@@ -319,7 +302,7 @@ const ChatRoomWebSocket = ({
                       />
                     </div>
                     <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
-                      유저1
+                      유저
                     </p>
                   </div>
                   <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
@@ -369,6 +352,7 @@ const ChatRoomWebSocket = ({
                         stroke="#808080"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        fill="none"
                       />
                       <circle
                         cx="0.666667"
