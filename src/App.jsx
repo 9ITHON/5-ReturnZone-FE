@@ -15,11 +15,15 @@ import MyPageExchange from './pages/MyPageExchange';
 import MyPageModify from './pages/MyPageModify';
 import MyPageProduct from './pages/MyPageProduct';
 import MyPageLocation from './pages/MyPageLocation';
-import { AuthProvider } from "./utils/AuthContext.jsx";
+import { AuthProvider, useAuth } from "./utils/AuthContext.jsx";
+import { useEffect } from "react";
+import { GetMyPage } from "./utils/GetMyPage";
 
 // 라우터 설정 함수
 function AppRoute(){
   return(
+    <AuthProvider>
+    <BrowserRouter>
     <Routes>
       <Route path='/' element={<Home/>}></Route>
       <Route path='/LogIn' element={<Login/>}></Route>
@@ -36,21 +40,50 @@ function AppRoute(){
       <Route path='/MyPageModify' element={<MyPageModify/>}/>
       <Route path='/MyPageProduct' element={<MyPageProduct/>}/>
       <Route path='/MyPageLocation' element={<MyPageLocation/>}/>
+      <Route path="/login" element={<Login />} />
       {/* 존재하지 않는 경로에 대한 설정 */}
       {/* <Route path="*" element={<NotFound />} />  */}
     </Routes>
-  )
-}
-// 메인 페이지
-function App() {
-
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoute></AppRoute>
-      </BrowserRouter>
+    </BrowserRouter>
     </AuthProvider>
   )
 }
 
-export default App
+function AuthGate({ children }) {
+  const { setUser } = useAuth();
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = localStorage.getItem("auth_token");
+      const userId = localStorage.getItem("userId");
+      if (token && userId) {
+        try {
+          const userInfo = await GetMyPage(userId);
+          if (userInfo) {
+            setUser(userInfo);
+          } else {
+            localStorage.removeItem("auth_token");
+            setUser(null);
+          }
+        } catch {
+          localStorage.removeItem("auth_token");
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    checkToken();
+  }, [setUser]);
+  return children;
+}
+// 메인 페이지
+export default function App() {
+
+  return (
+    <AuthProvider>
+      <AuthGate>
+          <AppRoute></AppRoute>
+      </AuthGate>
+    </AuthProvider>
+  )
+}

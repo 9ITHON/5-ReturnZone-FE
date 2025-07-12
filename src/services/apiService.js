@@ -11,28 +11,29 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true,
 });
 
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// apiClient.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('accessToken');
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-    }
-    return Promise.reject(error);
-  }
-);
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       localStorage.removeItem('auth_token');
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
   try {
@@ -67,11 +68,15 @@ export const apiService = {
     });
   },
   async logout() {
-    return retryRequest(async () => {
-      const response = await apiClient.post('/auth/logout');
-      localStorage.removeItem('auth_token');
-      return response.data;
-    });
+    try {
+      await retryRequest(async () => {
+        const response = await apiClient.post('/auth/logout');
+        return response.data;
+      });
+    } catch {
+      // ignore error, always remove token
+    }
+    localStorage.removeItem('auth_token');
   },
   async findId({ name, email }) {
     return retryRequest(async () => {
@@ -268,6 +273,12 @@ export const apiService = {
         },
         options
       );
+    });
+  },
+  async getMyPage() {
+    return retryRequest(async () => {
+      const response = await apiClient.get('/mypage');
+      return response.data;
     });
   },
 };

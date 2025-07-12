@@ -4,17 +4,12 @@ import { apiService } from '../services/apiService';
 import kakaoIcon from '../assets/카카오.svg';
 import { useAuth } from "../utils/AuthContext.jsx";
 
-const KAKAO_CLIENT_ID = "4b5c5b6d6f920a0fe945665f2da2648a";
-const KAKAO_REDIRECT_URI = "http://15.164.234.32:8080/auth/login/kakao";
+const KAKAO_LOGIN_URL = "http://15.164.234.32:8080/auth/login/kakao";
 
-function handleKakaoLogin() {
-  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
-  window.location.href = kakaoAuthUrl;
-}
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { fetchUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -22,13 +17,16 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleKakaoLogin = () => {
+    window.location.href = KAKAO_LOGIN_URL;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    
-    // 에러 메시지 초기화
+    setIsLoading(true);
     setEmailError('');
     setPasswordError('');
-    setIsLoading(true);
+ 
 
     // 기본 유효성 검사
     if (!email) {
@@ -50,7 +48,17 @@ export default function Login() {
     try {
       // 로그인 API 호출
       const response = await apiService.login({ email, password });
-      setUser(response); // context에만 저장
+      // 토큰
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('accessTokenExpires', response.accessTokenExpires);
+      localStorage.setItem('userId', response.memberId);
+      localStorage.setItem('user', JSON.stringify({
+        email: response.email,
+        username: response.username,
+        imageUrl: response.imageUrl,
+      }));
+      await fetchUser();
       navigate("/"); // 메인 페이지로 이동
 
     } catch (error) {
