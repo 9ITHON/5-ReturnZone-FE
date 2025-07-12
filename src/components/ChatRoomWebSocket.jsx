@@ -279,6 +279,8 @@ const ChatRoomWebSocket = ({
           right: 0,
           bottom: 0,
           zIndex: 20,
+          width: '100%',
+          maxWidth: 390, 
         }}
       >
       <div className="flex justify-center items-center w-full gap-2.5 px-2 py-2 bg-white">
