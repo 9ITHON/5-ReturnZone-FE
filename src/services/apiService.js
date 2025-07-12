@@ -25,15 +25,70 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       localStorage.removeItem('auth_token');
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function onAccessTokenRefreshed(newToken) {
+  refreshSubscribers.forEach(callback => callback(newToken));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(callback) {
+  refreshSubscribers.push(callback);
+}
+
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // 이미 다른 요청이 refresh 중이면 기다렸다가 새 accessToken으로 재시도
+      if (isRefreshing) {
+        return new Promise(resolve => {
+          addRefreshSubscriber(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(apiClient(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      if (!refreshToken) {
+        localStorage.removeItem('accessToken');
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await axios.post(`${API_BASE_URL}/members/refresh`, {
+          refreshToken,
+        });
+
+        const newAccessToken = data.accessToken;
+        localStorage.setItem('accessToken', newAccessToken);
+
+        isRefreshing = false;
+        onAccessTokenRefreshed(newAccessToken);
+
+        // Authorization 헤더 갱신 후 재요청
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        isRefreshing = false;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        // TODO: 로그아웃 페이지로 이동하거나 알림 표시
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
   try {
