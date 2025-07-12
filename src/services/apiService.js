@@ -105,7 +105,7 @@ export const apiService = {
     } catch {
       // ignore error, always remove token
     }
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('accessToken');
   },
   // 아이디 찾기
   async findId({ name, email }) {
