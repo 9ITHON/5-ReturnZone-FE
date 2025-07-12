@@ -20,7 +20,7 @@ const ChatRoomWebSocket = ({
   isFinder = false,
   showPaymentCompleted = false,
 }) => {
-  // 왼쪽(상대방) 더미 메시지
+  // 더미 메시지 목록 (상대방)
   const dummyMessages = [
     {
       id: 1,
@@ -41,9 +41,10 @@ const ChatRoomWebSocket = ({
       createdAt: "2024-06-10T10:00:15.000Z",
     },
   ];
-  // 오른쪽(내 메시지): 사용자가 입력해서 보냄
+  // 내 메시지
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [dummyIndex, setDummyIndex] = useState(0); // 다음에 보여줄 더미 메시지 인덱스
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -54,27 +55,38 @@ const ChatRoomWebSocket = ({
 
   const sendMessage = () => {
     if (!input.trim()) return;
-    const newMsg = {
+    const myMsg = {
       id: Date.now(),
       memberId: memberId,
       content: input,
       createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => [...prev, myMsg]);
     setInput("");
+    // 1초 후 더미 메시지 하나 추가 (있을 때만)
+    if (dummyIndex < dummyMessages.length) {
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...dummyMessages[dummyIndex],
+            id: Date.now() + 1, // 고유 id 보장
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+        setDummyIndex((idx) => idx + 1);
+      }, 1000);
+    }
   };
-
-  // 렌더링: 더미(상대방) + 내 메시지 시간순 정렬
-  const allMessages = [...dummyMessages, ...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%' }}>
       <div className="flex-1 overflow-y-auto px-2 py-2" style={{ minHeight: 0, background: '#fff' }}>
-        {allMessages.map((msg, idx) => {
+        {messages.map((msg, idx) => {
           const isMine = String(msg.memberId) === String(memberId);
           const isLastOfGroup =
-            idx === allMessages.length - 1 ||
-            String(allMessages[idx + 1]?.memberId) !== String(msg.memberId);
+            idx === messages.length - 1 ||
+            String(messages[idx + 2]?.memberId) !== String(msg.memberId);
           return (
             <ChatMessage
               key={msg.id || idx}
