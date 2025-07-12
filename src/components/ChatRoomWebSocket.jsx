@@ -85,15 +85,15 @@ const ChatRoomWebSocket = ({
         {/* 상단 경고 메시지 */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+            <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               ❗현상금 요구는 가능하지만 강제할 수 없고,{' '}
             </span>
             <br />
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+            <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               물건 가치의 20%를 넘기면 법적 문제가 될 수 있습니다.
             </span>
             <br />
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+            <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
               또한 습득자가 반환을 거부하거나 악의로 보관하면 법적 책임을 질 수 있습니다.
             </span>
           </p>
