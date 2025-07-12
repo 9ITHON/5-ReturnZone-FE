@@ -11,7 +11,7 @@ import RegisterTag from "../components/register-tag";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import CalendarModal from "../components/calendar-modal";
 import TimePickerModal from "../components/time-picker-modal";
-import { getUserId } from '../services/apiService'
+import { getUserId } from '../services/apiService';
 
 import CameraIcon from "../assets/camera.svg";
 import WhiteX from "../assets/흰색x.svg";
@@ -23,297 +23,141 @@ import XButton from "../assets/x버튼.svg";
 
 export default function RegisterPage() {
   const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8080";
-  const {
-    title,
-    setTitle, // 제목
-    selectedTag,
-    setSelectedTag, // 태그
-    selectedCategory,
-    setSelectedCategory, // 카테고리
-    images,
-    setImages, // 이미지
-    selectedLocation,
-    setSelectedLocation, // 위치
-    latitude, setlatitude,
-    longitude, setlongitude, //위도 경도 추가
-    detailLocation,
-    setDetailLocation, // 상세 위치
-    questions,
-    setQuestions, // 질문
-    selectedDate,
-    setSelectedDate, // 날짜
-    selectedTimes,
-    setSelectedTimes, // 시간
-    description,
-    setDescription, // 설명
-    itemName,
-    setItemName, // 상품명
-    reward,
-    setReward, // 현상금
-    reset,
-  } = useRegisterStore();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false); // 캘린더 열림 상태
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false); // 시간 모달 열림 상태
-  const [agree, setAgree] = useState(false);
-  const fileInputRef = useRef(null); // 파일 선택 창 접근
-  const calendarRef = useRef(null); // 캘린더 영역 참조
-  const timePickerRef = useRef(null); // 시간 영역 참조
-
+  const store = useRegisterStore();
   const navigate = useNavigate();
-  const isKeyboardOpen = UseKeyboardOpen();
-  const userId = getUserId();
   const location = useLocation();
-  const safeQuestions = Array.isArray(questions) ? questions : [];
-  // const isLoggedIn = userId && userId != null; // 사용자의 로그인 상태 저장
+  const userId = getUserId();
+  const isKeyboardOpen = UseKeyboardOpen();
 
-  // 분실/획득 시간 라벨 텍스트 동적 처리
-  const locationLabel =
-    selectedTag === "주인을 찾아요" ? "획득 장소" : "분실품 장소";
-  const dateLabel = selectedTag === "주인을 찾아요" ? "획득 날짜" : "분실 날짜";
-  const timeLabel = selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간";
-  const detailLabel =
-    selectedTag === "주인을 찾아요"
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [agree, setAgree] = useState(false);
+
+  const calendarRef = useRef(null);
+  const timePickerRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const safeQuestions = Array.isArray(store.questions) ? store.questions : [];
+
+  const labels = {
+    location: store.selectedTag === "주인을 찾아요" ? "획득 장소" : "분실품 장소",
+    date: store.selectedTag === "주인을 찾아요" ? "획득 날짜" : "분실 날짜",
+    time: store.selectedTag === "주인을 찾아요" ? "획득 시간" : "분실 시간",
+    detail: store.selectedTag === "주인을 찾아요"
       ? "획득한 분실품 특징 (최대 5개)"
-      : "분실품 특징 (최대 5개)";
-
-  // // RegisterLocation에서 온 주소 수신
-  // useEffect(() => {
-  //     if (location.state?.address) {
-  //         console.log("주소 수신:", location.state);
-  //         setSelectedLocation(location.state.address);
-  //     }
-  // }, [location]);
-
-  // 이미지 등록 버튼 (최대 5개)
-  const handleCameraClick = (e) => {
-    if (images.length >= 5) {
-      alert("최대 선택 가능 이미지는 5장 입니다.");
-      return;
-    }
-    fileInputRef.current.click();
+      : "분실품 특징 (최대 5개)",
   };
-  // 추가 이미지 선택 가능
-  const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    const prevImages = Array.isArray(images) ? images : [];
 
-    const remainingSlots = 5 - prevImages.length;
-    const filesToAdd = selectedFiles.slice(0, remainingSlots);
-
-    setImages([...prevImages, ...filesToAdd]);
-  };
-  // x 버튼 클릭 시 호출
-  const handleDelete = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-  // 위치창으로 이동
-  const handleLocation = () => {
-    navigate("/RegisterLocation", {
-      state: {
-        path: "/Register",
-        title,
-        selectedTag,
-        selectedCategory,
-        description,
-        itemName,
-        selectedLocation,
-        detailLocation,
-        questions,
-        selectedDate,
-        selectedTimes,
-        reward,
-        images,
-      },
-    });
-  };
-  // // 위치 받기
-  // const handleConfirm = () => {
-  //   if (!address || latlng.lat === null || latlng.lng === null) return;
-
-  //   setSelectedLocation(address); // 도로명 or 지번
-  //   setlatitude(latlng.lat);      // ← 위도
-  //   setlongitude(latlng.lng);       // 경도 저장
-
-  //   navigate(path, { replace: true });    // RegisterPage로 이동
-  // };
   useEffect(() => {
-    if (
-      location.state?.address &&
-      location.state?.lat !== null &&
-      location.state?.lng !== null
-    ) {
-      // 정상 위치 전달 시
-      setSelectedLocation(location.state.address);
-      setlatitude(location.state.lat);
-      setlongitude(location.state.lng);
-      console.log("위치 설정됨:", location.state);
+    if (location.state?.address && location.state?.lat != null && location.state?.lng != null) {
+      store.setSelectedLocation(location.state.address);
+      store.setlatitude(location.state.lat);
+      store.setlongitude(location.state.lng);
     } else {
-      // 위치 정보 없으면 판교역으로 더미값 세팅
-      const dummyAddress = "경기도 성남시 분당구 판교역로 235 (삼평동)";
-      const dummyLat = 37.3948;
-      const dummyLng = 127.1111;
-
-      setSelectedLocation(dummyAddress);
-      setlatitude(dummyLat);
-      setlongitude(dummyLng);
-      console.warn("위치 정보 누락 - 판교역으로 기본 설정됨");
+      store.setSelectedLocation("경기도 성남시 분당구 판교역로 235 (삼평동)");
+      store.setlatitude(37.3948);
+      store.setlongitude(127.1111);
     }
   }, [location.state]);
-  // 상세 특징 업데이트
+
+  const handleCameraClick = () => {
+    if (store.images.length >= 5) return alert("최대 선택 가능 이미지는 5장 입니다.");
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    const prev = Array.isArray(store.images) ? store.images : [];
+    store.setImages([...prev, ...files.slice(0, 5 - prev.length)]);
+  };
+
+  const handleDelete = (index) => store.setImages((prev) => prev.filter((_, i) => i !== index));
+
+  const handleLocation = () => navigate("/RegisterLocation", { state: { ...store, path: "/Register" } });
+
   const handleChange = (index, value) => {
-    setQuestions((prev) => {
+    store.setQuestions((prev) => {
       const updated = [...prev];
       updated[index] = value;
       return updated;
     });
   };
-  // 최대 5개 까지 빈 질문 추가 가능
+
   const handleAddQuestion = () => {
-    if (questions.length >= 5) return;
-    setQuestions((prev) => [...prev, ""]);
+    if (store.questions.length < 5) store.setQuestions((prev) => [...prev, ""]);
   };
-  // 질문 삭제
-  const handleDeleteQuestion = (index) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index));
-  };
-  // 숫자 콤마 추가
-  const formatWithComma = (value) => {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-  // 쉼표 제거 → 숫자만 추출
-  const unformatComma = (value) => {
-    return value.replace(/,/g, "");
-  };
-  // 한글 오전/오후 시간 → HH:mm 포맷으로 변환
-  function convertTo24HourFormat(timeStr) {
+
+  const handleDeleteQuestion = (index) => store.setQuestions((prev) => prev.filter((_, i) => i !== index));
+
+  const formatWithComma = (value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const unformatComma = (value) => value.replace(/,/g, "");
+
+  const convertTo24HourFormat = (timeStr) => {
     const [ampm, time] = timeStr.split(' ');
-    let [hour, minute] = time.split(':').map((t) => parseInt(t, 10));
+    let [hour, minute] = time.split(':').map(Number);
     if (ampm === '오전' && hour === 12) hour = 0;
     if (ampm === '오후' && hour !== 12) hour += 12;
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-  }
+  };
 
   const handleRegister = async () => {
-    try {
-      if (!userId) {
-        alert("로그인이 필요한 기능입니다.");
-        return;
-      }
-      if (!(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
-        alert("날짜를 올바르게 선택해주세요.");
-        return;
-      }
-      if (
-        !Array.isArray(selectedTimes) ||
-        selectedTimes.length < 2 ||
-        typeof selectedTimes[0] !== "string" ||
-        typeof selectedTimes[1] !== "string"
-      ) {
-        alert("시간을 올바르게 선택해주세요.");
-        return;
-      }
+    if (!userId) return alert("로그인이 필요한 기능입니다.");
+    if (!(store.selectedDate instanceof Date) || isNaN(store.selectedDate.getTime())) return alert("날짜를 선택해주세요.");
+    if (!Array.isArray(store.selectedTimes) || store.selectedTimes.length < 2) return alert("시간을 올바르게 선택해주세요.");
 
-      const date = selectedDate.toISOString().split("T")[0];
-      const startTime = convertTo24HourFormat(selectedTimes[0]);
-      const endTime = convertTo24HourFormat(selectedTimes[1]);
+    const date = store.selectedDate.toISOString().split("T")[0];
+    const start = convertTo24HourFormat(store.selectedTimes[0]);
+    const end = convertTo24HourFormat(store.selectedTimes[1]);
 
-      const lostDateTimeStart = new Date(`${date}T${startTime}`);
-      const lostDateTimeEnd = new Date(`${date}T${endTime}`);
+    const dto = {
+      registrationType: store.selectedTag === "분실했어요" ? "LOST" : "FOUND",
+      title: store.title,
+      description: store.description,
+      category: store.selectedCategory,
+      itemName: store.itemName,
+      lostLocationDong: store.selectedLocation,
+      detailedLocation: store.detailLocation,
+      latitude: store.latitude,
+      longitude: store.longitude,
+      reward: Number(store.reward),
+      instantSettlement: true,
+      feature1: store.questions[0] || "",
+      feature2: store.questions[1] || "",
+      feature3: store.questions[2] || "",
+      feature4: store.questions[3] || "",
+      feature5: store.questions[4] || "",
+      lostDateTimeStart: new Date(`${date}T${start}`).toISOString(),
+      lostDateTimeEnd: new Date(`${date}T${end}`).toISOString(),
+    };
 
-      if (
-        isNaN(lostDateTimeStart.getTime()) ||
-        isNaN(lostDateTimeEnd.getTime())
-      ) {
-        alert("시간 형식이 올바르지 않습니다.");
-        return;
-      }
+    const formData = new FormData();
+    formData.append("requestDto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+    store.images.forEach((img) => formData.append("images", img));
 
-      const requestDto = {
-        registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
-        title,
-        description,
-        category: selectedCategory,
-        itemName,
-        lostLocationDong: selectedLocation,
-        detailedLocation: detailLocation,
-        latitude,
-        longitude,
-        reward: Number(reward),
-        instantSettlement: true,
-        feature1: questions[0] || "",
-        feature2: questions[1] || "",
-        feature3: questions[2] || "",
-        feature4: questions[3] || "",
-        feature5: questions[4] || "",
-        lostDateTimeStart: lostDateTimeStart.toISOString(),
-        lostDateTimeEnd: lostDateTimeEnd.toISOString(),
-
-      };
-      console.log("requestDto:", requestDto);
-
-      const formData = new FormData();
-      formData.append(
-        "requestDto",
-        new Blob([JSON.stringify(requestDto)], { type: "application/json" })
-      );
-
-      images.forEach((img) => {
-        formData.append("images", img);
-      });
-
-      const response = await axios.post(
-        `${apiBase}/api/v1/lostPosts`,
-        formData,
-        {
-          // 🔥 주의: Content-Type은 axios가 자동 설정해야 함!
-          // headers: {
-          //   "Content-Type": "multipart/form-data",
-          // },
-          validateStatus: () => true,
-        }
-      );
-
-      if (response.status === 201) {
-        alert("등록이 완료되었습니다.");
-        reset();
-        navigate("/");
-      } else if (response.status === 400) {
-        const msg = response.data?.message || "입력값을 다시 확인해 주세요.";
-        alert(`요청 오류: ${msg}`);
-      } else {
-        alert(`서버 오류 (${response.status})가 발생했습니다.`);
-      }
-    } catch (error) {
-      console.error("등록 요청 실패:", error);
-      alert("요청 중 예외가 발생했습니다.");
+    const res = await axios.post(`${apiBase}/api/v1/lostPosts`, formData, { validateStatus: () => true });
+    if (res.status === 201) {
+      alert("등록이 완료되었습니다.");
+      store.reset();
+      navigate("/");
+    } else {
+      const msg = res.data?.message || "서버 오류입니다.";
+      alert(`등록 실패: ${msg}`);
     }
   };
 
-
-  // 외부클릭으로 모달 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        isCalendarOpen &&
-        calendarRef.current &&
-        !calendarRef.current.contains(e.target)
-      ) {
+      if (isCalendarOpen && calendarRef.current && !calendarRef.current.contains(e.target)) {
         setIsCalendarOpen(false);
       }
-      if (
-        isTimePickerOpen &&
-        timePickerRef.current &&
-        !timePickerRef.current.contains(e.target)
-      ) {
+      if (isTimePickerOpen && timePickerRef.current && !timePickerRef.current.contains(e.target)) {
         setIsTimePickerOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isCalendarOpen, isTimePickerOpen]);
+
   return (
     <div>
       {/* {!userId && (
