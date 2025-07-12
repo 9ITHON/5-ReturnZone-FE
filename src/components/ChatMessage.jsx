@@ -19,7 +19,7 @@ const ChatMessage = ({ message, isMine, senderName, showSenderName = false }) =>
           className={
             isMine
               ? 'px-4 py-2.5 rounded-[22px] bg-[#06f] text-white ml-auto mr-2'
-              : 'px-4 py-2.5 rounded-[22px] bg-[#f2f2f2] text-[#111] mr-auto ml-1'
+              : 'px-4 py-2.5 rounded-[22px] bg-[#f2f2f2] text-[#111] mr-auto ml-0.5'
           }
           style={{ maxWidth: '100%', wordBreak: 'break-word' }}
         >
