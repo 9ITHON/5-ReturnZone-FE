@@ -16,7 +16,7 @@ const apiClient = axios.create({
 // 자동으로 JWT 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('auth_token');  // 토큰 가져오기
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -207,9 +207,12 @@ export const apiService = {
       return response.data;
     });
   },
+  // 룸 들어가기 (채팅 목록 조회)
   async getChatRoom(roomId) {
     return retryRequest(async () => {
-      const response = await apiClient.get(`/chat/rooms/${roomId}`);
+      const response = await apiClient.get(`/chats/rooms/${roomId}/messages`, {
+        params: { page },
+      });
       return response.data;
     });
   },
