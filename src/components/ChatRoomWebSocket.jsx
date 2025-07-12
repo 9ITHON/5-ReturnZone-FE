@@ -20,32 +20,76 @@ const ChatRoomWebSocket = ({
   isFinder = false,
   showPaymentCompleted = false,
 }) => {
-  // 더미 메시지 목록 (상대방)
+  // 내쪽(오른쪽) 더미 메시지 3개
+  const initialMyMessages = [
+    {
+      id: 1001,
+      memberId: memberId,
+      content: "아래는 습득자가 등록한 분실물 특징입니다. 분실물과 비교하여 정확하게 답변해 주세요.",
+      createdAt: "2024-06-10T10:00:01.000Z",
+    },
+    {
+      id: 1002,
+      memberId: memberId,
+      content: "1. 분실물에 흠집이나 손상이 있나요?",
+      createdAt: "2024-06-10T10:00:02.000Z",
+    },
+    {
+      id: 1003,
+      memberId: memberId,
+      content: "2. 분실물을 어디서 잃어버리셨나요?",
+      createdAt: "2024-06-10T10:00:03.000Z",
+    },
+  ];
+  // 왼쪽(상대방) 더미 메시지
   const dummyMessages = [
     {
       id: 1,
       memberId: "other",
-      content: "네, 안녕하세요! 무엇을 도와드릴까요?",
+      content: "상단에 약간의 흠집이 있습니다!",
       createdAt: "2024-06-10T10:00:05.000Z",
     },
     {
       id: 2,
       memberId: "other",
-      content: "분실물의 특징을 알려주시면 도와드릴 수 있습니다.",
+      content: "도서관 근처에서 잃어버렸습니다",
       createdAt: "2024-06-10T10:00:10.000Z",
     },
     {
       id: 3,
       memberId: "other",
-      content: "찾으시는 물건이 어떤 건가요?",
+      content: "아마 다마고치 스티커가 붙여져 있을거에요!",
       createdAt: "2024-06-10T10:00:15.000Z",
     },
   ];
-  // 내 메시지
-  const [messages, setMessages] = useState([]);
+  // 실제 메시지 state: 오른쪽 더미만 먼저 보임
+  const [messages, setMessages] = useState(initialMyMessages);
   const [input, setInput] = useState("");
   const [dummyIndex, setDummyIndex] = useState(0); // 다음에 보여줄 더미 메시지 인덱스
   const messagesEndRef = useRef(null);
+
+  // 2초 후 왼쪽 더미 메시지 1개씩 1초 간격으로 추가
+  useEffect(() => {
+    if (dummyIndex === 0) {
+      const timer = setTimeout(() => {
+        setDummyIndex(1);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else if (dummyIndex > 0 && dummyIndex <= dummyMessages.length) {
+      const timer = setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...dummyMessages[dummyIndex - 1],
+            id: Date.now() + dummyIndex, // 고유 id 보장
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+        setDummyIndex(dummyIndex + 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [dummyIndex]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -63,25 +107,14 @@ const ChatRoomWebSocket = ({
     };
     setMessages((prev) => [...prev, myMsg]);
     setInput("");
-    // 1초 후 더미 메시지 하나 추가 (있을 때만)
-    if (dummyIndex < dummyMessages.length) {
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...dummyMessages[dummyIndex],
-            id: Date.now() + 1, // 고유 id 보장
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-        setDummyIndex((idx) => idx + 1);
-      }, 1000);
-    }
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%' }}>
-      <div className="flex-1 overflow-y-auto px-2 py-2" style={{ minHeight: 0, background: '#fff' }}>
+      <div
+        className="flex-1 overflow-y-auto px-2 py-2"
+        style={{ minHeight: 0, background: '#fff', maxHeight: 500, height: '100%' }}
+      >
         {/* 상단 경고 메시지 */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
