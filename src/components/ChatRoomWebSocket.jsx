@@ -9,7 +9,7 @@ import { apiService } from "../services/apiService";
  *
  * Props:
  * - roomId: string | number (필수)
- * - userId: string | number (필수)
+ * - memberId: string | number (필수)
  * - subscribeTopic: string (예: `/topic/chat/${roomId}`)
  * - sendDestination: string (예: `/app/chat.send`)
  * - renderMessage: (msg, idx) => ReactNode (optional, 메시지 렌더링 커스텀)
@@ -18,7 +18,7 @@ const WS_URL = "https://15.164.234.32.nip.io/ws-stomp";
 
 const ChatRoomWebSocket = ({
   roomId,
-  userId,
+  memberId, // userId -> memberId
   subscribeTopic,
   sendDestination,
   showFoundOwnerMsg,
@@ -35,22 +35,20 @@ const ChatRoomWebSocket = ({
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (!roomId || !userId) return;
+    if (!roomId || !memberId) return;
     connect();
     return () => disconnect();
-  }, [roomId, userId]);
+  }, [roomId, memberId]);
+
+  useEffect(() => {}, [roomId]);
 
   useEffect(() => {
-  }, [roomId]);
-
-  useEffect(() => {
-    if (!roomId || !userId) return;
+    if (!roomId || !memberId) return;
     const loadChatHistory = async () => {
       try {
         console.log("Loading chat history for roomId:", roomId);
         const response = await apiService.getChatMessages(roomId, 0);
         console.log("Chat history loaded:", response);
-
         if (response && response.content) {
           setMessages(response.content);
         }
@@ -59,13 +57,13 @@ const ChatRoomWebSocket = ({
       }
     };
     loadChatHistory();
-  }, [roomId, userId]);
+  }, [roomId, memberId]);
 
   const connect = () => {
     clientRef.current = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: {
-        "X-USER-ID": userId,
+        "X-USER-ID": memberId,
       },
       debug: (str) => {
         console.log("STOMP Debug:", str);
@@ -98,7 +96,6 @@ const ChatRoomWebSocket = ({
       subscribeTopic,
       async (message) => {
         const receivedMessage = JSON.parse(message.body);
-
         setMessages((prev) => {
           const isDuplicate = prev.some(
             (m) =>
@@ -108,10 +105,9 @@ const ChatRoomWebSocket = ({
           );
           return isDuplicate ? prev : [...prev, receivedMessage];
         });
-
-        if (String(receivedMessage.senderId) !== String(userId)) {
+        if (String(receivedMessage.memberId) !== String(memberId)) {
           try {
-            await apiService.markMessageAsRead(roomId, userId);
+            await apiService.markMessageAsRead(roomId, memberId);
             console.log("Message marked as read");
           } catch (error) {
             console.error("Failed to mark message as read:", error);
@@ -125,7 +121,7 @@ const ChatRoomWebSocket = ({
     if (input.trim() && clientRef.current?.connected) {
       const chatMessage = {
         roomId: roomId,
-        senderId: userId,
+        memberId: memberId, // senderId -> memberId
         content: input,
         type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장
@@ -156,8 +152,8 @@ const ChatRoomWebSocket = ({
         {console.log(
           "[WebSocket Render] roomId:",
           roomId,
-          "userId:",
-          userId,
+          "memberId:",
+          memberId,
           "subscribeTopic:",
           subscribeTopic,
           "messages:",
@@ -165,7 +161,7 @@ const ChatRoomWebSocket = ({
         )}
         {messages.map((msg, idx) => {
           // memberId로 내 메시지/상대 메시지 구분
-          const isMine = String(msg.memberId) === String(userId);
+          const isMine = String(msg.memberId) === String(memberId);
           // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
           const isLastOfGroup =
             idx === messages.length - 1 ||
@@ -271,8 +267,8 @@ const ChatRoomWebSocket = ({
         className="flex flex-col justify-start items-center bg-white"
         style={{
           position: "fixed",
-          left: 0,
-          right: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
           bottom: 0,
           zIndex: 20,
           width: '100%',

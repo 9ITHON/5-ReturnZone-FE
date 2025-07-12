@@ -472,7 +472,8 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
 const ChatRoomPage = ({ roomId: propRoomId }) => {
   const params = useParams();
   const location = useLocation();
-  const userId = localStorage.getItem("user_id") || "1";
+  // userId -> memberId로 변수명 및 로직 변경
+  const memberId = localStorage.getItem("user_id") || "1";
   const navigate = useNavigate();
   const [showOption, setShowOption] = useState(false);
   const [reportModalType, setReportModalType] = useState(null);
@@ -496,7 +497,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
     searchParams.get("lostPostId") || params.lostPostId || params.itemId;
 
   // 실제 API 데이터 기반으로만 역할 판별
-  const isLostOwner = item?.memberId === userId || item?.userId === userId;
+  const isLostOwner = item?.memberId === memberId || item?.userId === memberId;
   const isFinder = !isLostOwner;
 
   useEffect(() => {
@@ -517,17 +518,17 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
         }
 
         let chatRoomId = lostPostId;
-        const targetUserId = itemData?.memberId || itemData?.userId;
+        const targetMemberId = itemData?.memberId || itemData?.userId;
         if (
           !propRoomId &&
           lostPostId &&
-          targetUserId &&
-          userId !== targetUserId
+          targetMemberId &&
+          memberId !== targetMemberId
         ) {
           await apiService.createChatRoom({
             lostPostId: Number(lostPostId),
-            memberId: Number(userId),
-            otherMemberId: Number(targetUserId),
+            memberId: Number(memberId),
+            otherMemberId: Number(targetMemberId),
           });
           navigate(`/chat/${lostPostId}`);
           return;
@@ -782,7 +783,7 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
               roomId={String(
                 roomId || lostPostId || params.roomId || params.lostPostId
               )}
-              userId={String(userId)}
+              memberId={String(memberId)}
               subscribeTopic={`/topic/chat/${String(
                 roomId || lostPostId || params.roomId || params.lostPostId
               )}`}
