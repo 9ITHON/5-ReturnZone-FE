@@ -40,6 +40,7 @@ export default function ModifyPage() {
     const [reward, setReward] = useState(""); // 현상금
     const calendarRef = useRef(null); // 캘린더 영역 참조
     const timePickerRef = useRef(null); // 시간 영역 참조
+    const [agree, setAgree] = useState(false); // 약관 동의 여부
 
     const { lostPostId } = useParams(); // URL로 정보 받기
     const navigate = useNavigate("");
@@ -385,47 +386,64 @@ export default function ModifyPage() {
                             )}
                         </div>
                     </div>
-                    {/* 분실했어요 조건 렌더링 */}
-                    {selectedTag === "분실했어요" && (
-                        <div>
-                            {/* 현상금 입력 */}
-                            <div className="mb-[32px]">
-                                <RegisterLabel label="현상금" />
-                                <p className=" font-medium text-[#808080] text-[14px] mb-[8px]">
-                                    현상금은 등록 시 예치되며, 반환 실패 시 환불 요청으로 돌려받을 수 있습니다.
-                                    금액은 입력값과 일치해야 하며, 입금자명은 계정명과 동일해야 합니다.
-                                </p>
-                                <div className="flex items-center border border-[#D0D0D0] rounded-[8px] px-[16px] py-[14px]">
-                                    <input
-                                        type="text" placeholder="금액을 입력해주세요" value={formatWithComma(reward)}
-                                        onChange={(e) => {
-                                            const raw = unformatComma(e.target.value);
-                                            if (!/^\d*$/.test(raw)) return; // 숫자만 허용
-                                            setReward(raw);
-                                        }}
-                                        className="flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* 예치 계좌 정보 */}
-                            <div>
-                                <RegisterLabel label="플랫폼 예치 계좌" />
-                                <p className=" font-medium text-[#808080] text-[14px]">예금주명 : 리턴존</p>
-                                <div className="flex items-center gap-[8px]">
-                                    <span>우리은행 1111-22222-23323</span>
-                                    <button className="flex items-center justify-center gap-[4px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText("1111-22222-23323");
-                                            alert("계좌번호가 복사되었습니다.");
-                                        }}
-                                    >
-                                        계좌복사
-                                    </button>
-                                </div>
+                    {/* 분실했어요 */}
+                    <div>
+                        {/* 현상금 입력 */}
+                        <div className="mb-[32px]">
+                            <RegisterLabel label="현상금" />
+                            <p className=" font-medium text-[#808080] text-[14px] mb-[8px]">
+                                현상금은 등록 시 예치되며, 반환 실패 시 환불 요청으로 돌려받을 수 있습니다.
+                                금액은 입력값과 일치해야 하며, 입금자명은 계정명과 동일해야 합니다.
+                            </p>
+                            <div className="flex items-center border border-[#D0D0D0] rounded-[8px] px-[16px] py-[14px]">
+                                <input
+                                    type="text" placeholder="금액을 입력해주세요" value={formatWithComma(reward)}
+                                    onChange={(e) => {
+                                        const raw = unformatComma(e.target.value);
+                                        if (!/^\d*$/.test(raw)) return; // 숫자만 허용
+                                        setReward(raw);
+                                    }}
+                                    className="flex-1 outline-none placeholder-[#B8B8B8] font-normal hide-number-spin"
+                                />
                             </div>
                         </div>
-                    )}
+                        {selectedTag === "주인을 찾아요" && (
+                            <div className="h-[136px] w-full mt-[24px] mb-[32px] ">
+                                <div className="text-[14px] bg-[#FF00001A] text-[#D32F2F] font-medium border border-[#FF0000] rounded-[8px] p-[10px]" >
+                                    <p>현상금 요구는 가능하지만 <span className="font-bold">강제할 수 없고,<br /> 물건 금액의 20</span>%를 넘기면 법적 문제가 될 수 있습니다. <br /> 또한 습득자가 반환을 거부하거나 악의로 보관하면 법적 책 <br />임을 질 수 있습니다.</p>
+                                </div>
+                                <label className="flex justify-between items-center gap-[10px] h-[44px] ">
+                                    <div></div>
+                                    <div className="flex items-center justify-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={agree}
+                                            onChange={(e) => setAgree(e.target.checked)}
+                                            className="w-[22px] h-[22px] mx-[10px] "
+                                        />
+                                        <span className="font-medium text-[#4D4D4D] text-[16px]">약관 동의하기</span>
+                                    </div>
+                                </label>
+                            </div>
+                        )}
+                        {/* 예치 계좌 정보 */}
+                        <div>
+                            <RegisterLabel label="플랫폼 예치 계좌" />
+                            <p className=" font-medium text-[#808080] text-[14px]">예금주명 : 리턴존</p>
+                            <div className="flex items-center gap-[8px]">
+                                <span>우리은행 1111-22222-23323</span>
+                                <button className="flex items-center justify-center gap-[4px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText("1111-22222-23323");
+                                        alert("계좌번호가 복사되었습니다.");
+                                    }}
+                                >
+                                    계좌복사
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
