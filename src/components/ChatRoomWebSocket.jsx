@@ -97,6 +97,7 @@ const ChatRoomWebSocket = ({
     subscriptionRef.current = clientRef.current.subscribe(
       subscribeTopic,
       async (message) => {
+        console.log('WebSocket 수신 메시지:', message); // 수신 디버깅 로그 추가
         const receivedMessage = JSON.parse(message.body);
         setMessages((prev) => {
           const isDuplicate = prev.some(
