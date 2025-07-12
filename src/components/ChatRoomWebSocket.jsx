@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatMessage from "./ChatMessage";
+import { GetMyPage } from "../utils/GetMyPage";
+import { formatNumber } from "../utils/formatNumber";
 
 /**
  * ChatRoomWebSocket
@@ -14,7 +16,6 @@ import ChatMessage from "./ChatMessage";
 const ChatRoomWebSocket = ({
   memberId,
   showFoundOwnerMsg = false,
-  showDeliveryMsg = false,
   showDeliveryCompleted = false,
   isLostOwner = false,
   isFinder = false,
@@ -71,7 +72,21 @@ const ChatRoomWebSocket = ({
   const [dummyIndex, setDummyIndex] = useState(0); // 다음에 보여줄 더미 메시지 인덱스
   const [rewardAmount, setRewardAmount] = useState(""); // 현상금 금액
   const [isAgreed, setIsAgreed] = useState(false); // 약관 동의 상태
+  const [userInfo, setUserInfo] = useState(null); // 사용자 정보
   const messagesEndRef = useRef(null);
+
+  // 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const data = await GetMyPage();
+        setUserInfo(data);
+      } catch (error) {
+        console.error("사용자 정보 로딩 실패:", error);
+      }
+    };
+    fetchUserInfo();
+  }, []);
 
   // 2초 후 왼쪽 더미 메시지 1개씩 1초 간격으로 추가
   useEffect(() => {
@@ -131,10 +146,13 @@ const ChatRoomWebSocket = ({
   };
 
   // 숫자를 천 단위로 포맷팅
-  const formatNumber = (num) => {
+  const formatNumberLocal = (num) => {
     if (!num) return '';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
+
+  // 버튼 활성화 조건: 약관 동의 + 금액 입력
+  const isButtonEnabled = isAgreed && rewardAmount.trim() !== "";
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
@@ -297,12 +315,12 @@ const ChatRoomWebSocket = ({
                   <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2">
                     <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
                       <img
-                        src="rectangle-3468137.jpeg"
+                        src={userInfo?.imageUrl || "rectangle-3468137.jpeg"}
                         className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
                       />
                     </div>
                     <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
-                      유저
+                      {userInfo?.nickname || "유저"}
                     </p>
                   </div>
                   <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
@@ -310,7 +328,7 @@ const ChatRoomWebSocket = ({
                       보유 포인트
                     </p>
                     <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
-                      15,000원
+                      {userInfo ? formatNumber(userInfo.point) : "0"}원
                     </p>
                   </div>
                 </div>
@@ -332,7 +350,7 @@ const ChatRoomWebSocket = ({
                       type="text"
                       className="flex-grow-0 flex-shrink-0 text-4xl font-bold text-left text-[#111] bg-transparent border-none outline-none"
                       placeholder="얼마나 지급할까요?"
-                      value={formatNumber(rewardAmount)}
+                      value={formatNumberLocal(rewardAmount)}
                       onChange={handleRewardAmountChange}
                       maxLength={10}
                     />
@@ -434,12 +452,12 @@ const ChatRoomWebSocket = ({
               <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
                 <button
                   onClick={handleRewardPayment}
-                  disabled={!isAgreed || !rewardAmount.trim()}
+                  disabled={!isButtonEnabled}
                   className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#e6e6e6] disabled:text-[#808080]"
                 >
                   <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
                     <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
-                      지급하기
+                      {isButtonEnabled ? "선택 완료" : "지급하기"}
                     </p>
                   </div>
                 </button>
