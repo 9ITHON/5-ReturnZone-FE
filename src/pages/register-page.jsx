@@ -179,7 +179,10 @@ export default function RegisterPage() {
 
       const lostDateTimeStart = new Date(`${date}T${startTime}`);
       const lostDateTimeEnd = new Date(`${date}T${endTime}`);
-
+      console.log("selectedDate:", selectedDate);
+      console.log("selectedTimes:", selectedTimes);
+      console.log("startTime:", selectedTimes?.[0]);
+      console.log("endTime:", selectedTimes?.[1]);
       if (isNaN(lostDateTimeStart) || isNaN(lostDateTimeEnd)) {
         alert("시간을 올바르게 입력해주세요.");
         return;
