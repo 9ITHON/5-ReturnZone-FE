@@ -157,7 +157,7 @@ const ChatRoomWebSocket = ({
 
   return (
     <div
-      className="flex flex-col h-[630px] w-full bg-white"
+      className="flex flex-col h-[630px] w-full  bg-white"
       style={{
         minHeight: 0,
         height: "60%",
@@ -171,7 +171,7 @@ const ChatRoomWebSocket = ({
         className="flex-1 overflow-y-auto px-6 pb-2"
         style={{
           background: "#fff",
-          minHeight: 0
+          minHeight: "100%",
         }}
       >
         {/* 상단 안내문(❗) */}
