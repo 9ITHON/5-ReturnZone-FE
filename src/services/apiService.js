@@ -16,9 +16,9 @@ const apiClient = axios.create({
 // 자동으로 JWT 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken'); // ✅ 반드시 accessToken
+    const token = localStorage.getItem('accessToken'); // 반드시 accessToken
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // ✅ 누락되면 401
+      config.headers.Authorization = `Bearer ${token}`; // 누락되면 401
     }
     return config;
   },
