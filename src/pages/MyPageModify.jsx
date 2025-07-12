@@ -99,7 +99,7 @@ export default function MyPageModify() {
             const response = await axios.put(`${apiBase}/api/v1/mypage`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    "X-USER-ID": userId,
+                    // "X-USER-ID": userId,
                 }
             });
 
