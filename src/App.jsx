@@ -29,7 +29,7 @@ function AppRoute(){
       <Route path='/LogIn' element={<Login/>}></Route>
       <Route path='/SignUp' element={<SignUp/>}></Route>
       <Route path="ChatList" element={<ChatList />} />
-//    <Route path="chat/:id" element={<Chat />} />
+      <Route path="chat/:id" element={<Chat />} />
       <Route path='/RegisterLocation' element={<RegisterLocation/>}/>
       <Route path='/Register' element={<RegisterPage/>}></Route>
       <Route path="/lost/:lostPostId" element={<DetailedPage />} />
