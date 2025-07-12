@@ -198,15 +198,14 @@ export const apiService = {
   async getChatRooms(page = 0) {
     return retryRequest(async () => {
       const response = await apiClient.get(
-        '/chats/rooms',
+        '/api/v1/chats/rooms', // 명세에 맞게 수정
         {
           params: { page },
-          // headers: { 'X-USER-ID': getUserId() }
         }
       );
       return response.data;
     });
-  },
+  }
   // 룸 들어가기 (채팅 목록 조회)
   async getChatRoom(roomId) {
     return retryRequest(async () => {
