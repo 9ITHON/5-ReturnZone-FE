@@ -7,7 +7,7 @@ const Chat = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const lostPostId = searchParams.get('lostPostId');
-  const resolvedRoomId = id || roomId || lostPostId;
+  const resolvedRoomId = roomId || lostPostId;
   if (resolvedRoomId) {
     return <ChatRoomPage roomId={resolvedRoomId} />;
   }

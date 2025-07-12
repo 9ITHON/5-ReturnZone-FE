@@ -469,7 +469,7 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   </div>
 );
 
-const ChatRoomPage = () => {
+const ChatRoomPage = ({ roomId: propRoomId }) => {
   const params = useParams();
   const location = useLocation();
   const userId = localStorage.getItem("user_id") || "1";
@@ -477,7 +477,7 @@ const ChatRoomPage = () => {
   const [showOption, setShowOption] = useState(false);
   const [reportModalType, setReportModalType] = useState(null);
   const [item, setItem] = useState(null);
-  const [roomId, setRoomId] = useState(params.roomId);
+  const [roomId, setRoomId] = useState(propRoomId || params.roomId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState("");
@@ -519,7 +519,7 @@ const ChatRoomPage = () => {
         let chatRoomId = lostPostId;
         const targetUserId = itemData?.memberId || itemData?.userId;
         if (
-          !params.roomId &&
+          !propRoomId &&
           lostPostId &&
           targetUserId &&
           userId !== targetUserId
@@ -541,7 +541,7 @@ const ChatRoomPage = () => {
     }
     fetchData();
     // eslint-disable-next-line
-  }, [lostPostId, params.roomId]);
+  }, [lostPostId, propRoomId]);
 
   if (loading)
     return (

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'; // Router 추가
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
 import RegisterLocation from './pages/register-location';
