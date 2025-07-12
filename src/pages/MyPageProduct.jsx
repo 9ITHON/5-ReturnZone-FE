@@ -46,6 +46,7 @@ export default function MyPageProduct() {
     //     // 상태에 저장
     //     setProducts(dummyProducts);
     // }, []);
+    // 내가 등록한 분실물 조회
     useEffect(() => {
         const fetchLostPosts = async () => {
             try {
@@ -55,9 +56,9 @@ export default function MyPageProduct() {
                     return;
                 }
                 const response = await axios.get(`${apiBase}/api/v1/mypage/lostPosts`, {
-                    headers: {
-                        "X-USER-ID": userId,
-                    },
+                    // headers: {
+                    //     "X-USER-ID": userId,
+                    // },
                     params: {
                         page: 0, // 기본값
                     },
@@ -73,7 +74,7 @@ export default function MyPageProduct() {
 
         fetchLostPosts();
     }, []);
-    
+
     return (
         <div>
             <MyPageUserHeader label="내가 등록한 분실물" />

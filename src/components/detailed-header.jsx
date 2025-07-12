@@ -31,7 +31,7 @@ export default function DetailedHeader({ postMemberId }) {
     const handleDelete = async () => {
         try {
             await axios.delete(`${apiBase}/api/v1/lostPosts/${lostPostId}`, {
-                headers: { 'X-USER-ID': userId }
+                // headers: { 'X-USER-ID': userId }
             });
             alert("삭제되었습니다.");
             navigate("/", { replace: true });
@@ -46,7 +46,7 @@ export default function DetailedHeader({ postMemberId }) {
             {/* 뒤로가기 버튼 */}
             <button onClick={() => goBack(navigate)} > <img src={LArrow} alt="<" /></button>
             {/* 옵션 버튼 */}
-            { isAuthor && (
+            {isAuthor && (
                 <div className="relative" ref={menuRef}>
                     <button onClick={() => setMenuOpen((prev) => !prev)}> <img src={OptionButton} alt="옵션" /></button>
                     {menuOpen && (

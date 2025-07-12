@@ -26,9 +26,9 @@ export default function SearchPage() {
     const fetchRecentKeywords = async () => {
         try {
             const res = await axios.get(`${apiBase}/api/v1/search/recent`, {
-                headers: {
-                    'X-USER-ID': userId
-                }
+                // headers: {
+                //     'X-USER-ID': userId
+                // }
             });
             setRecentKeywords(res.data);
         } catch (error) {
@@ -52,9 +52,9 @@ export default function SearchPage() {
 
             try {
                 const res = await axios.get(`${apiBase}/api/v1/search/posts`, {
-                    headers: {
-                        'X-USER-ID': userId
-                    },
+                    // headers: {
+                    //     'X-USER-ID': userId
+                    // },
                     params: {
                         keyword: trimmed,
                         includeReturned: includeCompleted
@@ -88,9 +88,9 @@ export default function SearchPage() {
     const handleDeleteSearchItem = async (label) => {
         try {
             await axios.delete(`${apiBase}/api/v1/search/recent`, {
-                headers: {
-                    'X-USER-ID': userId
-                },
+                // headers: {
+                //     'X-USER-ID': userId
+                // },
                 params: {
                     keyword: label
                 }
@@ -104,9 +104,9 @@ export default function SearchPage() {
     const handleClearAll = async () => {
         try {
             await axios.delete(`${apiBase}/api/v1/search/recent/all`, {
-                headers: {
-                    'X-USER-ID': userId
-                }
+                // headers: {
+                //     'X-USER-ID': userId
+                // }
             });
             fetchRecentKeywords();
         } catch (error) {

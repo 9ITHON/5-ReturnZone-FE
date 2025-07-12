@@ -210,7 +210,7 @@ export default function RegisterPage() {
         {
           headers: {
             "Content-Type": "multipart/form-data", // optional (axios가 자동 지정함)
-            "X-USER-ID": userId, // 명세에 따라 로그인한 사용자 ID 전달
+            // "X-USER-ID": userId, // 명세에 따라 로그인한 사용자 ID 전달
           },
           validateStatus: () => true,
         }
@@ -392,9 +392,8 @@ export default function RegisterPage() {
             <RegisterLabel label={locationLabel} path="/Register" />
             <button
               onClick={handleLocation}
-              className={`w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${
-                selectedLocation ? "text-[#111111]" : "text-[#B8B8B8]"
-              }`}
+              className={`w-full h-[56px] my-[8px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedLocation ? "text-[#111111]" : "text-[#B8B8B8]"
+                }`}
             >
               {selectedLocation || "위치를 지정해 주세요"}
               <img src={InputArrow} alt=">" />
@@ -412,9 +411,8 @@ export default function RegisterPage() {
             <RegisterLabel label={dateLabel} />
             <button
               onClick={() => setIsCalendarOpen(true)}
-              className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${
-                selectedDate ? "text-[#111111]" : "text-[#B8B8B8]"
-              }`}
+              className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedDate ? "text-[#111111]" : "text-[#B8B8B8]"
+                }`}
             >
               <div className="flex items-center gap-[8px]">
                 <img src={Calendar} alt="" />
@@ -428,17 +426,16 @@ export default function RegisterPage() {
             <RegisterLabel label={timeLabel} />
             <button
               onClick={() => setIsTimePickerOpen(true)}
-              className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${
-                selectedTimes.length > 0 ? "text-[#111111]" : "text-[#B8B8B8]"
-              }`}
+              className={`w-full h-[56px] px-[16px] py-[14px] border border-[#B8B8B8] rounded-[8px] flex justify-between items-center font-normal cursor-pointer ${selectedTimes.length > 0 ? "text-[#111111]" : "text-[#B8B8B8]"
+                }`}
             >
               <div className="flex items-center gap-[8px]">
                 <img src={Time} alt="" />
                 {selectedTimes.length > 0
                   ? selectedTimes.join(" ~ ")
                   : selectedTag === "주인을 찾아요"
-                  ? "획득 시간 선택"
-                  : "시간 선택"}
+                    ? "획득 시간 선택"
+                    : "시간 선택"}
               </div>
               <img src={InputArrow} alt=">" />
             </button>
@@ -536,9 +533,8 @@ export default function RegisterPage() {
         </div>
       </div>
       <div
-        className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-2 ${
-          isKeyboardOpen ? "!bottom-[10px]" : ""
-        }`}
+        className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-2 ${isKeyboardOpen ? "!bottom-[10px]" : ""
+          }`}
       >
         <Button label="등록 하기" onClick={handleRegister} />
       </div>
