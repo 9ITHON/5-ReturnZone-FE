@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { GetMyPage } from "../utils/GetMyPage";
 import { formatNumber } from "../utils/formatNumber";
+import { getUserId } from '../services/apiService';
 
 export default function MyPageUserCard() {
     const [userInfo, setUserInfo] = useState(null); // 사용자 정보 가져오기
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userId = localStorage.getItem("userId");
+                const userId = getUserId();
                 // 실제 호출
                 const data = await GetMyPage(userId);
 

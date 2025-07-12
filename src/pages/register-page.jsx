@@ -12,6 +12,7 @@ import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import CalendarModal from "../components/calendar-modal";
 import TimePickerModal from "../components/time-picker-modal";
 import UserMessageLogin from "../components/UserMessageLogin";
+import { getUserId } from '../services/apiService'
 
 import CameraIcon from "../assets/camera.svg";
 import WhiteX from "../assets/흰색x.svg";
@@ -60,8 +61,8 @@ export default function RegisterPage() {
 
   const navigate = useNavigate();
   const isKeyboardOpen = UseKeyboardOpen();
-  const user = JSON.parse(localStorage.getItem("userId")); // 사용자의 아이디 가져오기
-  const isLoggedIn = user && user.id != null; // 사용자의 로그인 상태 저장
+  const userId = getUserId();
+  // const isLoggedIn = userId && userId != null; // 사용자의 로그인 상태 저장
 
   // 분실/획득 시간 라벨 텍스트 동적 처리
   const locationLabel =
@@ -121,11 +122,11 @@ export default function RegisterPage() {
     });
   };
   // 위치 받기
-  const handleConfirm = () => {
-    if (!address || latlng.lat === null || latlng.lng === null) return;
-    setSelectedLocation(address); // RegisterPage가 읽는 상태
-    navigate(path, { replace: true });
-  };
+  // const handleConfirm = () => {
+  //   if (!address || latlng.lat === null || latlng.lng === null) return;
+  //   setSelectedLocation(address); // RegisterPage가 읽는 상태
+  //   navigate(path, { replace: true });
+  // };
   // 상세 특징 업데이트
   const handleChange = (index, value) => {
     setQuestions((prev) => {
@@ -155,8 +156,7 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     try {
       // 로그인 유효성 검사 진행
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.id) {
+      if (!userId) {
         alert("로그인이 필요한 기능입니다.");
         return;
       }
@@ -180,8 +180,8 @@ export default function RegisterPage() {
         itemName,
         lostLocationDong: selectedLocation,
         detailedLocation: detailLocation,
-        latitude: lat,
-        longitude: lng,
+        latitude,
+        longitude,
         reward: Number(reward),
         instantSettlement: true,
         feature1: questions[0] || "",
@@ -210,7 +210,7 @@ export default function RegisterPage() {
         {
           headers: {
             "Content-Type": "multipart/form-data", // optional (axios가 자동 지정함)
-            "X-USER-ID": user?.id, // 명세에 따라 로그인한 사용자 ID 전달
+            "X-USER-ID": userId, // 명세에 따라 로그인한 사용자 ID 전달
           },
           validateStatus: () => true,
         }
@@ -260,7 +260,7 @@ export default function RegisterPage() {
   }, [isCalendarOpen, isTimePickerOpen]);
   return (
     <div>
-      {!user && (
+      {!userId && (
         <UserMessageLogin
           title="로그인이 필요합니다"
           message="분실물 등록은 로그인 후 <br> 이용하실 수 있습니다."

@@ -10,6 +10,7 @@ import RegisterTag from "../components/register-tag";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import CalendarModal from "../components/calendar-modal";
 import TimePickerModal from "../components/time-picker-modal";
+import { getUserId } from '../services/apiService'
 
 import CameraIcon from '../assets/camera.svg'
 import WhiteX from '../assets/흰색x.svg'
@@ -75,7 +76,7 @@ export default function ModifyPage() {
                     new Date(data.lostDateTimeEnd).toTimeString().slice(0, 5),
                 ]);
 
-                setImages([data.imageUrls || []]); // 이미지는 URL이므로 미리보기 필요시 별도 처리
+                setImages(data.imageUrls || []); // 이미지는 URL이므로 미리보기 필요시 별도 처리
             } catch (err) {
                 console.error("불러오기 실패", err);
                 alert("게시글 정보를 불러오지 못했습니다.");
@@ -140,26 +141,10 @@ export default function ModifyPage() {
     const unformatComma = (value) => {
         return value.replace(/,/g, "");
     };
-    // 외부클릭으로 모달 닫기
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (isCalendarOpen && calendarRef.current && !calendarRef.current.contains(e.target)) {
-                setIsCalendarOpen(false);
-            }
-            if (isTimePickerOpen && timePickerRef.current && !timePickerRef.current.contains(e.target)) {
-                setIsTimePickerOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isCalendarOpen, isTimePickerOpen]);
     // 수정하기
     const handleUpdate = async () => {
         try {
-            const userId = localStorage.getItem("userId");
+            const userId = getUserId();
             const { lat, lng } = location.state || {};
 
             const date = selectedDate?.toISOString().split("T")[0];
@@ -172,8 +157,6 @@ export default function ModifyPage() {
             formData.append("requestDto", new Blob([JSON.stringify({
                 registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
                 title,
-                nickname: "유저 1",
-                timeAgo: "방금 전",
                 lostLocationDong: selectedLocation,
                 detailedLocation: detailLocation,
                 latitude: lat,
@@ -216,7 +199,6 @@ export default function ModifyPage() {
                 setIsTimePickerOpen(false);
             }
         };
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -259,7 +241,7 @@ export default function ModifyPage() {
                             className="relative w-[72px] h-[72px] bg-[#F5F5F5] rounded-[8px] shrink-0 "
                         >
                             <img
-                                src={URL.createObjectURL(file)}
+                                src={file instanceof File ? URL.createObjectURL(file) : file}
                                 alt={`preview-${index}`}
                                 className="w-full h-full object-cover rounded-[8px] "
                             />

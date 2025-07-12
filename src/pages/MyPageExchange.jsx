@@ -6,6 +6,7 @@ import MyPageUserHeader from "../components/MyPageUserHeader";
 import Button from "../components/button";
 import MyPagePoint from "../components/MyPagePoint";
 import { GetMyPage } from "../utils/GetMyPage";
+import { getUserId } from '../services/apiService'
 
 
 export default function MyPageExchange() {
@@ -17,7 +18,7 @@ export default function MyPageExchange() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userId = localStorage.getItem("userId");
+                const userId = getUserId();
                 // 실제 호출
                 const data = await GetMyPage(userId);
 
@@ -34,7 +35,7 @@ export default function MyPageExchange() {
     // 환전하기 기능
     const handleExchange = async () => {
         try {
-            const userId = localStorage.getItem("userId");
+            const userId = getUserId();
             if (!userId || userInfo?.point === 0 || isLoading) return;
 
             setIsLoading(true);
