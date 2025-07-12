@@ -169,7 +169,7 @@ const Home = () => {
   // Show error state
   if (error) {
     return (
-      <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
+      <div className="relative w-[390px] h-[844px] pb-[150px] bg-white flex flex-col items-center mx-auto overflow-hidden">
         <MainHeader />
         <div className="flex flex-col items-center px-0 pt-[158px] pb-[88px] flex-1 w-full overflow-y-scroll">
           <div className="flex flex-col gap-4 w-[342px] items-center justify-center">
@@ -244,11 +244,10 @@ const Home = () => {
                   <button
                     key={f.key}
                     onClick={() => handleFilterClick(f.key)}
-                    className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${
-                      isSelected
-                        ? "bg-[#06f]/[0.15] border-[#06f] text-[#111]"
-                        : "bg-white border-[#e6e6e6] text-[#111]"
-                    }`}
+                    className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected
+                      ? "bg-[#06f]/[0.15] border-[#06f] text-[#111]"
+                      : "bg-white border-[#e6e6e6] text-[#111]"
+                      }`}
                   >
                     <span>
                       {f.key === "category" && selectedCategory

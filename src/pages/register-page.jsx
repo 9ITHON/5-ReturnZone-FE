@@ -11,7 +11,6 @@ import RegisterTag from "../components/register-tag";
 import { UseKeyboardOpen } from "../utils/useKeyboardOpen";
 import CalendarModal from "../components/calendar-modal";
 import TimePickerModal from "../components/time-picker-modal";
-import UserMessageLogin from "../components/UserMessageLogin";
 import { getUserId } from '../services/apiService'
 
 import CameraIcon from "../assets/camera.svg";
@@ -62,6 +61,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const isKeyboardOpen = UseKeyboardOpen();
   const userId = getUserId();
+  const safeQuestions = Array.isArray(questions) ? questions : [];
   // const isLoggedIn = userId && userId != null; // 사용자의 로그인 상태 저장
 
   // 분실/획득 시간 라벨 텍스트 동적 처리
@@ -81,6 +81,7 @@ export default function RegisterPage() {
   //         setSelectedLocation(location.state.address);
   //     }
   // }, [location]);
+
   // 이미지 등록 버튼 (최대 5개)
   const handleCameraClick = (e) => {
     if (images.length >= 5) {
@@ -91,11 +92,13 @@ export default function RegisterPage() {
   };
   // 추가 이미지 선택 가능
   const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const remainingSlots = 5 - images.length;
+    const selectedFiles = Array.from(e.target.files || []);
+    const prevImages = Array.isArray(images) ? images : [];
+
+    const remainingSlots = 5 - prevImages.length;
     const filesToAdd = selectedFiles.slice(0, remainingSlots);
-    setImages((prev) => [...prev, ...filesToAdd]);
-    e.target.value = ""; // 같은 파일 일 경우 초기화
+
+    setImages([...prevImages, ...filesToAdd]);
   };
   // x 버튼 클릭 시 호출
   const handleDelete = (index) => {
@@ -160,7 +163,6 @@ export default function RegisterPage() {
         alert("로그인이 필요한 기능입니다.");
         return;
       }
-      const { latitude, longitude } = useRegisterStore.getState();
       if (!latitude || !longitude) return alert("위치를 선택해주세요.");
       if (!selectedDate) return alert("날짜를 선택해주세요.");
 
@@ -260,18 +262,18 @@ export default function RegisterPage() {
   }, [isCalendarOpen, isTimePickerOpen]);
   return (
     <div>
-      {!userId && (
+      {/* {!userId && (
         <UserMessageLogin
           title="로그인이 필요합니다"
           message="분실물 등록은 로그인 후 <br> 이용하실 수 있습니다."
           path="/Login"
           cancelPath={-1}
         />
-      )}
+      )} */}
       <div>
         <RegisterHeader title="분실물 등록" />
       </div>
-      <div className="overflow-y-auto h-[660px] hide-scrollbar">
+      <div className="pb-[150px] h-screen overflow-y-auto hide-scrollbar">
         {/* 숨겨진 input */}
         <input
           type="file"
@@ -449,7 +451,7 @@ export default function RegisterPage() {
               <br />
               입력한 내용은 습득자에게 퀴즈 형식으로 제공됩니다.
             </p>
-            {questions.map((q, index) => (
+            {safeQuestions.map((q, index) => (
               <input
                 key={index}
                 type="text"
@@ -467,7 +469,7 @@ export default function RegisterPage() {
                   className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
                 >
                   <img src={Plus} alt="+" />
-                  질문 추가
+                  질문추가
                 </button>
               )}
               {questions.length > 2 && (
@@ -477,7 +479,7 @@ export default function RegisterPage() {
                   className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
                 >
                   <img src={XButton} alt="x" className="w-[18px] h-[18px]" />{" "}
-                  질문 삭제
+                  질문삭제
                 </button>
               )}
             </div>
@@ -533,7 +535,7 @@ export default function RegisterPage() {
         </div>
       </div>
       <div
-        className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-2 ${isKeyboardOpen ? "!bottom-[10px]" : ""
+        className={`bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10 ${isKeyboardOpen ? "!bottom-[10px]" : ""
           }`}
       >
         <Button label="등록 하기" onClick={handleRegister} />
