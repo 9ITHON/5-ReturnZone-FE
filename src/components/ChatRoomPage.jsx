@@ -558,52 +558,48 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
     );
 
   return (
-      <div className="flex justify-between items-center w-[390px] overflow-hidden px-6 py-1.5 bg-white">
-  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
-    <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 pr-3 py-2.5">
-      <svg
-        width={24}
-        height={24}
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852"
-          stroke="#111111"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </div>
-    <p className="flex-grow-0 flex-shrink-0 text-[22px] font-semibold text-left text-[#111]">
-      유저1
-    </p>
-  </div>
-  <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-      preserveAspectRatio="none"
-    >
-      <path
-        d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z"
-        stroke="#111111"
-        stroke-width="1.5"
-      />
-    </svg>
-  </div>
-</div>
-      {/* 개발용 역할 토글 (개발 중에만 표시) */}
-      {/* 이 부분은 개발용 역할 토글 UI와 관련 상태, 로직을 모두 제거하고, 실제 API 데이터 기반으로만 역할을 판별하도록 정리합니다. */}
-      {/* 채팅방, 분실자/습득자 판별, 버튼, 메시지 등은 실제 API 데이터와 연동되도록 유지합니다. */}
+    <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
+      <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
+        <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 pr-3 py-2.5">
+          <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852"
+              stroke="#111111"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p className="flex-grow-0 flex-shrink-0 text-[22px] font-semibold text-left text-[#111]">
+          유저1
+        </p>
+      </div>
+      <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
+        <svg
+          width={24}
+          height={24}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z"
+            stroke="#111111"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
       {showOption && (
         <OptionModal
           onClose={() => setShowOption(false)}
@@ -656,50 +652,43 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
         />
 
         {/* 습득자용 버튼 (물건을 찾은 사람) */}
-        {isFinder && (
-          <>
-            <div
-              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${
-                showDeliveryCompleted
-                  ? "bg-[#f2f2f2]"
-                  : showFoundOwnerMsg
-                  ? "bg-[#f2f2f2] cursor-pointer"
-                  : "bg-[#06f] cursor-pointer"
-              }`}
-              onClick={
-                showDeliveryCompleted
-                  ? undefined
-                  : showFoundOwnerMsg
-                  ? () => setShowDeliveryCompleted(true)
-                  : () => setShowConfirmModal(true)
-              }
-            >
-              <p
-                className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${
-                  showDeliveryCompleted
-                    ? "text-[#06f] font-semibold"
-                    : showFoundOwnerMsg
-                    ? "text-[#111]"
-                    : "text-white"
-                }`}
-              >
-                {showDeliveryCompleted
-                  ? `${item?.reward || 500}포인트 지급 완료`
-                  : showFoundOwnerMsg
-                  ? "전달을 기다리고 있어요"
-                  : "물건 주인을 찾았어요"}
-              </p>
-            </div>
-            {showConfirmModal && (
-              <ConfirmOwnerModal
-                userName={userName}
-                onClose={() => {
-                  setShowConfirmModal(false);
-                  setShowFoundOwnerMsg(true); // 버튼 클릭 시 안내 메시지 뜨도록 보장
-                }}
-              />
-            )}
-          </>
+        {isFinder && !showFoundOwnerMsg && !showDeliveryCompleted && (
+          <div
+            className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2] cursor-pointer"
+            onClick={() => setShowFoundOwnerMsg(true)}
+          >
+            <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+              물건 주인을 찾고 있어요
+            </p>
+          </div>
+        )}
+        {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+          <div
+            className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[134px] py-[9px] rounded-lg bg-[#06f] cursor-pointer"
+            onClick={() => setShowDeliveryCompleted(true)}
+          >
+            <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-white">
+              물건을 잘 받았어요
+            </p>
+          </div>
+        )}
+        {isFinder && showDeliveryCompleted && (
+          <div
+            className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]"
+          >
+            <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+              전달을 기다리고 있어요
+            </p>
+          </div>
+        )}
+        {showConfirmModal && (
+          <ConfirmOwnerModal
+            userName={userName}
+            onClose={() => {
+              setShowConfirmModal(false);
+              setShowFoundOwnerMsg(true); // 버튼 클릭 시 안내 메시지 뜨도록 보장
+            }}
+          />
         )}
 
         {/* 분실자용 버튼 (물건을 잃어버린 사람) */}
@@ -788,6 +777,24 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
               isFinder={isFinder}
               showPaymentCompleted={showPaymentCompleted}
             />
+            {/* 안내 알림 메시지 */}
+            {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+              <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4">
+                <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                  <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                    📦 물건 전달이 시작되었습니다.
+                  </span>
+                  <br />
+                  <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                    물건을 받으셨다면, 상단의 버튼을 눌러주세요.
+                  </span>
+                  <br />
+                  <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                    버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
