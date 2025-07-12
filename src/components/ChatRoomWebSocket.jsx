@@ -130,7 +130,7 @@ const ChatRoomWebSocket = ({
   const sendMessage = () => {
     if (input.trim() && clientRef.current && clientRef.current.connected) {
       const chatMessage = {
-        roomId: 19,
+        roomId: roomId,
         senderId: userId,
         content: input,
         type: "TEXT",
