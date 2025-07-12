@@ -1,4 +1,3 @@
-// 위치 페이지 이동시 데이터 저장 및 이미지 처리
 import { create } from 'zustand';
 
 export const useRegisterStore = create((set) => ({
@@ -16,6 +15,12 @@ export const useRegisterStore = create((set) => ({
 
     selectedLocation: '',
     setSelectedLocation: (v) => set({ selectedLocation: v }),
+
+    latitude: null,
+    setlatitude: (v) => set({ latitude: v }),
+
+    longitude: null,
+    setlongitude: (v) => set({ longitude: v }),
 
     detailLocation: '',
     setDetailLocation: (v) => set({ detailLocation: v }),
@@ -41,22 +46,14 @@ export const useRegisterStore = create((set) => ({
     reward: '',
     setReward: (v) => set({ reward: v }),
 
-    setLocation: (address, lat, lng) => {
-        set({
-            selectedLocation: address,
-            latitude: null,
-            longitude: null,
-            setLatitude: (v) => set({ latitude: v }),
-            setLongitude: (v) => set({ longitude: v }),
-        });
-    },
-
     reset: () => set({
         selectedTag: '',
         selectedCategory: '',
         title: '',
         images: [],
         selectedLocation: '',
+        latitude: null,
+        longitude: null,
         detailLocation: '',
         questions: ["", ""],
         selectedDate: null,
