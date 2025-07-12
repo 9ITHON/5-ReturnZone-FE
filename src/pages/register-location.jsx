@@ -164,12 +164,13 @@ export default function RegisterLocation() {
         setLocation(address, latlng.lat, latlng.lng);
 
         // 이전 상태 유지한 채 navigate
-        navigate("/Register", {
+        navigate(path, {
+            replace: true,
             state: {
-                address: selectedAddress,     // 도로명 주소
-                lat: selectedLatLng.lat,
-                lng: selectedLatLng.lng,
-                // 필요한 다른 상태가 있다면 추가
+                ...previousState,
+                address,
+                lat: latlng.lat,
+                lng: latlng.lng,
             },
         });
     };
