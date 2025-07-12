@@ -14,6 +14,7 @@ import Button from "../components/button";
 import { GetMyPage } from "../utils/GetMyPage";
 import MyPageBank from "../components/MyPageBank";
 import useMyPageFormStore from "../stores/useMyPageFormStore";
+import { getUserId } from '../services/apiService'
 
 export default function MyPageModify() {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
@@ -49,7 +50,7 @@ export default function MyPageModify() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userId = localStorage.getItem("userId");
+                const userId = getUserId();
                 // 실제 호출
                 const data = await GetMyPage(userId);
                 // const data = await GetMyPageDummy(); // 테스트용 더미 데이터 호출
@@ -78,7 +79,7 @@ export default function MyPageModify() {
             return;
         }
         try {
-            const userId = localStorage.getItem("userId");
+            const userId = getUserId();
 
             const formData = new FormData();
             if (selectedImageFile) {

@@ -6,6 +6,7 @@ import LArrow from '../assets/좌측꺽쇠.svg'
 import OptionButton from '../assets/옵션버튼.svg'
 import PenIcon from '../assets/팬.svg'
 import DeletesIcon from '../assets/삭제.svg'
+import { getUserId } from '../services/apiService';
 
 export default function DetailedHeader({ postMemberId }) {
     const [menuOpen, setMenuOpen] = useState(false); // 메뉴 열림?
@@ -14,12 +15,12 @@ export default function DetailedHeader({ postMemberId }) {
     const navigate = useNavigate();
     const { lostPostId } = useParams(); // URL에서 ID 추출
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    const userId = localStorage.getItem("userId"); // 로그인 정보 유지
-    const isAuthor = String(userId) === String(postMemberId); // 글쓴이랑 비교
+    const userId = getUserId(); // 로그인 정보 유지
+    const isAuthor = postMemberId && String(userId) === String(postMemberId); // 글쓴이랑 비교
     // 메뉴 닫고 열기
     useEffect(() => {
         function handleClickOutside(event) {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+            if (menuRef.current && event.target && !menuRef.current.contains(event.target)) {
                 setMenuOpen(false);
             }
         }
@@ -33,7 +34,7 @@ export default function DetailedHeader({ postMemberId }) {
                 headers: { 'X-USER-ID': userId }
             });
             alert("삭제되었습니다.");
-            navigate("/");
+            navigate("/", { replace: true });
         } catch (err) {
             console.error(err);
             alert("삭제에 실패했습니다.");
