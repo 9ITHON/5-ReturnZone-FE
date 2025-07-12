@@ -39,10 +39,10 @@ const ItemCard = ({
         <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
           {/* 상태 뱃지 */}
           {finalStatus === '주인찾아요' && (
-            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#e6fbee]">
-              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-1 py-[3px] rounded">
+            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#E7F4EC] h-[20px] w-[57px]">
+              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-[4px] py-[3px] rounded">
                 <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#00d455]">
+                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#00C34E]">
                     주인 찾아요
                   </p>
                 </div>
@@ -50,10 +50,10 @@ const ItemCard = ({
             </div>
           )}
           {finalStatus === '분실했어요' && (
-            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#f9eae0]">
-              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-1 py-[3px] rounded">
+            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#F6EEE9]h-[20px]w-[57px]">
+              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-[4px] py-[3px] rounded">
                 <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#ff5900]">
+                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#FF5900]">
                     분실했어요
                   </p>
                 </div>
