@@ -6,6 +6,7 @@ import SearchHeader from '../components/search-header';
 import SearchDetail from '../components/search-detail';
 import SearchFilter from '../components/search-filter';
 import ItemCard from '../components/ItemCard';
+import { getUserId } from '../services/apiService'
 
 export default function SearchPage() {
 
@@ -19,8 +20,7 @@ export default function SearchPage() {
 
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
     // 유저의 정보 유지
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id;
+    const userId = getUserId();
 
     // 최근 검색어 불러오기
     const fetchRecentKeywords = async () => {

@@ -20,7 +20,7 @@ import UserMessageLogin from './components/UserMessageLogin';
 
 // 라우터 설정 함수
 function AppRoute() {
-  const isLoggedIn = Boolean(localStorage.getItem('userId')); // 로그인 정보 확인
+  const isLoggedIn = Boolean(localStorage.getItem('user_id')); // 로그인 정보 확인
   // 로그인 검사
   const loginRequired = (element) =>
     isLoggedIn ? element : (

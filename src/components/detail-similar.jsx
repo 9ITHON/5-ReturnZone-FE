@@ -1,5 +1,4 @@
 // 유사 상품
-import React from 'react';
 import { formatPrice } from '../utils/formatPrice';
 
 export default function DetailSimilar({ post }) {

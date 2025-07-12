@@ -34,7 +34,7 @@ export default function RegisterLocation() {
         };
         document.head.appendChild(script);
     }, []);
-    const moveToCurrentLocation = (map, marker, path) => {
+    const moveToCurrentLocation = (map, marker) => {
         if (!navigator.geolocation) {
             alert("위치 정보를 사용할 수 없습니다.");
             return;
@@ -221,7 +221,7 @@ export default function RegisterLocation() {
             />
 
             {/* 버튼 */}
-            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
+            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? 'bottom-[10px]' : ''}`}>
                 <Button label="선택 완료" onClick={handleConfirm} />
             </div>
         </div>

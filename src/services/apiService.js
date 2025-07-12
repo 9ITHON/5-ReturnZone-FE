@@ -47,25 +47,45 @@ const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
 };
 
 function getUserId() {
-  // 실제 로그인 유저의 id를 가져오세요 (예: localStorage)
-  return localStorage.getItem('user_id') || '1';
+  // 로그인하지 않았으면 null 반환
+  return localStorage.getItem('user_id') ?? null;
 }
 
 export const apiService = {
-  // Auth
+  // 로그인
   async login({ email, password }) {
     return retryRequest(async () => {
       const response = await apiClient.post('/members/login', { email, password });
-      // localStorage 저장 코드 제거
-      return response.data; // { email, username, imageUrl }
+      const {
+        accessToken,
+        refreshToken,
+        memberId,
+        email: userEmail,
+        username,
+        imageUrl,
+        accessTokenExpiresDate,
+      } = response.data;
+
+      // localStorage 저장
+      localStorage.setItem('auth_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem('user_id', memberId.toString());
+      localStorage.setItem('email', userEmail);
+      localStorage.setItem('username', username);
+      localStorage.setItem('image_url', imageUrl);
+      localStorage.setItem('token_expiry', accessTokenExpiresDate);
+
+      return response.data;
     });
   },
+  //회원가입
   async register(userData) {
     return retryRequest(async () => {
       const response = await apiClient.post('/members/signup', userData);
       return response.data;
     });
   },
+  //로그아웃
   async logout() {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/logout');
@@ -73,18 +93,21 @@ export const apiService = {
       return response.data;
     });
   },
+  // 아이디 찾기
   async findId({ name, email }) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/find-id', { name, email });
       return response.data;
     });
   },
+  // 패스워드
   async findPassword({ username, email }) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/find-password', { username, email });
       return response.data;
     });
   },
+  // 카카오 로그인
   async kakaoLogin(kakaoAccessToken, userInfo) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/login/kakao', { kakaoAccessToken, userInfo });
@@ -94,18 +117,21 @@ export const apiService = {
       return response.data;
     });
   },
+  // 카카오 
   async kakaoCallback(code) {
     return retryRequest(async () => {
       const response = await apiClient.post('/auth/kakao/callback', { code });
       return response.data;
     });
   },
+  // 카카오 로그인 콜백
   async kakaoLoginCallback(code) {
     return retryRequest(async () => {
       const response = await apiClient.post("/auth/kakao/callback", { code });
       return response.data;
     });
   },
+  // 이메일 사용가능?
   async checkEmailDuplicate(email) {
     return retryRequest(async () => {
       const response = await apiClient.get(`/members/email/${email}`);
@@ -120,18 +146,21 @@ export const apiService = {
       return response.data;
     });
   },
+  // 분실물 조회
   async getLostPost(id) {
     return retryRequest(async () => {
       const response = await apiClient.get(`/lostPosts/${lostPostId}`);
       return response.data;
     });
   },
+  // 분실물 생성
   async createLostPost(data) {
     return retryRequest(async () => {
       const response = await apiClient.post('/lostPosts', data);
       return response.data;
     });
   },
+  // 분실물 수정
   async updateLostPost(id, data) {
     return retryRequest(async () => {
       const response = await apiClient.put(`/lostPosts/${lostPostId}`, data);

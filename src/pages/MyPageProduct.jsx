@@ -3,13 +3,12 @@ import axios from "axios";
 
 import ItemCard from "../components/ItemCard";
 import MyPageUserHeader from "../components/MyPageUserHeader";
-
+import { getUserId } from '../services/apiService'
 
 export default function MyPageProduct() {
     const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
     // useEffect(() => {
     //     // 더미 데이터 정의
     //     const dummyProducts = [
@@ -50,7 +49,7 @@ export default function MyPageProduct() {
     useEffect(() => {
         const fetchLostPosts = async () => {
             try {
-                const userId = localStorage.getItem("userId");
+                const userId = getUserId();
                 if (!userId) {
                     console.error("userId가 없습니다.");
                     return;

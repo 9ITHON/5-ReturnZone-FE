@@ -51,14 +51,6 @@ export default function DetailedPage() {
 
     if (loading) return <p>불러오는 중...</p>;
     if (!post) return <p>{error || "데이터 없음"}</p>;
-    // 로그인 한 사람이랑 글쓴이랑 같은지 확인
-    const handleEditClick = () => {
-        if (String(myId) !== String(post.memberId)) {
-            alert("게시글 작성자만 수정할 수 있습니다.");
-            return;
-        }
-        navigate(`/lost/${post.lostPostId}/edit`);
-    };
     return (
         <div>
             <DetailedHeader postMemberId={post.memberId} />
