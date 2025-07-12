@@ -172,8 +172,8 @@ const ChatRoomWebSocket = ({
           const isLastOfGroup =
             idx === messages.length - 1 ||
             ((msg.userId !== undefined)
-              ? String(messages[idx + 1]?.userId) !== String(msg.userId)
-              : String(messages[idx + 1]?.senderId) !== String(msg.senderId));
+              ? String(messages[idx + 1]?.userId) !== String(msg.memberId)
+              : String(messages[idx + 1]?.senderId) !== String(msg.memberId));
 
           return (
             <ChatMessage
@@ -272,8 +272,16 @@ const ChatRoomWebSocket = ({
       </div>
       {/* 메시지 입력 바 */}
       <div
-        className="flex flex-col justify-start items-center w-[390px] gap-[38px] pt-3 pb-12 bg-white"
+        className="flex flex-col justify-start items-center bg-white"
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 20,
+        }}
       >
+      <div className="flex justify-center items-center w-full gap-2.5 px-2 py-2 bg-white">
         <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
           <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <svg
@@ -282,7 +290,7 @@ const ChatRoomWebSocket = ({
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+               className="flex-grow-0 flex-shrink-0 w-6 h-6 relative "
               preserveAspectRatio="none"
             >
               <path
@@ -303,10 +311,10 @@ const ChatRoomWebSocket = ({
               />
             </svg>
           </div>
-          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[290px] h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
+          <div className="flex justify-start items-center flex-grow h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
             <input
               type="text"
-              className="flex-grow w-[266px] text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
+              className="flex-grow text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
               placeholder="메시지 보내기"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -314,7 +322,7 @@ const ChatRoomWebSocket = ({
             />
           </div>
           <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-            <button onClick={sendMessage}>
+          <button onClick={sendMessage}>
               <svg
                 width={24}
                 height={24}
@@ -324,17 +332,18 @@ const ChatRoomWebSocket = ({
                 className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
                 preserveAspectRatio="none"
               >
-                <g clipPath="url(#clip0_652_10693)">
+                <g clipPath="url(#clip0_652_9848)">
                   <path
                     d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836"
                     stroke="#111111"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    fill="none"
                   />
                 </g>
                 <defs>
-                  <clipPath id="clip0_652_10693">
+                  <clipPath id="clip0_652_9848">
                     <rect width={24} height={24} fill="white" />
                   </clipPath>
                 </defs>
@@ -343,6 +352,7 @@ const ChatRoomWebSocket = ({
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
