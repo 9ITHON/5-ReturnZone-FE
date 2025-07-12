@@ -23,10 +23,10 @@ const CATEGORY_LIST = [
 ];
 
 const FILTERS = [
-  { key: 'all', label: '전체' },
-  { key: 'location', label: '위치' },
-  { key: 'latest', label: '최신순' },
-  { key: 'category', label: '카테고리' },
+  { key: "all", label: "전체" },
+  { key: "location", label: "위치" },
+  { key: "latest", label: "최신순" },
+  { key: "category", label: "카테고리" },
 ];
 
 const Home = () => {
@@ -40,7 +40,7 @@ const Home = () => {
   const [allFilterOpen, setAllFilterOpen] = React.useState(false);
   const [allFilterValue, setAllFilterValue] = React.useState("all");
   const [latestFilterOpen, setLatestFilterOpen] = React.useState(false);
-  const [latestFilterValue, setLatestFilterValue] = React.useState("latest");
+  const [latestFilterValue, setLatestFilterValue] = React.useState("");
 
   // Use the location data hook
   const {
@@ -56,14 +56,16 @@ const Home = () => {
   // selectedFilters, selectedCategory, selectedLocation이 바뀔 때마다 필터 적용
   React.useEffect(() => {
     if (userLocation) {
-      let sortBy = selectedFilters.includes('latest') ? 'latest' : undefined;
-      filterItems(
-        selectedCategory,
-        selectedLocation,
-        sortBy
-      );
+      let sortBy = selectedFilters.includes("latest") ? "latest" : undefined;
+      filterItems(selectedCategory, selectedLocation, sortBy);
     }
-  }, [userLocation, selectedFilters, selectedCategory, selectedLocation, filterItems]);
+  }, [
+    userLocation,
+    selectedFilters,
+    selectedCategory,
+    selectedLocation,
+    filterItems,
+  ]);
 
   // 필터 버튼 클릭 핸들러 (중복 적용)
   const handleFilterClick = (key) => {
@@ -71,15 +73,15 @@ const Home = () => {
       setAllFilterOpen(true);
       return;
     }
-    if (key === 'category') {
+    if (key === "category") {
       setCategoryOpen(true);
       return;
     }
-    if (key === 'location') {
+    if (key === "location") {
       setMapOpen(true);
       return;
     }
-    if (key === 'latest') {
+    if (key === "latest") {
       setLatestFilterOpen(true);
       return;
     }
@@ -94,6 +96,7 @@ const Home = () => {
     setSelectedCategory(null);
     // setSelectedLocation(""); // 위치 초기화 제거
     setSelectedFilters([]);
+
     if (value === "all") {
       fetchItems();
     } else if (value === "lost") {
@@ -116,7 +119,7 @@ const Home = () => {
       geocoder.coord2Address(pos.lng, pos.lat, (result, status) => {
         if (status === window.kakao.maps.services.Status.OK && result[0]) {
           // 동/읍/면 이름 추출
-          let dong = '';
+          let dong = "";
           if (result[0].address) {
             dong = result[0].address.region_3depth_name;
           } else if (result[0].road_address) {
@@ -124,16 +127,16 @@ const Home = () => {
           }
           setSelectedLocation(dong);
           // 가까운순 정렬
-          filterItems(selectedCategory, dong, 'distance', pos);
+          filterItems(selectedCategory, dong, "distance", pos);
         } else {
-          setSelectedLocation('');
-          filterItems(selectedCategory, '', 'distance', pos);
+          setSelectedLocation("");
+          filterItems(selectedCategory, "", "distance", pos);
         }
       });
     } else {
       // fallback: 좌표만 저장
-      setSelectedLocation('');
-      filterItems(selectedCategory, '', 'distance', pos);
+      setSelectedLocation("");
+      filterItems(selectedCategory, "", "distance", pos);
     }
   };
 
@@ -143,8 +146,8 @@ const Home = () => {
     setLatestFilterOpen(false);
     // 최신순/거리순 필터 적용
     setSelectedFilters((prev) => {
-      let arr = prev.filter(f => f !== 'latest' && f !== 'distance');
-      return value === 'latest' ? [...arr, 'latest'] : [...arr, 'distance'];
+      let arr = prev.filter((f) => f !== "latest" && f !== "distance");
+      return value === "latest" ? [...arr, "latest"] : [...arr, "distance"];
     });
   };
 
@@ -188,52 +191,82 @@ const Home = () => {
     <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
       <MainHeader />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
-      {!categoryOpen && !locationOpen && !allFilterOpen && !latestFilterOpen && (
-        <div className="sticky top-0 z-50 bg-white">
-          <div className="flex items-center w-full h-12 px-4 gap-1.5">
-            {/* 필터 라벨 버튼 */}
-            <button
-              type="button"
-              disabled
-              className="flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium bg-[#06f] border-[#06f] text-white cursor-default"
-              tabIndex={-1}
-              style={{ pointerEvents: 'none' }}
-            >
-              <span>필터</span>
-            </button>
-            {/* 필터 버튼들 */}
-            {FILTERS.map((f) => {
-              let label = f.label;
-              if (f.key === 'all') {
-                if (allFilterValue === 'lost') label = '분실';
-                else if (allFilterValue === 'found') label = '주인';
-                else label = '전체';
-              }
-              if (f.key === 'latest') {
-                label = latestFilterValue === 'distance' ? '현재 위치와 가까운 순' : '최신순';
-              }
-              if (f.key === 'location' && selectedLocation) {
-                label = selectedLocation;
-              }
-              const isCategorySelected = f.key === 'category' && selectedCategory;
-              const isAllSelected = f.key === 'all' && allFilterValue !== 'all';
-              const isLatestSelected = f.key === 'latest' && (latestFilterValue === 'distance' || latestFilterValue === 'latest');
-              const isLocationSelected = f.key === 'location' && !!selectedLocation;
-              const isSelected = isAllSelected || selectedFilters.includes(f.key) || isCategorySelected || isLatestSelected || isLocationSelected;
-              return (
-                <button
-                  key={f.key}
-                  onClick={() => handleFilterClick(f.key)}
-                  className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${isSelected ? 'bg-[#06f]/[0.15] border-[#06f] text-[#111]' : 'bg-white border-[#e6e6e6] text-[#111]'}`}
-                >
-                  <span>{f.key === 'category' && selectedCategory ? selectedCategory : label}</span>
-                  <img src={categoryIcon} alt="arrow" className="w-4 h-4" style={{ filter: 'none' }} />
-                </button>
-              );
-            })}
+      {!categoryOpen &&
+        !locationOpen &&
+        !allFilterOpen &&
+        !latestFilterOpen && (
+          <div className="sticky top-0 z-50 bg-white">
+            <div className="flex items-center w-full h-12 px-4 gap-1.5">
+              {/* 필터 라벨 버튼 */}
+              <button
+                type="button"
+                disabled
+                className="flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium bg-[#06f] border-[#06f] text-white cursor-default"
+                tabIndex={-1}
+                style={{ pointerEvents: "none" }}
+              >
+                <span>필터</span>
+              </button>
+              {/* 필터 버튼들 */}
+              {FILTERS.map((f) => {
+                let label = f.label;
+                if (f.key === "all") {
+                  if (allFilterValue === "lost") label = "분실";
+                  else if (allFilterValue === "found") label = "주인";
+                  else label = "전체";
+                }
+                if (f.key === "latest") {
+                  label =
+                    latestFilterValue === "distance"
+                      ? "현재 위치와 가까운 순"
+                      : "최신순";
+                }
+                if (f.key === "location" && selectedLocation) {
+                  label = selectedLocation;
+                }
+                const isCategorySelected =
+                  f.key === "category" && selectedCategory;
+                const isAllSelected =
+                  f.key === "all" && allFilterValue !== "all";
+                const isLatestSelected =
+                  f.key === "latest" &&
+                  (latestFilterValue === "distance" ||
+                    latestFilterValue === "latest");
+                const isLocationSelected =
+                  f.key === "location" && !!selectedLocation;
+                const isSelected =
+                  isAllSelected ||
+                  selectedFilters.includes(f.key) ||
+                  isCategorySelected ||
+                  isLatestSelected ||
+                  isLocationSelected;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => handleFilterClick(f.key)}
+                    className={`flex justify-start items-center relative overflow-hidden gap-1 px-3 py-2 rounded-lg border flex-shrink-0 text-[13px] font-medium ${
+                      isSelected
+                        ? "bg-[#06f]/[0.15] border-[#06f] text-[#111]"
+                        : "bg-white border-[#e6e6e6] text-[#111]"
+                    }`}
+                  >
+                    <span>
+                      {f.key === "category" && selectedCategory
+                        ? selectedCategory
+                        : label}
+                    </span>
+                    <img
+                      src={categoryIcon}
+                      alt="arrow"
+                      className="w-4 h-4"
+                      style={{ filter: "none" }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {categoryOpen && (
         <div className="fixed inset-0 z-30 flex items-end justify-center w-full max-w-[390px] mx-auto overflow-hidden gap-2.5 bg-[#111]/50">
           <div className="w-full max-w-[390px] bg-white rounded-t-xl z-40">
@@ -274,27 +307,39 @@ const Home = () => {
             let filteredItems = items;
             if (allFilterValue === "lost") {
               filteredItems = items.filter(
-                (item) => item.type === "분실" || item.registrationType === "LOST" || item.status === "분실했어요"
+                (item) =>
+                  item.type === "분실" ||
+                  item.registrationType === "LOST" ||
+                  item.status === "분실했어요"
               );
             } else if (allFilterValue === "found") {
               filteredItems = items.filter(
-                (item) => item.type === "주인" || item.registrationType === "FOUND" || item.status === "주인 찾아요"
+                (item) =>
+                  item.type === "주인" ||
+                  item.registrationType === "FOUND" ||
+                  item.status === "주인 찾아요"
               );
             }
             return filteredItems.length > 0 ? (
               filteredItems.map((item) => {
                 let status = "";
-                if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
-                else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
+                if (item.type === "분실" || item.registrationType === "LOST")
+                  status = "분실했어요";
+                else if (
+                  item.type === "주인" ||
+                  item.registrationType === "FOUND"
+                )
+                  status = "주인찾아요";
 
                 const postId = item.lostPostId || item.id; // postId 정의 추가
 
                 return (
-                  <div onClick={() => navigate(`/lost/${postId}`)} className="cursor-pointer" key={item.id}>
-                    <ItemCard
-                      {...item}
-                      status={status}
-                    />
+                  <div
+                    onClick={() => navigate(`/lost/${postId}`)}
+                    className="cursor-pointer"
+                    key={item.id}
+                  >
+                    <ItemCard {...item} status={status} />
                   </div>
                 );
               })
@@ -313,7 +358,6 @@ const Home = () => {
       />
       <BottomNav />
     </div>
-    
   );
 };
 
