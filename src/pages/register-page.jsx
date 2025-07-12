@@ -34,8 +34,8 @@ export default function RegisterPage() {
     setImages, // 이미지
     selectedLocation,
     setSelectedLocation, // 위치
-    latitude,
-    longitude, //위도 경도 추가
+    latitude, setlatitude,
+    longitude, setlongitude, //위도 경도 추가
     detailLocation,
     setDetailLocation, // 상세 위치
     questions,
@@ -125,11 +125,15 @@ export default function RegisterPage() {
     });
   };
   // 위치 받기
-  // const handleConfirm = () => {
-  //   if (!address || latlng.lat === null || latlng.lng === null) return;
-  //   setSelectedLocation(address); // RegisterPage가 읽는 상태
-  //   navigate(path, { replace: true });
-  // };
+  const handleConfirm = () => {
+    if (!address || latlng.lat === null || latlng.lng === null) return;
+
+    setSelectedLocation(address);         // 위치 주소 저장
+    setLatitude(latlng.lat);              // 위도 저장
+    setLongitude(latlng.lng);            // 경도 저장
+
+    navigate(path, { replace: true });    // RegisterPage로 이동
+  };
   // 상세 특징 업데이트
   const handleChange = (index, value) => {
     setQuestions((prev) => {
