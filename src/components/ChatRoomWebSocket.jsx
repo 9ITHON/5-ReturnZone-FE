@@ -115,7 +115,7 @@ const ChatRoomWebSocket = ({
         className="flex-1 overflow-y-auto px-2 py-2 min-h-0 max-h-full"
         style={{ background: '#fff', maxHeight: 'calc(100vh - 120px)', height: '100%' }}
       >
-        {/* 상단 경고 메시지 */}
+        {/* 상단 안내문(❗)도 스크롤 영역 안에 포함 */}
         <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
           <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
             <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
@@ -167,6 +167,8 @@ const ChatRoomWebSocket = ({
               </p>
             </div>
           )}
+          {/* 안내문이 입력창에 가려지지 않도록 24px 여유 공간 */}
+          <div style={{height:24}} />
           <div ref={messagesEndRef} />
         </div>
         {/* 마지막 메시지 시간만 하단에 표시 */}

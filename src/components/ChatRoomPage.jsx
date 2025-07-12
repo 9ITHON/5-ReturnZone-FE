@@ -24,7 +24,7 @@ const ConfirmOwnerModal = ({ onClose, userName }) => (
         <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[390px]">
           <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
             <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
-              <img
+              <img  
                 src="rectangle-3468137.jpeg"
                 className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
                 alt="user"
