@@ -17,7 +17,8 @@ const ItemCard = ({
   const finalReward = data?.reward || reward;
   const finalStatus = data?.registrationType === 'LOST' ? '분실했어요' :
     data?.registrationType === 'FOUND' ? '주인찾아요' : status;
-  const finalImageUrl = data?.mainImageUrl || imageUrl;
+  const finalImageUrl =
+    data?.mainImageUrl || data?.imageUrls?.[0] || imageUrl || mainImageUrl;
 
   return (
     <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3 mb-4">
