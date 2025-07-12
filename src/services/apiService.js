@@ -79,7 +79,7 @@ export const apiService = {
   //     return response.data;
   //   });
   // },
-  
+
   // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
@@ -201,7 +201,7 @@ export const apiService = {
         '/chats/rooms',
         {
           params: { page },
-          headers: { 'X-USER-ID': getUserId() }
+          // headers: { 'X-USER-ID': getUserId() }
         }
       );
       return response.data;
@@ -220,7 +220,7 @@ export const apiService = {
         `/chats/rooms/${roomId}/messages`,
         {
           params: { page },
-          headers: { 'X-USER-ID': getUserId() }
+          // headers: { 'X-USER-ID': getUserId() }
         }
       );
       return response.data;
