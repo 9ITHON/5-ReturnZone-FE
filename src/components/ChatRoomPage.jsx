@@ -24,7 +24,7 @@ const ConfirmOwnerModal = ({ onClose, userName }) => (
         <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[390px]">
           <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
             <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
-              <img
+              <img 
                 src="rectangle-3468137.jpeg"
                 className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
                 alt="user"
@@ -385,7 +385,7 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
     >
       {/* 신고하기 */}
       <div
-        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
+        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
         style={{ zIndex: 1 }}
         onClick={onReport}
       >
@@ -411,7 +411,7 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
       </div>
       {/* 차단하기 */}
       <div
-        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0  border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
+        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
         style={{ zIndex: 1 }}
         onClick={onBlock}
       >
@@ -704,45 +704,47 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
           {/* 분실자용 버튼 (물건을 잃어버린 사람) */}
           {isLostOwner && (
             <div
-              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${showPaymentCompleted
-                ? "bg-[#f2f2f2]"
-                : showDeliveryCompleted
+              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${
+                showPaymentCompleted
+                  ? "bg-[#f2f2f2]"
+                  : showDeliveryCompleted
                   ? "bg-[#f2f2f2]"
                   : showLostOwnerPayment
-                    ? "bg-[#06f] cursor-pointer"
-                    : showFoundOwnerMsg
-                      ? "bg-[#06f] cursor-pointer"
-                      : "bg-[#06f] cursor-pointer"
-                }`}
+                  ? "bg-[#06f] cursor-pointer"
+                  : showFoundOwnerMsg
+                  ? "bg-[#06f] cursor-pointer"
+                  : "bg-[#06f] cursor-pointer"
+              }`}
               onClick={
                 showPaymentCompleted
                   ? undefined
                   : showDeliveryCompleted
-                    ? undefined
-                    : showLostOwnerPayment
-                      ? () => setShowPaymentModal(true)
-                      : showFoundOwnerMsg
-                        ? () => setShowLostOwnerPayment(true)
-                        : () => setShowLostOwnerConfirmModal(true)
+                  ? undefined
+                  : showLostOwnerPayment
+                  ? () => setShowPaymentModal(true)
+                  : showFoundOwnerMsg
+                  ? () => setShowLostOwnerPayment(true)
+                  : () => setShowLostOwnerConfirmModal(true)
               }
             >
               <p
-                className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${showPaymentCompleted
-                  ? "text-[#111]"
-                  : showDeliveryCompleted
+                className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${
+                  showPaymentCompleted
+                    ? "text-[#111]"
+                    : showDeliveryCompleted
                     ? "text-[#06f] font-semibold"
                     : showLostOwnerPayment
-                      ? "text-white"
-                      : showFoundOwnerMsg
-                        ? "text-white"
-                        : "text-white"
-                  }`}
+                    ? "text-white"
+                    : showFoundOwnerMsg
+                    ? "text-white"
+                    : "text-white"
+                }`}
               >
                 {showPaymentCompleted
                   ? "현상금 지급 완료"
                   : showFoundOwnerMsg
-                    ? "현상금 지급하기"
-                    : "제 물건이에요"}
+                  ? "현상금 지급하기"
+                  : "제 물건이에요"}
               </p>
             </div>
           )}
@@ -810,7 +812,8 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
           </div>
         </div>
       </div>
-      );
+    </>
+  );
 };
 
-      export default ChatRoomPage;
+export default ChatRoomPage;
