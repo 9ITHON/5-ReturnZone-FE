@@ -1,437 +1,368 @@
-import React, { useState, useRef, useEffect } from "react";
-import ChatMessage from "./ChatMessage";
-import { GetMyPage } from "../utils/GetMyPage";
-import { formatNumber } from "../utils/formatNumber";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { apiService } from "../services/apiService";
+import ReportHeader from "./ReportHeader";
+import ReportModal from "./ReportModal";
+import ChatRoomWebSocket from "./ChatRoomWebSocket";
+import ChatRoomItemCard from "./ChatRoomItemCard";
 
-const ChatRoomWebSocket = ({
-  memberId,
-  item, // item 데이터를 prop으로 받음
-  isLostOwner = false,
-  isFinder = false,
-  showPaymentCompleted = false,
-  showRewardModal = false,
-  setShowRewardModal = () => {},
-  setShowDeliveryCompleted = () => {},
-  setShowPaymentCompleted = () => {}, // prop 추가
-}) => {
-  const initialMyMessages = [
-    {
-      id: 1001,
-      memberId: memberId,
-      content: "아래는 습득자가 등록한 분실물 특징입니다. 분실물과 비교하여 정확하게 답변해 주세요.",
-      createdAt: "2024-06-10T10:00:01.000Z",
-    },
-    {
-      id: 1002,
-      memberId: memberId,
-      content: "1. 분실물에 흠집이나 손상이 있나요?",
-      createdAt: "2024-06-10T10:00:02.000Z",
-    },
-    {
-      id: 1003,
-      memberId: memberId,
-      content: "2. 분실물을 어디서 잃어버리셨나요?",
-      createdAt: "2024-06-10T10:00:03.000Z",
-    },
-  ];
-  const dummyMessages = [
-    {
-      id: 1,
-      memberId: "other",
-      content: "상단에 약간의 흠집이 있습니다!",
-      createdAt: "2024-06-10T10:00:05.000Z",
-    },
-    {
-      id: 2,
-      memberId: "other",
-      content: "도서관 근처에서 잃어버렸습니다",
-      createdAt: "2024-06-10T10:00:10.000Z",
-    },
-    {
-      id: 3,
-      memberId: "other",
-      content: "아마 다마고치 스티커가 붙여져 있을거에요!",
-      createdAt: "2024-06-10T10:00:15.000Z",
-    },
-  ];
-  const [messages, setMessages] = useState(initialMyMessages);
-  const [input, setInput] = useState("");
-  const [dummyIndex, setDummyIndex] = useState(0); 
-  const [rewardAmount, setRewardAmount] = useState(""); 
-  const [isAgreed, setIsAgreed] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const data = await GetMyPage();
-        setUserInfo(data);
-      } catch (error) {
-        console.error("사용자 정보 로딩 실패:", error);
-      }
-    };
-    fetchUserInfo();
-  }, []);
-
-  useEffect(() => {
-    if (dummyIndex === 0) {
-      const timer = setTimeout(() => {
-        setDummyIndex(1);
-      }, 2000);
-      return () => clearTimeout(timer);
-    } else if (dummyIndex > 0 && dummyIndex <= dummyMessages.length) {
-      const timer = setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...dummyMessages[dummyIndex - 1],
-            id: Date.now() + dummyIndex,
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-        setDummyIndex(dummyIndex + 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [dummyIndex]);
-  
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const myMsg = {
-      id: Date.now(),
-      memberId: memberId,
-      content: input,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, myMsg]);
-    setInput("");
-  };
-
-  const handleRewardPayment = () => {
-    if (!isAgreed || !rewardAmount.trim()) return;
-    // TODO: 실제 현상금 지급 API 호출 로직
-    console.log("현상금 지급 API 호출:", rewardAmount);
-    setShowRewardModal(false);
-    setShowDeliveryCompleted(true); // 습득자 버튼 상태 변경용
-    setShowPaymentCompleted(true);  // 분실자에게 지급 완료 알림 표시용
-    setRewardAmount("");
-    setIsAgreed(false);
-  };
-  
-  const handleRewardAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setRewardAmount(value);
-  };
-  
-  const formatNumberLocal = (num) => {
-    if (!num) return '';
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
-
-  const isButtonEnabled = isAgreed && rewardAmount.trim() !== "";
-
-  return (
-    <div className="flex flex-col h-full w-full bg-white" style={{ minHeight: 0, height: '100%', maxWidth: 480, width: '100vw', margin: '0 auto' }}>
-      <div
-        className="flex-1 overflow-y-auto px-2 py-2 min-h-0"
-        style={{ background: '#fff' }}
-      >
-        <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-          <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-              ❗현상금 요구는 가능하지만 강제할 수 없고,{' '}
-            </span>
-            <br />
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-              물건 가치의 20%를 넘기면 법적 문제가 될 수 있습니다.
-            </span>
-            <br />
-            <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-              또한 습득자가 반환을 거부하거나 악의로 보관하면 법적 책임을 질 수 있습니다.
-            </span>
-          </p>
+const ConfirmOwnerModal = ({ onClose, userName }) => (
+  <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30">
+    <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
+      <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+        <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
+          <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
         </div>
-        <div className="flex flex-col w-full min-h-0">
-          {messages.map((msg, idx) => {
-            const isMine = String(msg.memberId) === String(memberId);
-            const isLastOfGroup =
-              idx === messages.length - 1 ||
-              String(messages[idx + 1]?.memberId) !== String(msg.memberId);
-            return (
-              <ChatMessage
-                key={msg.id || idx}
-                message={msg}
-                isMine={isMine}
-                senderName={isMine ? "나" : "상대방"}
-                showSenderName={!isMine && isLastOfGroup}
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
+            <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-base font-semibold text-center text-[#111]">
+              분실품 주인 확인
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[390px]">
+          <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
+            <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
+              <img 
+                src="rectangle-3468137.jpeg"
+                className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
+                alt="user"
               />
-            );
-          })}
-          
-          {/* 마지막 메시지 시간과 읽음 상태 표시 */}
-          {messages.length > 0 && (
-            <div className={`flex items-center gap-1 mt-1 w-fit ${String(messages[messages.length - 1].memberId) === String(memberId) ? 'ml-auto' : 'mr-auto'}`}>
-              {String(messages[messages.length - 1].memberId) === String(memberId) && (
-                <p className="text-xs font-medium text-[#808080]">읽음</p>
-              )}
-              <p className="text-xs text-[#808080]">
-                {new Date(messages[messages.length - 1].createdAt).toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: 'Asia/Seoul',
-                })}
-              </p>
             </div>
-          )}
-
-          {/* 분실자에게 현상금 지급 완료 알림 */}
-          {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
-            <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-2 mb-2">
-              <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  📦 물건 전달이 시작되었습니다.
-                </span>
-                <br />
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  물건을 받으셨다면, 상단의 버튼을 눌러주세요.
-                </span>
-                <br />
-                <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
-                  버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
-                </span>
-              </p>
-            </div>
-          )}
-          {/* 안내문이 입력창에 가려지지 않도록 24px 여유 공간 */}
-          <div style={{height:24}} />
-          <div ref={messagesEndRef} />
+            <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
+              {userName || "유저"}
+            </p>
+          </div>
         </div>
-        {/* 마지막 메시지 시간만 하단에 표시 */}
-        {messages.length > 0 && (
-          <div className="flex justify-end items-center w-full mt-2 pr-4">
-            <span className="text-xs text-[#808080]">
-              {(() => {
-                const lastMsg = messages[messages.length - 1];
-                const date = new Date(lastMsg.createdAt);
-                return date.toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: 'Asia/Seoul',
-                });
-              })()}
-            </span>
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-2 px-6 pt-2 pb-[72px]">
+            <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 relative gap-0.5">
+              <p className="flex-grow-0 flex-shrink-0 text-xl font-semibold text-left text-[#111]">
+                분실품 주인이 확실한가요?
+              </p>
+            </div>
+            <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                  stroke="#808080"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <circle
+                  cx="0.666667"
+                  cy="0.666667"
+                  r="0.5"
+                  transform="matrix(-1 0 0 1 8.66699 10)"
+                  fill="#808080"
+                  stroke="#808080"
+                  strokeWidth="0.333333"
+                />
+              </svg>
+              <p className="flex-grow-0 flex-shrink-0 text-sm text-center text-[#808080]">
+                분실품 주인이 확인되면 물건을 전달해야 합니다.
+              </p>
+            </div>
           </div>
-        )}
-    
-        {showFoundOwnerMsg && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                📦 물건 전달이 시작되었습니다.
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                물건을 받으셨다면, 상단의 버튼을 눌러주세요.
-              </span>
-              <br />
-              <span className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-                버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
-              </span>
-            </p>
-          </div>
-        )}
-        {showPaymentCompleted && isLostOwner && (
-          <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mb-2">
-            <p className="flex-grow w-[314px] text-[12px] font-medium text-left text-[#111]">
-              ✅ 습득자에게 현상금이 지급되었어요. 감사합니다!
-            </p>
-          </div>
-        )}
-          
-          <div style={{height:24}} />
-          <div ref={messagesEndRef} />
         </div>
       </div>
-  );
-      
-      {/* 현상금 지급 모달 */}
-      {showRewardModal && (
-        <div 
-          className="fixed inset-0 bg-[#111]/50 bg-opacity-50 z-50 flex items-end justify-center"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowRewardModal(false);
-              setRewardAmount("");
-              setIsAgreed(false);
-            }
-          }}
-        >
-          <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
-             <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
-              <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
-                <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
-              </div>
-              <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
-                <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
-                  <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-lg font-bold text-center text-[#111]">
-                    현상금 지급하기
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-between items-start flex-grow-0 flex-shrink-0 w-[390px] h-[58px]">
-                <div className="flex justify-between items-center flex-grow overflow-hidden px-6 py-[11px]">
-                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-2">
-                    <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
-                      <img
-                        src={userInfo?.imageUrl || "rectangle-3468137.jpeg"}
-                        className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
-                        alt="user profile"
-                      />
-                    </div>
-                    <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
-                      {userInfo?.nickname || "유저"}
-                    </p>
-                  </div>
-                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                    <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#808080]">
-                      보유 포인트
-                    </p>
-                    <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
-                      {userInfo ? formatNumber(userInfo.point) : "0"}원
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
-                <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-3 px-6 pt-2 pb-[72px]">
-                  <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2">
-                    <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-2">
-                      <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1">
-                        <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
-                          현상금
-                        </p>
-                        <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-left text-[#06f]">
-                           {item?.reward ? `${formatNumber(item.reward)}원 중` : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <input
-                      type="text"
-                      className="flex-grow-0 flex-shrink-0 text-4xl font-bold text-left text-[#111] bg-transparent border-none outline-none"
-                      placeholder="얼마나 지급할까요?"
-                      value={formatNumberLocal(rewardAmount)}
-                      onChange={handleRewardAmountChange}
-                      maxLength={10}
-                    />
-                  </div>
-                  <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
-                    <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-4 h-4 relative" preserveAspectRatio="none" >
-                      <path d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z" stroke="#808080" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                      <circle cx="0.666667" cy="0.666667" r="0.5" transform="matrix(-1 0 0 1 8.66699 10)" fill="#808080" stroke="#808080" strokeWidth="0.333333" />
-                    </svg>
-                    <p className="flex-grow w-[322px] text-sm text-left text-[#808080]">
-                      현상금은 0원 입력도 가능하며, 물건 금액의 5~20% 지급을 권장하고, 지급 시 자동으로 '해결
-                      완료' 상태로 전환됩니다.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-between items-start self-stretch flex-grow-0 flex-shrink-0 h-11">
-                 <div className="flex justify-between items-center flex-grow relative overflow-hidden px-6">
-                   <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
-                     <button
-                       onClick={() => setIsAgreed(!isAgreed)}
-                       className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative"
-                     >
-                       <svg width={44} height={44} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-11 h-11 relative" preserveAspectRatio="none">
-                         <rect x="11.5" y="11.5" width={21} height={21} rx="3.5" stroke={isAgreed ? "#06f" : "#808080"} fill={isAgreed ? "#06f" : "transparent"} />
-                         {isAgreed && (
-                           <path fillRule="evenodd" clipRule="evenodd" d="M20.1723 24.8999L26.9661 18L28 19.05L20.1723 27L16 22.7625L17.0339 21.7125L20.1723 24.8999Z" fill="white" />
-                         )}
-                       </svg>
-                       <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-center text-[#4d4d4d]">
-                         약관 동의하기
-                       </p>
-                     </button>
-                   </div>
-                 </div>
-              </div>
-            </div>
-            <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
-              <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
-                <button
-                  onClick={handleRewardPayment}
-                  disabled={!isButtonEnabled}
-                  className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#e6e6e6] disabled:text-[#808080]"
-                >
-                  <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
-                    <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
-                      {isButtonEnabled ? "선택 완료" : "지급하기"}
-                    </p>
-                  </div>
-                </button>
-              </div>
+      <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
+        <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+          <div
+            className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] cursor-pointer"
+            onClick={onClose}
+          >
+            <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+              <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                네. 주인이 맞습니다
+              </p>
             </div>
           </div>
         </div>
-      )}
-      
-      {/* 메시지 입력 바 */}
-       <div
-        className="flex flex-col justify-start items-center bg-white"
-        style={{
-          position: "fixed",
-          left: "50%",
-          transform: "translateX(-50%)",
-          bottom: 0,
-          zIndex: 20,
-          width: '100%',
-          maxWidth: 390,
-        }}
-      >
-        <div className="flex justify-center items-center w-full gap-2.5 px-2 py-2 bg-white">
-          <div className="flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
-            <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative " preserveAspectRatio="none">
-                <path d="M15 13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13C9 11.3431 10.3431 10 12 10C13.6569 10 15 11.3431 15 13Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M7.8523 5.34341L7.86169 5.31319C8.10539 4.52919 8.79233 4 9.56632 4L14.4337 4C15.2076 4 15.8946 4.52919 16.1383 5.31319L16.1477 5.34341C16.2695 5.7354 16.613 6 17 6L18 6C19.6569 6 21 7.34315 21 9V17C21 18.6569 19.6569 20 18 20H6C4.34315 20 3 18.6569 3 17L3 9C3 7.34315 4.34315 6 6 6L6.99999 6C7.38699 6 7.73045 5.7354 7.8523 5.34341Z" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </div>
+    </div>
+  </div>
+);
+
+const LostOwnerConfirmModal = ({ onClose }) => (
+  <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30">
+    <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
+      <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+        <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
+          <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
+        </div>
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
+            <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-base font-semibold text-center text-[#111]">
+              분실품 주인 확인
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+          <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-2 px-6 pt-2 pb-[72px]">
+            <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 relative gap-0.5">
+              <p className="flex-grow-0 flex-shrink-0 text-xl font-semibold text-left text-[#111]">
+                분실품 주인이 확실한가요?
+              </p>
+            </div>
+            <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                  stroke="#808080"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <circle
+                  cx="0.666667"
+                  cy="0.666667"
+                  r="0.5"
+                  transform="matrix(-1 0 0 1 8.66699 10)"
+                  fill="#808080"
+                  stroke="#808080"
+                  strokeWidth="0.333333"
+                />
+              </svg>
+              <p className="flex-grow-0 flex-shrink-0 text-[12px] text-center text-[#808080]">
+                분실품을 습득하면 상대방에게 현상금이 자동으로 나갑니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
+        <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+          <div
+            className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] cursor-pointer"
+            onClick={onClose}
+          >
+            <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+              <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                네. 주인이 맞습니다
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const PaymentModal = ({ onClose, reward = 10000, userName = "유저1" }) => {
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  const handlePayment = () => {
+    if (!isAgreed) {
+      setShowError(true);
+      return;
+    }
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-center items-end bg-[#111]/50 bg-opacity-30">
+      <div className="flex flex-col justify-start items-center w-[390px] overflow-hidden gap-2.5 rounded-tl-2xl rounded-tr-2xl bg-white">
+        <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 gap-1">
+          <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 p-2.5">
+            <div className="flex-grow-0 flex-shrink-0 w-[30px] h-1 rounded-[5px] bg-[#e6e6e6]" />
+          </div>
+          <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+            <div className="flex flex-col justify-center items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-0.5 px-6 py-[11px]">
+              <p className="self-stretch flex-grow-0 flex-shrink-0 w-[342px] text-lg font-bold text-center text-[#111]">
+                현상금 지급하기
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 w-[390px]">
+            <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2 px-6 py-[11px]">
+              <div className="flex-grow-0 flex-shrink-0 w-9 h-9 relative">
+                <img
+                  src="rectangle-3468137.jpeg"
+                  className="w-9 h-9 absolute left-[-0.82px] top-[-0.82px] rounded-[18px] object-cover"
+                />
+              </div>
+              <p className="flex-grow-0 flex-shrink-0 text-base font-semibold text-center text-[#111]">
+                {userName}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0">
+            <div className="flex flex-col justify-center items-start self-stretch flex-grow-0 flex-shrink-0 overflow-hidden gap-2 px-6 pt-2 pb-[72px]">
+              <div className="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 relative gap-0.5">
+                <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+                  현상금
+                </p>
+                <p className="flex-grow-0 flex-shrink-0 text-3xl font-bold text-center text-[#06f]">
+                  {reward.toLocaleString()}원
+                </p>
+              </div>
+              <div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-1 py-0.5">
+                <svg
+                  width={16}
+                  height={16}
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                    stroke="#808080"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                  <circle
+                    cx="0.666667"
+                    cy="0.666667"
+                    r="0.5"
+                    transform="matrix(-1 0 0 1 8.66699 10)"
+                    fill="#808080"
+                    stroke="#808080"
+                    strokeWidth="0.333333"
+                  />
+                </svg>
+                <p className="flex-grow-0 flex-shrink-0 text-[12px] text-center text-[#808080]">
+                  지급하면 자동으로 해결 완료 상태로 전환됩니다
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between items-start self-stretch flex-grow-0 flex-shrink-0 h-11">
+            <div className="flex justify-between items-center flex-grow relative overflow-hidden px-6">
+              <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 gap-1">
+                <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
+                  <svg
+                    width={44}
+                    height={44}
+                    viewBox="0 0 44 44"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="flex-grow-0 flex-shrink-0 w-11 h-11 relative cursor-pointer"
+                    preserveAspectRatio="none"
+                    onClick={() => setIsAgreed(!isAgreed)}
+                  >
+                    <rect
+                      x="11.5"
+                      y="11.5"
+                      width={21}
+                      height={21}
+                      rx="3.5"
+                      fill={isAgreed ? "#00D455" : "transparent"}
+                      stroke={isAgreed ? "#00D455" : "#808080"}
+                    />
+                    {isAgreed && (
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M20.1723 24.8999L26.9661 18L28 19.05L20.1723 27L16 22.7625L17.0339 21.7125L20.1723 24.8999Z"
+                        fill="white"
+                      />
+                    )}
+                  </svg>
+                  <p className="flex-grow-0 justify-start flex-shrink-0 text-[14px] font-medium  text-center text-[#4d4d4d]">
+                    약관 동의하기
+                  </p>
+                </div>
+                {showError && (
+                  <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
+                    <svg
+                      width={12}
+                      height={12}
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="flex-grow-0 flex-shrink-0 w-4 h-4 relative"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M8 5.33333V8.66667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                        stroke="#FF0000"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                      <mask id="path-2-inside-1_652_11061" fill="white">
+                        <ellipse
+                          cx="0.666667"
+                          cy="0.666667"
+                          rx="0.666667"
+                          ry="0.666667"
+                          transform="matrix(-1 0 0 1 8.66699 10)"
+                        />
+                      </mask>
+                      <ellipse
+                        cx="0.666667"
+                        cy="0.666667"
+                        rx="0.666667"
+                        ry="0.666667"
+                        transform="matrix(-1 0 0 1 8.66699 10)"
+                        fill="#FF0000"
+                      />
+                      <path
+                        d="M7.33366 10.6667H8.33366C8.33366 10.4826 8.18442 10.3333 8.00033 10.3333V11.3333V12.3333C7.07985 12.3333 6.33366 11.5871 6.33366 10.6667H7.33366ZM8.00033 11.3333V10.3333C7.81623 10.3333 7.66699 10.4826 7.66699 10.6667H8.66699H9.66699C9.66699 11.5871 8.9208 12.3333 8.00033 12.3333V11.3333ZM8.66699 10.6667H7.66699C7.66699 10.8508 7.81623 11 8.00033 11V10V9C8.9208 9 9.66699 9.74619 9.66699 10.6667H8.66699ZM8.00033 10V11C8.18442 11 8.33366 10.8508 8.33366 10.6667H7.33366H6.33366C6.33366 9.74619 7.07985 9 8.00033 9V10Z"
+                        fill="#FF0000"
+                        mask="url(#path-2-inside-1_652_11061)"
+                      />
+                    </svg>
+                    <p className="flex-grow-0 flex-shrink-0 text-[12px] font-medium text-left text-[#f00]">
+                      약관에 동의해 주세요
+                    </p>
+                  </div>
+                )}
+              </div>
+              <svg
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M9 6L15 12L9 18"
+                  stroke="#808080"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
               </svg>
             </div>
-            <div className="flex justify-start items-center flex-grow h-11 overflow-hidden gap-3 px-3 py-[11px] rounded-[22px] bg-[#f2f2f2]">
-              <input
-                type="text"
-                className="flex-grow text-base font-medium text-left text-[#111] bg-[#f2f2f2] outline-none border-none"
-                placeholder="메시지 보내기"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-            </div>
-            <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
-              <button onClick={sendMessage} disabled={!input.trim()}>
-                <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none">
-                  <g clipPath="url(#clip0_652_9848)">
-                    <path d="M21.2847 12.1421L4.46546 20.2403C3.64943 20.6332 2.77317 19.8256 3.0983 18.9803L5.72836 12.1421M21.2847 12.1421L4.46546 4.04397C3.64943 3.65107 2.77317 4.45864 3.0983 5.30396L5.72836 12.1421M21.2847 12.1421H5.72836" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_652_9848)">
-                      <rect width={24} height={24} fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </button>
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-center flex-grow-0 flex-shrink-0 h-[110px] w-[390px] gap-[38px] py-3">
+          <div className="flex flex-col justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2.5 px-6">
+            <div
+              className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] cursor-pointer"
+              onClick={handlePayment}
+            >
+              <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+                <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                  지급하기
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -439,4 +370,267 @@ const ChatRoomWebSocket = ({
     </div>
   );
 };
-export default ChatRoomWebSocket;
+
+const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
+  <div
+    className="absolute right-0 top-14 z-50"
+    style={{ pointerEvents: "auto" }}
+    onClick={onClose}
+  >
+    <div
+      className="flex flex-col justify-start items-start w-[250px] relative overflow-hidden rounded-xl bg-[#F2F2F2]"
+      style={{ boxShadow: "0 8px 32px 0 rgba(0,0,0,0.12)", borderRadius: 16 }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* 신고하기 */}
+      <div
+        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
+        style={{ zIndex: 1 }}
+        onClick={onReport}
+      >
+        <p className="flex-grow w-[180px] text-base font-medium text-left text-[#111]">
+          신고하기
+        </p>
+        <svg
+          width={24}
+          height={24}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M19.1111 16.4444V16.4444C19.602 16.4444 20 16.8424 20 17.3333V18.2222C20 19.2041 19.2041 20 18.2222 20H5.77778C4.79594 20 4 19.2041 4 18.2222V17.3333C4 16.8424 4.39797 16.4444 4.88889 16.4444V16.4444M19.1111 16.4444V11.1111C19.1111 8.74074 17.6889 4 12 4C6.31111 4 4.88889 8.74074 4.88889 11.1111V16.4444M19.1111 16.4444H4.88889"
+            stroke="#111111"
+            strokeWidth="1.5"
+            fill="none"
+          />
+        </svg>
+      </div>
+      {/* 차단하기 */}
+      <div
+        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b border-b-[#E5E5E5] border-b-[0.5px] border-l-0 bg-transparent"
+        style={{ zIndex: 1 }}
+        onClick={onBlock}
+      >
+        <p className="flex-grow w-[180px] text-base font-medium text-left text-[#111]">
+          차단하기
+        </p>
+        <svg
+          width={24}
+          height={24}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M5.63548 18.3634C4.00713 16.7348 3 14.485 3 12C3 7.02944 7.02944 3 12 3C14.485 3 16.7348 4.00713 18.3634 5.63548M5.63548 18.3634C7.26421 19.9924 9.51444 21 12 21C16.9706 21 21 16.9706 21 12C21 9.51444 19.9924 7.26421 18.3634 5.63548M5.63548 18.3634L18.3634 5.63548"
+            stroke="#111111"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+      </div>
+      {/* 채팅방 나가기 */}
+      <div
+        className="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative pl-[30px] pr-4 border-t-0 border-r-0 border-b-0 border-l-0 bg-transparent"
+        style={{ zIndex: 1 }}
+        onClick={onExit}
+      >
+        <p className="flex-grow w-[180px] text-base font-medium text-left text-[#111]">
+          채팅방 나가기
+        </p>
+        <svg
+          width={24}
+          height={24}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M16 8V5.5C16 4.11929 14.8807 3 13.5 3L8 3C6.34315 3 5 4.34315 5 6L5 18C5 19.6569 6.34315 21 8 21H13.5C14.8807 21 16 19.8807 16 18.5L16 16M23 12L11.3 12M23 12L20 9M23 12L20 15"
+            stroke="#111111"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+);
+
+
+const ChatRoomPage = ({ roomId: propRoomId }) => {
+  const params = useParams();
+  const location = useLocation();
+  const memberId = localStorage.getItem("userId") || "1";
+  const navigate = useNavigate();
+  const [showOption, setShowOption] = useState(false);
+  const [reportModalType, setReportModalType] = useState(null);
+  const [item, setItem] = useState(null);
+  const [roomId, setRoomId] = useState(propRoomId || params.roomId);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userName, setUserName] = useState("");
+  const [showDeliveryCompleted, setShowDeliveryCompleted] = useState(false);
+  const [showPaymentCompleted, setShowPaymentCompleted] = useState(false); // 지급 완료 상태
+  const [showRewardModal, setShowRewardModal] = useState(false); // 현상금 지급 모달 상태
+
+  const searchParams = new URLSearchParams(location.search);
+  const lostPostId = searchParams.get("lostPostId") || params.lostPostId || params.itemId;
+  
+  // NOTE: item.memberId와 item.userId가 혼용되고 있어, 둘 다 확인하도록 유지합니다.
+  const isLostOwner = item?.memberId === memberId || item?.userId === memberId;
+  const isFinder = !isLostOwner;
+
+  useEffect(() => {
+    async function fetchData() {
+        // ... 기존 데이터 fetching 로직 ...
+        // 이 부분은 제공된 코드의 로직을 그대로 사용한다고 가정합니다.
+        setLoading(true);
+        setError(null);
+        try {
+            const itemData = lostPostId ? await new Promise(resolve => setTimeout(() => resolve({
+                title: "소니 WH-1000XM4 헤드셋",
+                location: "역삼1동",
+                timeAgo: "10일 전",
+                mainImageUrl: "",
+                registrationType: "LOST",
+                status: "주인 찾는 중",
+                reward: 20000,
+                memberId: '1', // 분실자 ID 예시
+                nickname: '유저1' // 상대방 이름 예시
+            }), 500)) : null;
+
+            setItem(itemData);
+            setUserName(itemData?.nickname || '상대방');
+            setRoomId(lostPostId);
+        } catch (e) {
+            setError("채팅방 정보를 불러오지 못했습니다.");
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchData();
+  }, [lostPostId]);
+
+  if (loading) return <div className="w-full h-screen flex items-center justify-center">로딩중...</div>;
+  if (error) return <div className="w-full h-screen flex items-center justify-center text-red-500">{error}</div>;
+
+  return (
+    <>
+    <div className="flex justify-between items-center w-[390px] mx-auto overflow-hidden px-6 py-1.5 bg-white">
+        <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
+          <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 pr-3 py-2.5">
+            <button onClick={() => navigate(-1)}>
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none" >
+                <path d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <p className="flex-grow-0 flex-shrink-0 text-[22px] font-semibold text-left text-[#111]">
+            {userName || '유저1'}
+          </p>
+        </div>
+        <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
+          <button onClick={() => setShowOption(true)}>
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none" >
+              <path d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z" stroke="#111111" strokeWidth="1.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      {/* 화면 잘림 수정을 위해 h-screen, flex, flex-col 적용 */}
+      <div className="w-[390px] max-w-full h-screen bg-white flex flex-col items-center mx-auto">
+        {showOption && ( <OptionModal onClose={() => setShowOption(false)} /> )}
+        {reportModalType && ( <ReportModal type={reportModalType} onCancel={() => setReportModalType(null)} onConfirm={() => { setReportModalType(null); }} /> )}
+
+        {/* 아이템 카드와 버튼을 포함한 상단 컨텐츠 */}
+        <div className="w-full px-6 pt-4">
+          <ChatRoomItemCard
+            data={
+              item || {
+                title: "아이폰 14 프로 분실",
+                location: "역삼동",
+                timeAgo: "10분 전",
+                mainImageUrl: "",
+                registrationType: "LOST",
+                status: "주인 찾는 중",
+              }
+            }
+          />
+          
+          {/* 습득자용 버튼 */}
+          {isFinder && !showDeliveryCompleted && (
+             <div
+             className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg bg-[#f2f2f2]"
+           >
+             <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+               물건 주인을 찾고 있어요
+             </p>
+           </div>
+          )}
+          {/* 현상금 지급 완료 후 습득자에게 표시될 버튼 */}
+          {isFinder && showDeliveryCompleted && (
+            <div
+              className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg bg-[#f2f2f2]"
+            >
+              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+                현상금 지급 완료
+              </p>
+            </div>
+          )}
+
+          {/* 분실자용 버튼 */}
+          {isLostOwner && (
+            <div
+              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg ${
+                showPaymentCompleted
+                  ? "bg-[#f2f2f2] text-[#111]"
+                  : "bg-[#06f] text-white cursor-pointer"
+              }`}
+              onClick={
+                showPaymentCompleted ? undefined : () => setShowRewardModal(true)
+              }
+            >
+              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left">
+                {showPaymentCompleted ? "현상금 지급 완료" : "현상금 지급하기"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 채팅 영역이 남은 공간을 모두 차지하도록 flex-1, overflow-hidden 적용 */}
+        <div className="flex flex-col justify-start items-center w-full flex-1 overflow-hidden">
+          <ChatRoomWebSocket
+            roomId={String(roomId || lostPostId)}
+            memberId={String(memberId)}
+            item={item} // item 데이터 전달
+            subscribeTopic={`/topic/chat/${String(roomId || lostPostId)}`}
+            sendDestination="/app/chat.send"
+            isLostOwner={isLostOwner}
+            isFinder={isFinder}
+            showDeliveryCompleted={showDeliveryCompleted}
+            setShowDeliveryCompleted={setShowDeliveryCompleted}
+            showPaymentCompleted={showPaymentCompleted}
+            setShowPaymentCompleted={setShowPaymentCompleted} // setter 전달
+            showRewardModal={showRewardModal}
+            setShowRewardModal={setShowRewardModal}
+          />
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ChatRoomPage;
