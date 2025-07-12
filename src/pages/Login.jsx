@@ -1,20 +1,19 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiService } from '../services/apiService';
-import kakaoIcon from '../assets/카카오.svg';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiService } from "../services/apiService";
+import kakaoIcon from "../assets/카카오.svg";
 import { useAuth } from "../utils/AuthContext.jsx";
 
-const KAKAO_LOGIN_URL = "http://15.164.234.32:8080/auth/login/kakao";
-
+const KAKAO_LOGIN_URL = "http://15.164.234.32:8080/KakaoCallback";
 
 export default function Login() {
   const navigate = useNavigate();
   const { fetchUser } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKakaoLogin = () => {
@@ -24,23 +23,22 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setEmailError('');
-    setPasswordError('');
- 
+    setEmailError("");
+    setPasswordError("");
 
     // 기본 유효성 검사
     if (!email) {
-      setEmailError('이메일을 입력해주세요');
+      setEmailError("이메일을 입력해주세요");
       setIsLoading(false);
       return;
     }
     if (!password) {
-      setPasswordError('비밀번호를 입력해주세요');
+      setPasswordError("비밀번호를 입력해주세요");
       setIsLoading(false);
       return;
     }
     if (password.length < 8) {
-      setPasswordError('비밀번호는 8자 이상 입력해주세요');
+      setPasswordError("비밀번호는 8자 이상 입력해주세요");
       setIsLoading(false);
       return;
     }
@@ -49,48 +47,53 @@ export default function Login() {
       // 로그인 API 호출
       const response = await apiService.login({ email, password });
       // 토큰
-      localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('accessTokenExpires', response.accessTokenExpires);
-      localStorage.setItem('userId', response.memberId);
-      localStorage.setItem('user', JSON.stringify({
-        email: response.email,
-        username: response.username,
-        imageUrl: response.imageUrl,
-      }));
+      localStorage.setItem("accessToken", response.accessToken);
+      localStorage.setItem("refreshToken", response.refreshToken);
+      localStorage.setItem("accessTokenExpires", response.accessTokenExpires);
+      localStorage.setItem("userId", response.memberId);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          email: response.email,
+          username: response.username,
+          imageUrl: response.imageUrl,
+        })
+      );
       await fetchUser();
       navigate("/"); // 메인 페이지로 이동
-
     } catch (error) {
-      console.error('로그인 실패:', error);
-      
+      console.error("로그인 실패:", error);
+
       if (error.response) {
         const { status, data } = error.response;
-        
+
         switch (status) {
           case 400:
-            if (data?.message?.includes('email') || data?.field === 'email') {
-              setEmailError('올바른 이메일 형식이 아닙니다');
-            } else if (data?.message?.includes('password') || data?.field === 'password') {
-              setPasswordError('비밀번호가 일치하지 않습니다');
+            if (data?.message?.includes("email") || data?.field === "email") {
+              setEmailError("올바른 이메일 형식이 아닙니다");
+            } else if (
+              data?.message?.includes("password") ||
+              data?.field === "password"
+            ) {
+              setPasswordError("비밀번호가 일치하지 않습니다");
             } else {
-              setEmailError('입력 정보를 확인해주세요');
+              setEmailError("입력 정보를 확인해주세요");
             }
             break;
           case 401:
-            setEmailError('이메일 또는 비밀번호가 잘못되었습니다');
+            setEmailError("이메일 또는 비밀번호가 잘못되었습니다");
             break;
           case 404:
-            setEmailError('존재하지 않는 계정입니다');
+            setEmailError("존재하지 않는 계정입니다");
             break;
           case 500:
-            alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             break;
           default:
-            alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+            alert("로그인 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
       } else if (error.request) {
-        alert('서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.');
+        alert("서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
       } else {
         alert(`로그인 요청 설정 중 오류 발생: ${error.message}`);
       }
@@ -100,7 +103,7 @@ export default function Login() {
   };
 
   const handleSignup = () => {
-    navigate('/SignUp');
+    navigate("/SignUp");
   };
 
   // 컴포넌트 마운트 시 자동 로그인 체크
@@ -297,14 +300,14 @@ export default function Login() {
                     className="w-11 h-11 relative"
                     preserveAspectRatio="none"
                   >
-                    <rect 
-                      x="11.5" 
-                      y="11.5" 
-                      width={21} 
-                      height={21} 
-                      rx="3.5" 
+                    <rect
+                      x="11.5"
+                      y="11.5"
+                      width={21}
+                      height={21}
+                      rx="3.5"
                       fill={remember ? "#00D455" : "transparent"}
-                      stroke={remember ? "#00D455" : "#808080"} 
+                      stroke={remember ? "#00D455" : "#808080"}
                     />
                     {remember && (
                       <path
@@ -323,7 +326,7 @@ export default function Login() {
               <div className="flex flex-row justify-end items-center flex-grow w-full gap-2 text-sm">
                 <button
                   type="button"
-                  onClick={() => navigate('/search-id')}
+                  onClick={() => navigate("/search-id")}
                   disabled={isLoading}
                   className="flex justify-center items-center flex-grow-0 flex-shrink-0 h-11 relative gap-2.5 disabled:opacity-50 text-xs text-[#999999]"
                 >
@@ -342,7 +345,7 @@ export default function Login() {
                 </svg>
                 <button
                   type="button"
-                  onClick={() => navigate('/find')}
+                  onClick={() => navigate("/find")}
                   disabled={isLoading}
                   className="flex justify-center items-center flex-grow-0 flex-shrink-0 h-11 relative gap-2.5 disabled:opacity-50 text-xs text-[#999999]"
                 >
@@ -360,7 +363,7 @@ export default function Login() {
               >
                 <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
                   <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
-                    {isLoading ? '로그인 중...' : '로그인'}
+                    {isLoading ? "로그인 중..." : "로그인"}
                   </p>
                 </div>
               </button>
