@@ -176,53 +176,33 @@ export default function RegisterPage() {
   }
   // 분실물 등록
   const handleRegister = async () => {
-    console.log("selectedDate:", selectedDate);
-    console.log("selectedTimes:", selectedTimes);
-    console.log("startTime:", selectedTimes?.[0]);
-    console.log("endTime:", selectedTimes?.[1]);
-
     try {
-      // 로그인 여부 확인
+      // 로그인 유효성 검사 진행
       if (!userId) {
         alert("로그인이 필요한 기능입니다.");
         return;
       }
+      const startTime = convertTo24HourFormat(selectedTimes[0]);
+      const endTime = convertTo24HourFormat(selectedTimes[1]);
+      const lostDateTimeStart = new Date(`${date}T${startTime}`);
+      const lostDateTimeEnd = new Date(`${date}T${endTime}`);
 
-      // 날짜 유효성 검사
-      if (!(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
+      if (!(selectedDate instanceof Date) || isNaN(selectedDate)) {
         alert("날짜를 올바르게 선택해주세요.");
-        return;
-      }
-
-      // 시간 배열 검사
-      if (
-        !Array.isArray(selectedTimes) ||
-        selectedTimes.length < 2 ||
-        typeof selectedTimes[0] !== "string" ||
-        typeof selectedTimes[1] !== "string"
-      ) {
-        alert("시간을 올바르게 선택해주세요.");
         return;
       }
 
       const date = selectedDate.toISOString().split("T")[0];
 
-      // ✅ 한글 시간 → HH:mm 포맷으로 변환
-      const startTime = convertTo24HourFormat(selectedTimes[0]);
-      const endTime = convertTo24HourFormat(selectedTimes[1]);
-
-      const lostDateTimeStart = new Date(`${date}T${startTime}`);
-      const lostDateTimeEnd = new Date(`${date}T${endTime}`);
-
-      if (
-        isNaN(lostDateTimeStart.getTime()) ||
-        isNaN(lostDateTimeEnd.getTime())
-      ) {
-        alert("시간 형식이 올바르지 않습니다.");
+      console.log("selectedDate:", selectedDate);
+      console.log("selectedTimes:", selectedTimes);
+      console.log("startTime:", selectedTimes?.[0]);
+      console.log("endTime:", selectedTimes?.[1]);
+      if (isNaN(lostDateTimeStart) || isNaN(lostDateTimeEnd)) {
+        alert("시간을 올바르게 입력해주세요.");
         return;
       }
-
-      // API 바디 생성
+      // 바디 정의
       const requestDto = {
         registrationType: selectedTag === "분실했어요" ? "LOST" : "FOUND",
         title,
@@ -244,6 +224,7 @@ export default function RegisterPage() {
         lostDateTimeEnd: lostDateTimeEnd.toISOString(),
       };
 
+      // 이미지 처리 및 요청 바디 결합
       const formData = new FormData();
       formData.append(
         "requestDto",
@@ -253,17 +234,20 @@ export default function RegisterPage() {
         formData.append("images", img);
       });
 
+      // POST 요청
       const response = await axios.post(
         `${apiBase}/api/v1/lostPosts`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data", // optional (axios가 자동 지정함)
+            // "X-USER-ID": userId, // 명세에 따라 로그인한 사용자 ID 전달
           },
           validateStatus: () => true,
         }
       );
 
+      // 응답 처리
       if (response.status === 201) {
         alert("등록이 완료되었습니다.");
         reset();
