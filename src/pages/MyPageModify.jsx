@@ -188,7 +188,7 @@ export default function MyPageModify() {
                     </div>
                 </div>
             </div>
-            <div className=" px-[24px] pt-[12px] pb-[38px] fixed bottom-0 ">
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="수정하기" onClick={handleSubmit} />
             </div>
             {isBankModalOpen && (

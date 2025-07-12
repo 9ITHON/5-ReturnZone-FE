@@ -428,7 +428,7 @@ export default function ModifyPage() {
                     )}
                 </div>
             </div>
-            <div className={`px-[24px] py-[12px] fixed bottom-[30px] md:bottom-[110px] z-50 ${isKeyboardOpen ? '!bottom-[10px]' : ''}`}>
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="저장하기" onClick={handleUpdate} />
             </div>
             {/* 캘린더 모달 조건부 렌더링 */}

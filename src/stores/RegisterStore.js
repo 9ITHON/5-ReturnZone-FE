@@ -41,8 +41,10 @@ export const useRegisterStore = create((set) => ({
     setLocation: (address, lat, lng) => {
         set({
             selectedLocation: address,
-            latitude: lat,
-            longitude: lng,
+            latitude: null,
+            longitude: null,
+            setLatitude: (v) => set({ latitude: v }),
+            setLongitude: (v) => set({ longitude: v }),
         });
     },
 

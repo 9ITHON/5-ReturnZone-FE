@@ -73,7 +73,7 @@ export default function MyPageExchange() {
                 <MyPagePoint userInfo={userInfo} />
 
             </div>
-            <div className=" px-[24px] pt-[12px] pb-[38px] fixed bottom-0 ">
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label={userInfo?.point === 0 ? "환전완료" : "환전하기"}
                     className={userInfo.point === 0 ? "bg-[#F2F2F2] !text-[#111111] !cursor-default" : ""}
                     disabled={userInfo.point === 0}

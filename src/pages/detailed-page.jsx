@@ -54,7 +54,7 @@ export default function DetailedPage() {
     return (
         <div>
             <DetailedHeader postMemberId={post.memberId} />
-            <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
+            <div className=" flex flex-1 flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
                     <div>
@@ -138,7 +138,7 @@ export default function DetailedPage() {
                 )}
             </div>
             {/* 하단 버튼 */}
-            <div className=" pt-[12px] pb-[42px] px-[24px]">
+            <div className="bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10">
                 <Button label="채팅하기" onClick={() => navigate(`/chat/${post.memberId}`)}
                 ></Button>
             </div>
