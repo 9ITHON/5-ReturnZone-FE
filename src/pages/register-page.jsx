@@ -163,7 +163,6 @@ export default function RegisterPage() {
         alert("로그인이 필요한 기능입니다.");
         return;
       }
-      if (!latitude || !longitude) return alert("위치를 선택해주세요.");
       if (!selectedDate) return alert("날짜를 선택해주세요.");
 
       const date = selectedDate?.toISOString().split("T")[0];
