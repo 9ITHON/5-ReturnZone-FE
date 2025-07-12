@@ -437,11 +437,11 @@ const ChatRoomWebSocket = ({
                   disabled={!isAgreed || !rewardAmount.trim()}
                   className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f] disabled:bg-[#e6e6e6] disabled:text-[#808080]"
                 >
-                  <div className="flex flex-col justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-14 overflow-hidden px-4 py-3.5 rounded-lg bg-[#06f]">
-  <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
-    <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">지급하기</p>
-  </div>
-</div>
+                  <div className="flex justify-center items-center self-stretch flex-grow relative overflow-hidden gap-1.5">
+                    <p className="flex-grow w-[310px] text-base font-semibold text-center text-white">
+                      지급하기
+                    </p>
+                  </div>
                 </button>
               </div>
             </div>
