@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Router 추가
 import SignUp from './pages/signup';
 import Home from './pages/Home';
@@ -15,9 +14,10 @@ import MyPageExchange from './pages/MyPageExchange';
 import MyPageModify from './pages/MyPageModify';
 import MyPageProduct from './pages/MyPageProduct';
 import MyPageLocation from './pages/MyPageLocation';
-import { AuthProvider, useAuth } from "./utils/AuthContext.jsx";
-import { useEffect } from "react";
-import { GetMyPage } from "./utils/GetMyPage";
+import { AuthProvider } from "./utils/AuthContext.jsx";
+// useAuth
+// import { useEffect } from "react";
+// import { GetMyPage } from "./utils/GetMyPage";
 import UserMessageLogin from './components/UserMessageLogin';
 
 // 라우터 설정 함수
@@ -29,17 +29,18 @@ function AppRoute() {
       <UserMessageLogin
         title="로그인이 필요합니다"
         message="해당 페이지는 로그인 이후 <br /> 이용하실 수 있습니다."
-        path="/Login"
+        path={'/LogIn' || '/login' }
         cancelPath={-1}
       />
     );
   return (
-    <AuthProvider>
-    <BrowserRouter>
+    // <AuthProvider>
+    // <BrowserRouter>
     <Routes>
       {/* 공용 라우트 */}
       <Route path='/' element={<Home />} />
       <Route path='/LogIn' element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path='/SignUp' element={<SignUp />} />
       <Route path='/Register' element={<RegisterPage />} />
       <Route path='/lost/:lostPostId' element={<DetailedPage />} />
@@ -54,49 +55,53 @@ function AppRoute() {
       <Route path='/MyPageModify' element={loginRequired(<MyPageModify />)} />
       <Route path='/MyPageProduct' element={loginRequired(<MyPageProduct />)} />
       <Route path='/MyPageLocation' element={loginRequired(<MyPageLocation />)} />
-      <Route path="/login" element={<Login />} />
       <Route path='/MyPage' element={loginRequired(<MyPage />)} />
     </Routes>
-    </BrowserRouter>
-    </AuthProvider>
+    // </BrowserRouter>
+    // </AuthProvider> 
   )
 }
 
-function AuthGate({ children }) {
-  const { setUser } = useAuth();
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = localStorage.getItem("auth_token");
-      const userId = localStorage.getItem("userId");
-      if (token && userId) {
-        try {
-          const userInfo = await GetMyPage(userId);
-          if (userInfo) {
-            setUser(userInfo);
-          } else {
-            localStorage.removeItem("auth_token");
-            setUser(null);
-          }
-        } catch {
-          localStorage.removeItem("auth_token");
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    };
-    checkToken();
-  }, [setUser]);
-  return children;
-}
+// function AuthGate({ children }) {
+//   const { setUser } = useAuth();
+//   useEffect(() => {
+//     const checkToken = async () => {
+//       const token = localStorage.getItem("auth_token");
+//       const userId = localStorage.getItem("userId");
+//       if (token && userId) {
+//         try {
+//           const userInfo = await GetMyPage(userId);
+//           if (userInfo) {
+//             setUser(userInfo);
+//           } else {
+//             localStorage.removeItem("auth_token");
+//             setUser(null);
+//           }
+//         } catch {
+//           localStorage.removeItem("auth_token");
+//           setUser(null);
+//         }
+//       } else {
+//         setUser(null);
+//       }
+//     };
+//     checkToken();
+//   }, [setUser]);
+//   return children;
+// }
 // 메인 페이지
 export default function App() {
 
   return (
-    <AuthProvider>
-      <AuthGate>
-          <AppRoute></AppRoute>
-      </AuthGate>
+    // <AuthProvider>
+      // <AuthGate>
+          // <AppRoute></AppRoute>
+      // </AuthGate>
+    // </AuthProvider>
+     <AuthProvider>
+      <BrowserRouter>
+        <AppRoute></AppRoute>
+      </BrowserRouter>
     </AuthProvider>
   )
 }

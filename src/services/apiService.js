@@ -54,29 +54,37 @@ function getUserId() {
 
 export const apiService = {
   // 로그인
+  // async login({ email, password }) {
+  //   return retryRequest(async () => {
+  //     const response = await apiClient.post('/members/login', { email, password });
+  //     const {
+  //       accessToken,
+  //       refreshToken,
+  //       memberId,
+  //       email: userEmail,
+  //       username,
+  //       imageUrl,
+  //       accessTokenExpiresDate,
+  //     } = response.data;
+
+  //     // localStorage 저장
+  //     localStorage.setItem('auth_token', accessToken);
+  //     localStorage.setItem('refresh_token', refreshToken);
+  //     localStorage.setItem('user_id', memberId.toString());
+  //     localStorage.setItem('email', userEmail);
+  //     localStorage.setItem('username', username);
+  //     localStorage.setItem('image_url', imageUrl);
+  //     localStorage.setItem('token_expiry', accessTokenExpiresDate);
+
+  //     return response.data;
+  //   });
+  // },
+  // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
-      const response = await apiClient.post('/members/login', { email, password });
-      const {
-        accessToken,
-        refreshToken,
-        memberId,
-        email: userEmail,
-        username,
-        imageUrl,
-        accessTokenExpiresDate,
-      } = response.data;
-
-      // localStorage 저장
-      localStorage.setItem('auth_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-      localStorage.setItem('user_id', memberId.toString());
-      localStorage.setItem('email', userEmail);
-      localStorage.setItem('username', username);
-      localStorage.setItem('image_url', imageUrl);
-      localStorage.setItem('token_expiry', accessTokenExpiresDate);
-
-      return response.data;
+      const response = await apiClient.post('/auth/login', { email, password });
+      // localStorage 저장 코드 제거
+      return response.data; // { email, username, imageUrl }
     });
   },
   //회원가입
