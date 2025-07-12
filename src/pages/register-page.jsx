@@ -137,11 +137,25 @@ export default function RegisterPage() {
   //   navigate(path, { replace: true });    // RegisterPage로 이동
   // };
   useEffect(() => {
-    if (location.state?.address && location.state?.lat && location.state?.lng) {
+    if (
+      location.state?.address &&
+      location.state?.lat !== null &&
+      location.state?.lng !== null
+    ) {
       setSelectedLocation(location.state.address);
       setlatitude(location.state.lat);
       setlongitude(location.state.lng);
       console.log("위치 설정됨:", location.state);
+    } else {
+      // 위치 정보가 없는 경우 판교역으로 강제 설정
+      const fallbackAddress = "경기도 성남시 분당구 판교역로 235 (삼평동)";
+      const fallbackLat = 37.3948;
+      const fallbackLng = 127.1111;
+
+      setSelectedLocation(fallbackAddress);
+      setlatitude(fallbackLat);
+      setlongitude(fallbackLng);
+      console.warn("위치 정보 누락 - 판교역으로 기본 설정됨");
     }
   }, [location.state]);
   // 상세 특징 업데이트
