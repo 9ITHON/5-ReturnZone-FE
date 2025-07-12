@@ -775,7 +775,7 @@ const ChatRoomPage = () => {
         )}
       </div>
       {/* 채팅 메시지 영역 등 나머지 UI */}
-      <div className="flex flex-col justify-start items-center w-[390px] h-[630px]">
+      <div className="flex flex-col justify-start items-center w-[390px] min-h">
         <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 pt-4">
           <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
             <ChatRoomWebSocket
