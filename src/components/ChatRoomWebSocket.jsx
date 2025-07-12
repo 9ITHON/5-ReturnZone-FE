@@ -131,7 +131,6 @@ const ChatRoomWebSocket = ({
         type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장
       };
-      setMessages((prev) => [...prev, chatMessage]);
       clientRef.current.publish({
         destination: sendDestination,
         body: JSON.stringify(chatMessage),
