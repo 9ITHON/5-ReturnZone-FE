@@ -14,8 +14,8 @@ const ChatMessage = ({ message, isMine, senderName, showSenderName = false }) =>
 
   return (
     <div className={`flex w-full mb-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
-      <div className="flex flex-col items-end">
-        {/* 다른 사용자 메시지일 때만 이름 표시 */}
+      <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} w-full`}>
+        {/* 상대방 이름 */}
         {!isMine && showSenderName && (
           <div className="flex justify-start items-start self-stretch mb-1">
             <p className="text-sm text-left text-[#808080] font-medium">
@@ -23,34 +23,31 @@ const ChatMessage = ({ message, isMine, senderName, showSenderName = false }) =>
             </p>
           </div>
         )}
-        
         <div
           className={
             isMine
-              ? 'flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#06f]'
-              : 'flex flex-col justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-4 py-2.5 rounded-[22px] bg-[#f2f2f2]'
+              ? 'flex justify-end items-end px-4 py-2.5 rounded-[22px] bg-[#06f] w-fit max-w-[80%] ml-auto'
+              : 'flex flex-col justify-start items-start px-4 py-2.5 rounded-[22px] bg-[#f2f2f2] w-fit max-w-[80%] mr-auto'
           }
         >
           <p
             className={
               isMine
-                ? 'flex-grow w-[181px] text-base text-left text-white'
-                : 'flex-grow-0 flex-shrink-0 w-[186px] text-base text-left text-[#111]'
+                ? 'text-base text-left text-white break-words'
+                : 'text-base text-left text-[#111] break-words'
             }
+            style={{ wordBreak: 'break-all' }}
           >
             {message.content}
           </p>
         </div>
-        
         {/* 시간 표시 */}
-        <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-1 mt-1 mr-1">
-          <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">
+        <div className={`flex gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'} w-fit ${isMine ? 'ml-auto' : 'mr-auto'}`}>
+          <p className="text-xs text-[#808080]">
             {getTimeStr(message.createdAt)}
           </p>
           {isMine && (
-            <p className="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-[#808080]">
-              읽음
-            </p>
+            <p className="text-xs font-medium text-[#808080]">읽음</p>
           )}
         </div>
       </div>
