@@ -272,7 +272,7 @@ const ChatRoomWebSocket = ({
       </div>
       {/* 메시지 입력 바 */}
       <div
-        className="flex flex-col justify-start items-center w-full bg-white"
+        className="flex flex-col justify-start items-center bg-white"
         style={{
           position: "fixed",
           left: 0,
@@ -281,7 +281,7 @@ const ChatRoomWebSocket = ({
           zIndex: 20,
         }}
       >
-        <div className="flex justify-center items-center w-full max-w-2xl mx-auto gap-2.5 px-2 py-2 bg-white">
+        <div className="flex justify-center items-center w-full gap-2.5 px-2 py-2 bg-white">
           <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
             <svg
               width={24}
