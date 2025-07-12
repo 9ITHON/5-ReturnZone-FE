@@ -33,6 +33,8 @@ const FILTERS = [
 ];
 
 const Home = () => {
+  const [latitude, setLatitude] = React.useState(null);
+  const [longitude, setLongitude] = React.useState(null);
   const [categoryOpen, setCategoryOpen] = React.useState(false);
   const [locationOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState(null);

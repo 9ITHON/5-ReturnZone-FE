@@ -8,17 +8,22 @@ const ItemCard = ({
   reward = 10000,
   status = '', // '분실했어요' | '주인찾아요' | ''
   imageUrl = '',
-  data, // search-page에서 전달되는 data prop
+  mainImageUrl = '', // ✅ 추가
+  data, // search-page 또는 home-page에서 전달되는 데이터
 }) => {
-  // data prop이 있으면 data의 값들을 사용
+  // data가 존재할 경우 우선적으로 해당 값 사용
   const finalTitle = data?.title || title;
   const finalLocation = data?.location || data?.lostLocationDong || location;
   const finalTime = data?.timeAgo || time;
   const finalReward = data?.reward || reward;
-  const finalStatus = data?.registrationType === 'LOST' ? '분실했어요' :
-    data?.registrationType === 'FOUND' ? '주인찾아요' : status;
-  const finalImageUrl =
-    data?.mainImageUrl || data?.imageUrls?.[0] || imageUrl || mainImageUrl;
+  const finalStatus =
+    data?.registrationType === 'LOST'
+      ? '분실했어요'
+      : data?.registrationType === 'FOUND'
+        ? '주인찾아요'
+        : status;
+
+  const finalImageUrl = data?.mainImageUrl || data?.imageUrls?.[0] || imageUrl || mainImageUrl;
 
   return (
     <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3 mb-4">
@@ -40,10 +45,10 @@ const ItemCard = ({
         <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-1">
           {/* 상태 뱃지 */}
           {finalStatus === '주인찾아요' && (
-            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#E7F4EC] h-[20px] w-[57px]">
-              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-[4px] py-[3px] rounded">
+            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#e6fbee]">
+              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-1 py-[3px] rounded">
                 <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#00C34E]">
+                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#00d455]">
                     주인 찾아요
                   </p>
                 </div>
@@ -51,17 +56,19 @@ const ItemCard = ({
             </div>
           )}
           {finalStatus === '분실했어요' && (
-            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#F6EEE9]h-[20px]w-[57px]">
-              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-[4px] py-[3px] rounded">
+            <div className="flex justify-start items-start flex-grow-0 flex-shrink-0 rounded-md bg-[#f9eae0]">
+              <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 gap-1 px-1 py-[3px] rounded">
                 <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 relative gap-1">
-                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#FF5900]">
+                  <p className="flex-grow-0 flex-shrink-0 text-[11px] font-semibold text-left text-[#ff5900]">
                     분실했어요
                   </p>
                 </div>
               </div>
             </div>
           )}
-          <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">{finalLocation}</p>
+          <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">
+            {finalLocation}
+          </p>
           <svg
             width={4}
             height={4}
@@ -73,16 +80,20 @@ const ItemCard = ({
           >
             <circle cx={2} cy={2} r={2} fill="#B8B8B8" />
           </svg>
-          <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">{finalTime}</p>
+          <p className="flex-grow-0 flex-shrink-0 text-sm text-left text-[#808080]">
+            {finalTime}
+          </p>
         </div>
         {/* 현상금 */}
         <div className="flex flex-row items-center gap-1 mt-1">
           <span className="text-[15px] font-medium text-[#111]">현상금</span>
-          <b className="text-[15px] font-bold text-[#111]">{formatPrice(finalReward)}</b>
+          <b className="text-[15px] font-bold text-[#111]">
+            {formatPrice(finalReward)}
+          </b>
         </div>
       </div>
     </div>
   );
 };
 
-export default ItemCard; 
+export default ItemCard;
