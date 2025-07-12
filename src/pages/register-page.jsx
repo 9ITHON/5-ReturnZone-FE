@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useRegisterStore } from "../stores/RegisterStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 import SHInputField from "../components/SHInputField";
@@ -62,6 +62,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const isKeyboardOpen = UseKeyboardOpen();
   const userId = getUserId();
+  const location = useLocation();
   const safeQuestions = Array.isArray(questions) ? questions : [];
   // const isLoggedIn = userId && userId != null; // 사용자의 로그인 상태 저장
 
@@ -125,16 +126,24 @@ export default function RegisterPage() {
       },
     });
   };
-  // 위치 받기
-  const handleConfirm = () => {
-    if (!address || latlng.lat === null || latlng.lng === null) return;
+  // // 위치 받기
+  // const handleConfirm = () => {
+  //   if (!address || latlng.lat === null || latlng.lng === null) return;
 
-    setSelectedLocation(address);         // 위치 주소 저장
-    setlatitude(latlng.lat);      // 수정된 코드
-    setlongitude(latlng.lng);         // 경도 저장
+  //   setSelectedLocation(address); // 도로명 or 지번
+  //   setlatitude(latlng.lat);      // ← 위도
+  //   setlongitude(latlng.lng);       // 경도 저장
 
-    navigate(path, { replace: true });    // RegisterPage로 이동
-  };
+  //   navigate(path, { replace: true });    // RegisterPage로 이동
+  // };
+  useEffect(() => {
+    if (location.state?.address && location.state?.lat && location.state?.lng) {
+      setSelectedLocation(location.state.address);
+      setlatitude(location.state.lat);
+      setlongitude(location.state.lng);
+      console.log("위치 설정됨:", location.state);
+    }
+  }, [location.state]);
   // 상세 특징 업데이트
   const handleChange = (index, value) => {
     setQuestions((prev) => {
