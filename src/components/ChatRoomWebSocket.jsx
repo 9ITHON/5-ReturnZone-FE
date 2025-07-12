@@ -32,6 +32,7 @@ const ChatRoomWebSocket = ({
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    console.log('[WebSocket Mount] roomId:', roomId, 'userId:', userId, 'subscribeTopic:', subscribeTopic);
     if (!roomId || !userId) return;
     connect();
     return () => disconnect();
@@ -42,16 +43,18 @@ const ChatRoomWebSocket = ({
   const subscriptionRef = useRef(null);
 
   const connect = () => {
+    console.log('Connecting to WebSocket with userId:', userId);
     clientRef.current = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: {
         'X-USER-ID': userId,
       },
       debug: (str) => {
-        console.log(str);
+        console.log('STOMP Debug:', str);
       },
       reconnectDelay: 5000,
       onConnect: () => {
+        console.log('WebSocket connected successfully');
         subscribe();
       },
       onStompError: (frame) => {
@@ -77,13 +80,24 @@ const ChatRoomWebSocket = ({
       subscriptionRef.current.unsubscribe();
       subscriptionRef.current = null;
     }
+    console.log('Subscribing to topic:', subscribeTopic);
     subscriptionRef.current = clientRef.current.subscribe(subscribeTopic, (message) => {
+      console.log('Received message:', message.body);
       const receivedMessage = JSON.parse(message.body);
+      console.log('Parsed message:', receivedMessage);
       setMessages((prev) => {
+        console.log('Previous messages:', prev);
         // 메시지 id가 있으면 중복 추가 방지
-        if (prev.some(m => m.id && receivedMessage.id && m.id === receivedMessage.id)) return prev;
+        if (prev.some(m => m.id && receivedMessage.id && m.id === receivedMessage.id)) {
+          console.log('Duplicate message with id, skipping');
+          return prev;
+        }
         // id가 없으면 content+createdAt로 임시 중복 방지
-        if (prev.some(m => m.content === receivedMessage.content && m.createdAt === receivedMessage.createdAt)) return prev;
+        if (prev.some(m => m.content === receivedMessage.content && m.createdAt === receivedMessage.createdAt)) {
+          console.log('Duplicate message with content+time, skipping');
+          return prev;
+        }
+        console.log('Adding new message to state');
         return [...prev, receivedMessage];
       });
     });
@@ -98,17 +112,25 @@ const ChatRoomWebSocket = ({
         type: 'TEXT',
         createdAt: new Date().toISOString(), // UTC로 저장
       };
+      console.log('Sending message:', chatMessage);
       clientRef.current.publish({
         destination: sendDestination,
         body: JSON.stringify(chatMessage),
       });
       setInput('');
+    } else {
+      console.log('Cannot send message:', {
+        hasInput: !!input.trim(),
+        hasClient: !!clientRef.current,
+        isConnected: clientRef.current?.connected
+      });
     }
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-white" style={{height: '100%', minHeight: 400}}>
       <div className="flex-1 overflow-y-auto px-3 py-2" style={{maxHeight: 400, minHeight: 300, background: '#fff'}}>
+        {console.log('[WebSocket Render] roomId:', roomId, 'userId:', userId, 'subscribeTopic:', subscribeTopic, 'messages:', messages)}
         {messages.map((msg, idx) => {
           const isMine = String(msg.senderId) === String(userId);
           // 시간 포맷
