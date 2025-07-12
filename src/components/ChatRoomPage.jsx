@@ -542,7 +542,6 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
     fetchData();
     // eslint-disable-next-line
   }, [lostPostId, propRoomId]);
-  }, [lostPostId, params.roomId]);
 
   if (loading)
     return (
