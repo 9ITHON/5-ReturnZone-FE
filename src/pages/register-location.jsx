@@ -221,7 +221,7 @@ export default function RegisterLocation() {
             />
 
             {/* 버튼 */}
-            <div className={`bg-[#ffffff] px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10 ${isKeyboardOpen ? "!bottom-[10px]" : ""}`}>
+            <div className={` px-[24px] pt-[12px] pb-[24px] fixed bottom-0 z-10 ${isKeyboardOpen ? "!bottom-[10px]" : ""}`}>
                 <Button label="선택 완료" onClick={handleConfirm} />
             </div>
         </div>

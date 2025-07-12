@@ -121,7 +121,7 @@ export default function MyPageModify() {
     return (
         <div>
             <MyPageUserHeader label="개인정보 수정" />
-            <div className="overflow-y-auto h-[660px] hide-scrollbar">
+            <div className="overflow-y-auto pb-[150px] h-[660px] hide-scrollbar">
                 <div className="flex items-center flex-col gap-[32px] py-[16px] px-[24px]">
                     {/* 숨겨진 input */}
                     <input

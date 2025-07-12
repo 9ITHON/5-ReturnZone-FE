@@ -61,6 +61,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const isKeyboardOpen = UseKeyboardOpen();
   const userId = getUserId();
+  const safeQuestions = Array.isArray(questions) ? questions : [];
   // const isLoggedIn = userId && userId != null; // 사용자의 로그인 상태 저장
 
   // 분실/획득 시간 라벨 텍스트 동적 처리
@@ -272,7 +273,7 @@ export default function RegisterPage() {
       <div>
         <RegisterHeader title="분실물 등록" />
       </div>
-      <div className="h-screen overflow-y-auto hide-scrollbar">
+      <div className="pb-[150px] h-screen overflow-y-auto hide-scrollbar">
         {/* 숨겨진 input */}
         <input
           type="file"
@@ -450,7 +451,7 @@ export default function RegisterPage() {
               <br />
               입력한 내용은 습득자에게 퀴즈 형식으로 제공됩니다.
             </p>
-            {questions.map((q, index) => (
+            {safeQuestions.map((q, index) => (
               <input
                 key={index}
                 type="text"
@@ -468,7 +469,7 @@ export default function RegisterPage() {
                   className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
                 >
                   <img src={Plus} alt="+" />
-                  질문 추가
+                  질문추가
                 </button>
               )}
               {questions.length > 2 && (
@@ -478,7 +479,7 @@ export default function RegisterPage() {
                   className="flex items-center justify-center gap-[4px] w-[106px] h-[38px] my-[4px] bg-[#F2F2F2] px-[16px] py-[10px] text-[14px] text-[#111111] rounded-full cursor-pointer"
                 >
                   <img src={XButton} alt="x" className="w-[18px] h-[18px]" />{" "}
-                  질문 삭제
+                  질문삭제
                 </button>
               )}
             </div>

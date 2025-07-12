@@ -57,7 +57,7 @@ export default function DetailedPage() {
     return (
         <div>
             <DetailedHeader postMemberId={post.memberId} />
-            <div className=" flex flex-col gap-[40px] h-[686px] px-[24px] overflow-y-auto hide-scrollbar">
+            <div className=" flex flex-col gap-[40px] pb-[150px] px-[24px] overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-[16px]">
                     {/*이미지*/}
                     <div>
@@ -68,8 +68,8 @@ export default function DetailedPage() {
                         <div>
                             <span
                                 className={`rounded-[6px] py-[3px] px-[4px] text-[14px] ${post.registrationType === "LOST"
-                                        ? "bg-[#F9EAE0] text-[#FF5900]"
-                                        : "bg-[#d3ffe5] text-[#00D455]"
+                                    ? "bg-[#F9EAE0] text-[#FF5900]"
+                                    : "bg-[#d3ffe5] text-[#00D455]"
                                     }`}
                             >
                                 {post.registrationType === "LOST"

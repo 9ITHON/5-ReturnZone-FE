@@ -21,7 +21,10 @@ export const useRegisterStore = create((set) => ({
     setDetailLocation: (v) => set({ detailLocation: v }),
 
     questions: ["", ""],
-    setQuestions: (v) => set({ questions: v }),
+    setQuestions: (v) =>
+        set((state) => ({
+            questions: typeof v === "function" ? v(state.questions) : v,
+        })),
 
     selectedDate: null,
     setSelectedDate: (v) => set({ selectedDate: v }),

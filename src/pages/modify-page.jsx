@@ -211,7 +211,7 @@ export default function ModifyPage() {
             <div>
                 <RegisterHeader title="게시글 수정하기" />
             </div>
-            <div className="overflow-y-auto h-[660px] hide-scrollbar">
+            <div className="overflow-y-auto pb-[150px] h-[660px] hide-scrollbar">
                 {/* 숨겨진 input */}
                 <input
                     type="file"
