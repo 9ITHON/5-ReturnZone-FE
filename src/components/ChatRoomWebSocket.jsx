@@ -20,21 +20,11 @@ const ChatRoomWebSocket = ({
   isFinder = false,
   showPaymentCompleted = false,
 }) => {
-  // 더미 채팅 데이터: 내 메시지(memberId), 상대 메시지('other') 번갈아가며
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      memberId: memberId,
-      content: "",
-      createdAt: "2024-06-10T10:00:00.000Z",
-    },
-    {
-      id: 2,
-      memberId: "other",
-      content: "네, 안녕하세요! 무엇을 도와드릴까요?",
-      createdAt: "2024-06-10T10:00:05.000Z",
-    },
-  ]);
+
+
+
+  // 더미 채팅 데이터: 처음엔 빈 배열, 사용자가 메시지를 보내면 시작
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isMineTurn, setIsMineTurn] = useState(true); // 내 차례/상대 차례 번갈아가며
   const messagesEndRef = useRef(null);
