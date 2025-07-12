@@ -286,8 +286,11 @@ const Home = () => {
                 let status = "";
                 if (item.type === "분실" || item.registrationType === "LOST") status = "분실했어요";
                 else if (item.type === "주인" || item.registrationType === "FOUND") status = "주인찾아요";
+
+                const postId = item.lostPostId || item.id; // postId 정의 추가
+
                 return (
-                  <div onClick={() => navigate(`/chat?lostPostId=${item.lostPostId || item.id}`)} className="cursor-pointer" key={item.id}>
+                  <div onClick={() => navigate(`/lost/${postId}`)} className="cursor-pointer" key={item.id}>
                     <ItemCard
                       {...item}
                       status={status}

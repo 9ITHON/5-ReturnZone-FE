@@ -47,7 +47,7 @@ const retryRequest = async (fn, retries = API_RETRY_COUNT) => {
   }
 };
 
-function getUserId() {
+export function getUserId() {
   // 로그인하지 않았으면 null 반환
   return localStorage.getItem('user_id') ?? null;
 }
@@ -79,6 +79,7 @@ export const apiService = {
   //     return response.data;
   //   });
   // },
+  
   // Auth
   async login({ email, password }) {
     return retryRequest(async () => {
