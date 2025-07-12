@@ -204,7 +204,7 @@ const Home = () => {
 
   return (
     <div className="relative w-[390px] h-screen bg-white flex flex-col items-center mx-auto overflow-hidden">
-      <MainHeader label={selectedLocation || "위치미상"} />
+      <MainHeader label={selectedLocation || "삼평동"} />
       {/* 상단 바: 필터바 + 검색 아이콘 */}
       {!categoryOpen &&
         !locationOpen &&
