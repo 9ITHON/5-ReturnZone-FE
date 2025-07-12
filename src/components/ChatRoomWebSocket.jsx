@@ -164,16 +164,12 @@ const ChatRoomWebSocket = ({
           messages
         )}
         {messages.map((msg, idx) => {
-          // userId로 내 메시지/상대 메시지 구분, 없으면 senderId fallback
-          const isMine = (msg.userId !== undefined)
-            ? String(msg.userId) === String(userId)
-            : String(msg.senderId) === String(userId);
+          // memberId로 내 메시지/상대 메시지 구분
+          const isMine = String(msg.memberId) === String(userId);
           // 마지막 메시지 그룹 판별 (내 메시지 연속 그룹의 마지막만 시간/읽음 표시)
           const isLastOfGroup =
             idx === messages.length - 1 ||
-            ((msg.userId !== undefined)
-              ? String(messages[idx + 1]?.userId) !== String(msg.memberId)
-              : String(messages[idx + 1]?.senderId) !== String(msg.memberId));
+            String(messages[idx + 1]?.memberId) !== String(msg.memberId);
 
           return (
             <ChatMessage
