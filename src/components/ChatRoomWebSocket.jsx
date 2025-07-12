@@ -168,7 +168,7 @@ const ChatRoomWebSocket = ({
     >
       {/* 스크롤 가능한 메시지 영역 */}
       <div
-        className="flex-1 overflow-y-auto px-6 pt-4 pb-2"
+        className="flex-1 overflow-y-auto px-6 pt-20 pb-2"
         style={{
           background: "#fff",
           minHeight: 0
