@@ -31,45 +31,21 @@ const ChatRoomWebSocket = ({
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const clientRef = useRef(null);
+  const subscriptionRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    console.log(
-      "[WebSocket Mount] roomId:",
-      roomId,
-      "userId:",
-      userId,
-      "subscribeTopic:",
-      subscribeTopic
-    );
-    console.log(
-      "[WebSocket Mount] roomId:",
-      roomId,
-      "userId:",
-      userId,
-      "subscribeTopic:",
-      subscribeTopic
-    );
     if (!roomId || !userId) return;
     connect();
     return () => disconnect();
-    // eslint-disable-next-line
   }, [roomId, userId]);
 
-  // roomId가 바뀔 때 메시지 초기화
   useEffect(() => {
     setMessages([]);
   }, [roomId]);
 
-  // roomId가 바뀔 때 메시지 초기화
-  useEffect(() => {
-    setMessages([]);
-  }, [roomId]);
-
-  // 기존 채팅 내역 불러오기
   useEffect(() => {
     if (!roomId || !userId) return;
-
     const loadChatHistory = async () => {
       try {
         console.log("Loading chat history for roomId:", roomId);
@@ -83,12 +59,8 @@ const ChatRoomWebSocket = ({
         console.error("Failed to load chat history:", error);
       }
     };
-
     loadChatHistory();
   }, [roomId, userId]);
-
-  // Store subscription ref
-  const subscriptionRef = useRef(null);
 
   const connect = () => {
     clientRef.current = new Client({
@@ -98,16 +70,13 @@ const ChatRoomWebSocket = ({
       },
       debug: (str) => {
         console.log("STOMP Debug:", str);
-        console.log("STOMP Debug:", str);
       },
       reconnectDelay: 5000,
       onConnect: () => {
         console.log("WebSocket connected successfully");
-        console.log("WebSocket connected successfully");
         subscribe();
       },
       onStompError: (frame) => {
-        console.error("STOMP Error:", frame);
         console.error("STOMP Error:", frame);
       },
     });
@@ -126,45 +95,21 @@ const ChatRoomWebSocket = ({
 
   const subscribe = () => {
     if (!clientRef.current || !subscribeTopic) return;
-    if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe();
-      subscriptionRef.current = null;
-    }
-    console.log("Subscribing to topic:", subscribeTopic);
     subscriptionRef.current = clientRef.current.subscribe(
       subscribeTopic,
       async (message) => {
-        console.log("Received message:", message.body);
         const receivedMessage = JSON.parse(message.body);
-        console.log("Parsed message:", receivedMessage);
 
         setMessages((prev) => {
-          console.log("Previous messages:", prev);
-          // 메시지 id가 있으면 중복 추가 방지
-          if (
-            prev.some(
-              (m) => m.id && receivedMessage.id && m.id === receivedMessage.id
-            )
-          ) {
-            console.log("Duplicate message with id, skipping");
-            return prev;
-          }
-          // id가 없으면 content+createdAt로 임시 중복 방지
-          if (
-            prev.some(
-              (m) =>
-                m.content === receivedMessage.content &&
-                m.createdAt === receivedMessage.createdAt
-            )
-          ) {
-            console.log("Duplicate message with content+time, skipping");
-            return prev;
-          }
-          console.log("Adding new message to state");
-          return [...prev, receivedMessage];
+          const isDuplicate = prev.some(
+            (m) =>
+              (m.id && receivedMessage.id && m.id === receivedMessage.id) ||
+              (m.content === receivedMessage.content &&
+                m.createdAt === receivedMessage.createdAt)
+          );
+          return isDuplicate ? prev : [...prev, receivedMessage];
         });
 
-        // 내가 보낸 메시지가 아니면 읽음 처리
         if (String(receivedMessage.senderId) !== String(userId)) {
           try {
             await apiService.markMessageAsRead(roomId, userId);
@@ -178,7 +123,7 @@ const ChatRoomWebSocket = ({
   };
 
   const sendMessage = () => {
-    if (input.trim() && clientRef.current && clientRef.current.connected) {
+    if (input.trim() && clientRef.current?.connected) {
       const chatMessage = {
         roomId: roomId,
         senderId: userId,
@@ -186,12 +131,7 @@ const ChatRoomWebSocket = ({
         type: "TEXT",
         createdAt: new Date().toISOString(), // UTC로 저장
       };
-      console.log("Sending message:", chatMessage);
-
-      // 1. 바로 state에 추가 (UX 개선)
       setMessages((prev) => [...prev, chatMessage]);
-
-      // 2. 서버로 전송
       clientRef.current.publish({
         destination: sendDestination,
         body: JSON.stringify(chatMessage),
