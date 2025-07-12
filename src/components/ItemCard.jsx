@@ -15,15 +15,19 @@ const ItemCard = ({
   const finalLocation = data?.location || data?.lostLocationDong || location;
   const finalTime = data?.timeAgo || time;
   const finalReward = data?.reward || reward;
-  const finalStatus = data?.registrationType === 'LOST' ? '분실했어요' : 
-                     data?.registrationType === 'FOUND' ? '주인찾아요' : status;
-  const finalImageUrl = data?.imageUrls?.[0] || imageUrl;
+  const finalStatus = data?.registrationType === 'LOST' ? '분실했어요' :
+    data?.registrationType === 'FOUND' ? '주인찾아요' : status;
+  const finalImageUrl = data?.mainImageUrl || imageUrl;
 
   return (
     <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-3 mb-4">
       <div className="flex-grow-0 flex-shrink-0 w-[122px] h-[122px] relative">
         {finalImageUrl ? (
-          <img src={finalImageUrl} alt="분실물" className="object-cover w-[122px] h-[122px] absolute left-[-1px] top-[-1px] rounded-xl" />
+          <img
+            src={finalImageUrl}
+            alt="분실물"
+            className="object-cover w-[122px] h-[122px] absolute left-[-1px] top-[-1px] rounded-xl"
+          />
         ) : (
           <div className="w-[122px] h-[122px] rounded-xl bg-[#F2F2F2]" />
         )}
