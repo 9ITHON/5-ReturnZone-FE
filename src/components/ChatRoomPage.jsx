@@ -4,6 +4,7 @@ import { apiService } from "../services/apiService";
 import ReportHeader from "./ReportHeader";
 import ReportModal from "./ReportModal";
 import ChatRoomWebSocket from "./ChatRoomWebSocket";
+import ItemCard from "./ItemCard";
 import ChatRoomItemCard from "./ChatRoomItemCard";
 
 const ConfirmOwnerModal = ({ onClose, userName }) => (
@@ -468,10 +469,10 @@ const OptionModal = ({ onClose, onReport, onBlock, onExit }) => (
   </div>
 );
 
-
 const ChatRoomPage = ({ roomId: propRoomId }) => {
   const params = useParams();
   const location = useLocation();
+  // userId -> memberId로 변수명 및 로직 변경
   const memberId = localStorage.getItem("userId") || "1";
   const navigate = useNavigate();
   const [showOption, setShowOption] = useState(false);
@@ -481,59 +482,105 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showFoundOwnerMsg, setShowFoundOwnerMsg] = useState(false);
   const [showDeliveryCompleted, setShowDeliveryCompleted] = useState(false);
-  const [showPaymentCompleted, setShowPaymentCompleted] = useState(false); // 지급 완료 상태
-  const [showRewardModal, setShowRewardModal] = useState(false); // 현상금 지급 모달 상태
+  const [showLostOwnerConfirmModal, setShowLostOwnerConfirmModal] =
+    useState(false);
+  const [showLostOwnerPayment, setShowLostOwnerPayment] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentCompleted, setShowPaymentCompleted] = useState(false);
+  const [showRewardModal, setShowRewardModal] = useState(false); // 현상금 지급 모달 상태 추가
 
+  // itemId는 쿼리스트링 또는 params에서 추출
   const searchParams = new URLSearchParams(location.search);
-  const lostPostId = searchParams.get("lostPostId") || params.lostPostId || params.itemId;
-  
-  // NOTE: item.memberId와 item.userId가 혼용되고 있어, 둘 다 확인하도록 유지합니다.
+  const lostPostId =
+    searchParams.get("lostPostId") || params.lostPostId || params.itemId;
+
+  // 실제 API 데이터 기반으로만 역할 판별
   const isLostOwner = item?.memberId === memberId || item?.userId === memberId;
   const isFinder = !isLostOwner;
 
   useEffect(() => {
     async function fetchData() {
-        // ... 기존 데이터 fetching 로직 ...
-        // 이 부분은 제공된 코드의 로직을 그대로 사용한다고 가정합니다.
-        setLoading(true);
-        setError(null);
-        try {
-            const itemData = lostPostId ? await new Promise(resolve => setTimeout(() => resolve({
-                title: "소니 WH-1000XM4 헤드셋",
-                location: "역삼1동",
-                timeAgo: "10일 전",
-                mainImageUrl: "",
-                registrationType: "LOST",
-                status: "주인 찾는 중",
-                reward: 20000,
-                memberId: '1', // 분실자 ID 예시
-                nickname: '유저1' // 상대방 이름 예시
-            }), 500)) : null;
+      setLoading(true);
+      setError(null);
+      try {
+        const itemData = lostPostId
+          ? await apiService.getLostPost(lostPostId)
+          : null;
+        setItem(itemData);
 
-            setItem(itemData);
-            setUserName(itemData?.nickname || '상대방');
-            setRoomId(lostPostId);
-        } catch (e) {
-            setError("채팅방 정보를 불러오지 못했습니다.");
-        } finally {
-            setLoading(false);
+        if (itemData?.nickname) {
+          setUserName(itemData.nickname);
+        } else if (itemData?.memberId) {
+          // 만약 닉네임이 없고 memberId만 있으면, 유저 정보 추가 fetch 필요 (apiService.getUser 등)
+          // setUserName(await apiService.getUser(itemData.memberId).then(u => u.nickname || u.name));
         }
+
+        let chatRoomId = lostPostId;
+        const targetMemberId = itemData?.memberId || itemData?.userId;
+        if (
+          !propRoomId &&
+          lostPostId &&
+          targetMemberId &&
+          memberId !== targetMemberId
+        ) {
+          await apiService.createChatRoom({
+            lostPostId: Number(lostPostId),
+            memberId: Number(memberId),
+            otherMemberId: Number(targetMemberId),
+          });
+          navigate(`/chat/${lostPostId}`);
+          return;
+        }
+        setRoomId(chatRoomId);
+      } catch {
+        setError("채팅방 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
-  }, [lostPostId]);
+    // eslint-disable-next-line
+  }, [lostPostId, propRoomId]);
 
-  if (loading) return <div className="w-full h-screen flex items-center justify-center">로딩중...</div>;
-  if (error) return <div className="w-full h-screen flex items-center justify-center text-red-500">{error}</div>;
+  if (loading)
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        로딩중...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="w-full h-full flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
 
   return (
     <>
-    <div className="flex justify-between items-center w-[390px] mx-auto overflow-hidden px-6 py-1.5 bg-white">
+      {/* 상단 헤더 */}
+      <div className="flex justify-between items-center w-[390px] overflow-hidden px-6 py-1.5 bg-white">
         <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative">
           <div className="flex justify-start items-center flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 pr-3 py-2.5">
             <button onClick={() => navigate(-1)}>
-              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none" >
-                <path d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M16.0107 19.9785L8.01074 11.9785L16.0107 3.97852"
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
           </div>
@@ -543,19 +590,63 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
         </div>
         <div className="flex justify-end items-center flex-grow-0 flex-shrink-0 w-9 h-11 relative gap-2.5">
           <button onClick={() => setShowOption(true)}>
-            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-grow-0 flex-shrink-0 w-6 h-6 relative" preserveAspectRatio="none" >
-              <path d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z" stroke="#111111" strokeWidth="1.5" />
+            <svg
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M12 16.75C12.4142 16.75 12.75 17.0858 12.75 17.5C12.75 17.9142 12.4142 18.25 12 18.25C11.5858 18.25 11.25 17.9142 11.25 17.5C11.25 17.0858 11.5858 16.75 12 16.75ZM12 11.25C12.4142 11.25 12.75 11.5858 12.75 12C12.75 12.4142 12.4142 12.75 12 12.75C11.5858 12.75 11.25 12.4142 11.25 12C11.25 11.5858 11.5858 11.25 12 11.25ZM12 5.75C12.4142 5.75 12.75 6.08579 12.75 6.5C12.75 6.91421 12.4142 7.25 12 7.25C11.5858 7.25 11.25 6.91421 11.25 6.5C11.25 6.08579 11.5858 5.75 12 5.75Z"
+                stroke="#111111"
+                strokeWidth="1.5"
+              />
             </svg>
           </button>
         </div>
       </div>
-      
-      {/* 화면 잘림 수정을 위해 h-screen, flex, flex-col 적용 */}
-      <div className="w-[390px] max-w-full h-screen bg-white flex flex-col items-center mx-auto">
-        {showOption && ( <OptionModal onClose={() => setShowOption(false)} /> )}
-        {reportModalType && ( <ReportModal type={reportModalType} onCancel={() => setReportModalType(null)} onConfirm={() => { setReportModalType(null); }} /> )}
-
-        {/* 아이템 카드와 버튼을 포함한 상단 컨텐츠 */}
+      {/* 기존 채팅방 내용 */}
+      <div className="relative w-[390px] h-[844px] bg-white flex flex-col items-center mx-auto overflow-hidden">
+        {showOption && (
+          <OptionModal
+            onClose={() => setShowOption(false)}
+            onReport={() => {
+              setReportModalType("report");
+              setShowOption(false);
+            }}
+            onBlock={() => {
+              setReportModalType("block");
+              setShowOption(false);
+            }}
+            onExit={() => {
+              setReportModalType("exit");
+              setShowOption(false);
+            }}
+          />
+        )}
+        {reportModalType && (
+          <ReportModal
+            type={reportModalType}
+            onCancel={() => setReportModalType(null)}
+            onConfirm={async () => {
+              if (reportModalType === "exit") {
+                try {
+                  await apiService.deleteChatRoom(roomId);
+                  setReportModalType(null);
+                  navigate("/chat");
+                } catch {
+                  setReportModalType(null);
+                }
+              } else {
+                setReportModalType(null);
+              }
+            }}
+          />
+        )}
+        {/* 아이템 카드 - 채팅방 상단에 항상 노출 */}
         <div className="w-full px-6 pt-4">
           <ChatRoomItemCard
             data={
@@ -569,64 +660,156 @@ const ChatRoomPage = ({ roomId: propRoomId }) => {
               }
             }
           />
-          
-          {/* 습득자용 버튼 */}
-          {isFinder && !showDeliveryCompleted && (
-             <div
-             className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg bg-[#f2f2f2]"
-           >
-             <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
-               물건 주인을 찾고 있어요
-             </p>
-           </div>
-          )}
-          {/* 현상금 지급 완료 후 습득자에게 표시될 버튼 */}
-          {isFinder && showDeliveryCompleted && (
+
+          {/* 습득자용 버튼 (물건을 찾은 사람) */}
+          {isFinder && !showFoundOwnerMsg && !showDeliveryCompleted && (
             <div
-              className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg bg-[#f2f2f2]"
+              className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2] cursor-pointer"
+              onClick={() => setShowFoundOwnerMsg(true)}
             >
               <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
-                현상금 지급 완료
+                물건 주인을 찾고 있어요
               </p>
             </div>
           )}
+          {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+            <div
+              className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[134px] py-[9px] rounded-lg bg-[#06f] cursor-pointer"
+              onClick={() => setShowRewardModal(true)}
+            >
+              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-white">
+                물건을 잘 받았어요
+              </p>
+            </div>
+          )}
+          {isFinder && showDeliveryCompleted && (
+            <div
+              className="my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg bg-[#f2f2f2]"
+            >
+              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left text-[#111]">
+                전달을 기다리고 있어요
+              </p>
+            </div>
+          )}
+          {showConfirmModal && (
+            <ConfirmOwnerModal
+              userName={userName}
+              onClose={() => {
+                setShowConfirmModal(false);
+                setShowFoundOwnerMsg(true); // 버튼 클릭 시 안내 메시지 뜨도록 보장
+              }}
+            />
+          )}
 
-          {/* 분실자용 버튼 */}
+          {/* 분실자용 버튼 (물건을 잃어버린 사람) */}
           {isLostOwner && (
             <div
-              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative rounded-lg ${
+              className={`my-4 flex justify-center items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-[119px] py-[9px] rounded-lg ${
                 showPaymentCompleted
-                  ? "bg-[#f2f2f2] text-[#111]"
-                  : "bg-[#06f] text-white cursor-pointer"
+                  ? "bg-[#f2f2f2]"
+                  : showDeliveryCompleted
+                  ? "bg-[#f2f2f2]"
+                  : showLostOwnerPayment
+                  ? "bg-[#06f] cursor-pointer"
+                  : showFoundOwnerMsg
+                  ? "bg-[#06f] cursor-pointer"
+                  : "bg-[#06f] cursor-pointer"
               }`}
               onClick={
-                showPaymentCompleted ? undefined : () => setShowRewardModal(true)
+                showPaymentCompleted
+                  ? undefined
+                  : showDeliveryCompleted
+                  ? undefined
+                  : showLostOwnerPayment
+                  ? () => setShowPaymentModal(true)
+                  : showFoundOwnerMsg
+                  ? () => setShowLostOwnerPayment(true)
+                  : () => setShowLostOwnerConfirmModal(true)
               }
             >
-              <p className="flex-grow-0 flex-shrink-0 text-base font-medium text-left">
-                {showPaymentCompleted ? "현상금 지급 완료" : "현상금 지급하기"}
+              <p
+                className={`flex-grow-0 flex-shrink-0 text-base font-medium text-left ${
+                  showPaymentCompleted
+                    ? "text-[#111]"
+                    : showDeliveryCompleted
+                    ? "text-[#06f] font-semibold"
+                    : showLostOwnerPayment
+                    ? "text-white"
+                    : showFoundOwnerMsg
+                    ? "text-white"
+                    : "text-white"
+                }`}
+              >
+                {showPaymentCompleted
+                  ? "현상금 지급 완료"
+                  : showFoundOwnerMsg
+                  ? "현상금 지급하기"
+                  : "제 물건이에요"}
               </p>
             </div>
           )}
+          {showLostOwnerConfirmModal && (
+            <LostOwnerConfirmModal
+              onClose={() => {
+                setShowLostOwnerConfirmModal(false);
+                setShowFoundOwnerMsg(true);
+              }}
+            />
+          )}
+          {showPaymentModal && (
+            <PaymentModal
+              onClose={() => {
+                setShowPaymentModal(false);
+                setShowPaymentCompleted(true);
+              }}
+              reward={item?.reward || 10000}
+              userName={userName}
+            />
+          )}
         </div>
-
-        {/* 채팅 영역이 남은 공간을 모두 차지하도록 flex-1, overflow-hidden 적용 */}
-        <div className="flex flex-col justify-start items-center w-full flex-1 overflow-hidden">
-          <ChatRoomWebSocket
-            roomId={String(roomId || lostPostId)}
-            memberId={String(memberId)}
-            item={item} // item 데이터 전달
-            subscribeTopic={`/topic/chat/${String(roomId || lostPostId)}`}
-            sendDestination="/app/chat.send"
-            isLostOwner={isLostOwner}
-            isFinder={isFinder}
-            showDeliveryCompleted={showDeliveryCompleted}
-            setShowDeliveryCompleted={setShowDeliveryCompleted}
-            showPaymentCompleted={showPaymentCompleted}
-            setShowPaymentCompleted={setShowPaymentCompleted} // setter 전달
-            showRewardModal={showRewardModal}
-            setShowRewardModal={setShowRewardModal}
-          />
+        {/* 채팅 메시지 영역 등 나머지 UI */}
+        <div className="flex flex-col justify-start items-center w-[390px] min-h">
+          <div className="flex flex-col justify-start items-start self-stretch flex-grow overflow-hidden gap-2.5 px-6 pt-4">
+            <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-4">
+              <ChatRoomWebSocket
+                roomId={String(
+                  roomId || lostPostId || params.roomId || params.lostPostId
+                )}
+                memberId={String(memberId)}
+                subscribeTopic={`/topic/chat/${String(
+                  roomId || lostPostId || params.roomId || params.lostPostId
+                )}`}
+                sendDestination="/app/chat.send"
+                showFoundOwnerMsg={showFoundOwnerMsg}
+                showDeliveryMsg={false}
+                showDeliveryCompleted={showDeliveryCompleted}
+                isLostOwner={isLostOwner}
+                isFinder={isFinder}
+                showPaymentCompleted={showPaymentCompleted}
+                showRewardModal={showRewardModal}
+                setShowRewardModal={setShowRewardModal}
+                setShowDeliveryCompleted={setShowDeliveryCompleted}
+              />
+              {/* 안내 알림 메시지 */}
+              {isFinder && showFoundOwnerMsg && !showDeliveryCompleted && (
+                <div className="flex justify-start items-start self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#06f]/[0.15] border border-[#06f] mt-4">
+                  <p className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                    <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                      📦 물건 전달이 시작되었습니다.
+                    </span>
+                    <br />
+                    <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                      물건을 받으셨다면, 상단의 버튼을 눌러주세요.
+                    </span>
+                    <br />
+                    <span className="flex-grow w-[314px] text-sm font-medium text-left text-[#111]">
+                      버튼을 누르면 물건을 찾아준 분에게 현상금이 지급됩니다.
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

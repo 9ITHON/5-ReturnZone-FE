@@ -1,6 +1,17 @@
 import React from 'react';
 
 const ChatMessage = ({ message, isMine, senderName, showSenderName = false }) => {
+  // 시간 포맷 함수
+  const getTimeStr = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Seoul',
+    });
+  };
+
   return (
     <div className={`flex w-full mb-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} w-full`}>
@@ -30,10 +41,18 @@ const ChatMessage = ({ message, isMine, senderName, showSenderName = false }) =>
             {message.content}
           </p>
         </div>
-        {/* 시간 표시와 읽음 표시는 ChatRoomWebSocket에서 마지막 메시지에만 표시되도록 제거됨 */}
+        {/* 시간 표시 */}
+        <div className={`flex gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'} w-fit ${isMine ? 'ml-auto' : 'mr-auto'}`}>
+          <p className="text-xs text-[#808080]">
+            {getTimeStr(message.createdAt)}
+          </p>
+          {isMine && (
+            <p className="text-xs font-medium text-[#808080]">읽음</p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default ChatMessage;
+export default ChatMessage; 
